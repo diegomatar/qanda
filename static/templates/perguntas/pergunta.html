@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="blog-header">
+        <h1 class="blog-title">{{ pergunta.titulo }}</h1>
+        <p class="lead blog-description">em: {{ pergunta.data }} | por <a href='#'>{{ pergunta.autor }}</a> | vista: {{ pergunta.views }} vezes</p>
+      </div>
+
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+
+          <div class="blog-post">
+            <p>{{ pergunta.descricao }}</p>
+            <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
+          </div><!-- /.blog-post -->
+
+          <div class="blog-post">
+            {% if pergunta.num_respostas != 0 %}
+            <h2 class="blog-post-title">{{ pergunta.num_respostas }} respostas:</h2>
+          </div><!-- /.blog-post -->
+            
+          {% for resp in pergunta.respostas %}
+          <div class="blog-post">
+            <p>{{ resp.resposta }}</p>
+            <p class="blog-post-meta">por: <a href="#">{{ resp.autor }}</a> em {{ resp.data }}</p>
+          </div><!-- /.blog-post -->
+          {% endfor %}
+          {% else %}
+          <h3>Nenhuma resposta...</h3>
+          <a href="#" class="btn btn-info btn-lg">Seja o primeiro a responder</a>
+          </div><!-- /.blog-post -->
+          {% endif %}
+          
+        </div><!-- /.blog-main -->
+
+{% endblock %}

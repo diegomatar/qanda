@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="blog-header">
+    <h1 class="blog-title">{{ tag.nome }}</h1>
+    <p class="lead blog-description">Encontre as respostas para suas dúvidas sobre {{ tag.nome }}.</p>
+</div>
+<hr>
+
+<div class="row">
+
+<div class="col-sm-8 blog-main">
+{% for pergunta in perguntas %}
+    <div class="blog-post">
+        <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a></h2>
+        <p class="blog-post-meta"><i>em:</i> {{ pergunta.data }} | <i>por</i> <a href="#">{{ pergunta.autor }}</a> | <i>vista:</i> {{ pergunta.views }} vezes</p>
+        <p>{{ pergunta.descricao|truncatechars:200 }} <a href="{% url 'pergunta' pergunta.slug %}">ver pergunta ></a></p>
+        <p><b>Categorias:</b> {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}</a>, {% endfor %}</p>
+        <br>
+        {% if pergunta.num_respostas != 0 %}
+        <h3>{{ pergunta.num_respostas }} respostas:</h3>
+        {% for resp in pergunta.respostas|slice:":3" %}
+        <blockquote>
+          <p>{{ resp.resposta|truncatechars:100 }} - por <a href='#'>{{ resp.autor }}</a></p>       
+        </blockquote>
+        {% endfor %}
+        {% else %}
+        <h3>Sabe a resposta?</h3>
+        <a href="#" class="btn btn-info btn-lg">Responda Aqui</a>
+        
+        {% endif %}
+        
+            
+    </div><!-- /.blog-post -->
+    <hr>
+{% endfor %}
+
+</div><!-- /.blog-main -->
+
+{% endblock %}

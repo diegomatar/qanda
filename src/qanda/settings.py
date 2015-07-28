@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
 Django settings for qanda project.
 
@@ -31,6 +34,8 @@ ADMINS = (
     ('Diego Matar', 'diegomatar@gmail.com'),
 )
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -40,6 +45,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'perguntas',
 )
 
 MIDDLEWARE_CLASSES = (
