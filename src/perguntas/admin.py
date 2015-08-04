@@ -10,16 +10,16 @@ from .models import Pergunta, Resposta, Tag
 class RespostaInline(admin.TabularInline):
     extra = 0
     model = Resposta
-    readonly_fields = ['upvotes', 'downvotes']
+    readonly_fields = ['votes']
 
 
 class PerguntaAdmin(admin.ModelAdmin):
-    list_display = ['titulo', 'tags_list','data', 'autor', 'num_resp', 'views', 'upvotes', 'downvotes', 'live_link']
+    list_display = ['titulo', 'tags_list','data', 'autor', 'num_resp', 'views', 'votes', 'live_link']
     inlines = [RespostaInline]
     search_fields = ['titulo', 'descricao', 'autor', 'tags__nome']
     list_filter = ['autor', 'data', 'tags__nome']
     prepopulated_fields = {"slug": ("titulo", )}
-    readonly_fields = ['live_link', 'timestamp', 'updated', 'views', 'upvotes', 'downvotes']
+    readonly_fields = ['live_link', 'timestamp', 'updated', 'views', 'votes']
     
     class Meta:
         model = Pergunta
@@ -71,8 +71,8 @@ admin.site.register(Tag, TagAdmin)
     
     
 class RespostaAdmin(admin.ModelAdmin):
-    readonly_fields = ['timestamp', 'updated', 'upvotes', 'downvotes']
-    list_display = ['pergunta', 'autor', 'data', 'upvotes', 'downvotes']
+    readonly_fields = ['timestamp', 'updated', 'votes']
+    list_display = ['pergunta', 'autor', 'data', 'votes']
     list_filter = ['autor', 'data']
     search_fields = ['pergunta__titulo', 'resposta', 'autor__username', 'autor__email']
     

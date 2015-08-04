@@ -17,6 +17,7 @@ class Tag(models.Model):
     views = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    classe = models.CharField(max_length=100, default='tag')
     
     def __unicode__(self):
         return self.nome
@@ -40,11 +41,11 @@ class Pergunta(models.Model):
     slug = models.SlugField(unique=True)
     descricao = models.TextField(verbose_name='Descrição', max_length=5000)
     views = models.IntegerField(default=0)
-    upvotes = models.IntegerField(default=0)
-    downvotes = models.IntegerField(default=0)
+    votes = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    classe = models.CharField(max_length=100, default='pergunta')
     
     def __unicode__(self):
         return self.titulo
@@ -66,10 +67,10 @@ class Resposta(models.Model):
     autor = models.ForeignKey(User)
     data = models.DateField(default=datetime.now)
     resposta = models.TextField(max_length=5000)
-    upvotes = models.IntegerField(default=0)
-    downvotes = models.IntegerField(default=0)
+    votes = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    classe = models.CharField(max_length=100, default='resposta')
     
     def __unicode__(self):
         return 'Por %s em %s' % (self.autor, self.data)

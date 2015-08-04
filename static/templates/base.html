@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -43,9 +44,17 @@
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
             <li><a href="#">Perguntar</a></li>
+            <li><a href="#">Responder</a></li>
             <li><a href="#">Membros</a></li>
-            <li><a href="#">Meu Perfil</a></li>
-            <li><a href="#">Ajuda</a></li>
+            {% if request.user.is_authenticated %}
+            <li><a href="{% url 'profile' %}">Meu Perfil</a></li>
+            <li><a href="{% url 'account_logout' %}">Sair</a></li>
+            {% else %}
+            <li><a href="{% url 'account_login' %}">Entrar</a></li>
+            <li><a href="{% url 'account_signup' %}">Criar Conta</a></li>
+            {% endif %}
+            
+            
           </ul>
           <form class="navbar-form navbar-right">
             <input type="text" class="form-control" placeholder="Buscar...">
@@ -72,28 +81,31 @@
 
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
           <div class="sidebar-module sidebar-module-inset">
-            <h4>About</h4>
-            <p>Etiam porta <em>sem malesuada magna</em> mollis euismod. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur.</p>
+            <h4>Atividades Recentes</h4>
+            {% for ativ in atividades_recentes %}
+            {% if ativ.classe = 'pergunta' %}
+            <p><a href='#'>{{ ativ.autor }}</a> perguntou:</p>
+            <p><a href="{% url 'pergunta' ativ.slug %}">"{{ ativ.titulo }}"</a></p>
+            <p><i> - {{ ativ.timestamp }}</i></p>
+            <hr>
+            {% elif ativ.classe = 'resposta' %}
+            <p><a href='#'>{{ ativ.autor }}</a> respondeu:</p>
+            <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">"{{ ativ.resposta|truncatechars:200 }}"</a></p>
+            <p><i> - {{ ativ.timestamp }}</i></p>
+            <hr>
+            {% endif %}
+            {% endfor %}
           </div>
           <div class="sidebar-module">
-            <h4>Archives</h4>
+            <h4>Categorias</h4>
             <ol class="list-unstyled">
-              <li><a href="#">March 2014</a></li>
-              <li><a href="#">February 2014</a></li>
-              <li><a href="#">January 2014</a></li>
-              <li><a href="#">December 2013</a></li>
-              <li><a href="#">November 2013</a></li>
-              <li><a href="#">October 2013</a></li>
-              <li><a href="#">September 2013</a></li>
-              <li><a href="#">August 2013</a></li>
-              <li><a href="#">July 2013</a></li>
-              <li><a href="#">June 2013</a></li>
-              <li><a href="#">May 2013</a></li>
-              <li><a href="#">April 2013</a></li>
+              {% for tg in tags_todas %}
+              <li><a href="{% url 'categoria' tg.slug %}"><button class="btn btn-primary btn-xs" type="button">{{ tg.nome }} <span class="badge">{{ tg.num_perguntas }}</span></button></a></li>
+              {% endfor %}
             </ol>
           </div>
           <div class="sidebar-module">
-            <h4>Elsewhere</h4>
+            <h4>Membros Mais Ativos</h4>
             <ol class="list-unstyled">
               <li><a href="#">GitHub</a></li>
               <li><a href="#">Twitter</a></li>
@@ -122,6 +134,9 @@
     <!-- Latest compiled and minified JavaScript
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script> -->
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    
+    <!-- Custom Ajax js file -->
+    <script src="{% static 'js/qanda-ajax.js' %}"></script>
     
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="{% static 'js/ie10-viewport-bug-workaround.js' %}"></script>

@@ -1,8 +1,10 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 
 from .models import Pergunta, Resposta, Tag
 
-# Create your views here.
+
+
+
 def home(request):
     
     perguntas = Pergunta.objects.all()
@@ -13,6 +15,7 @@ def home(request):
         'tags': tags,
     }
     return render(request, 'home.html', context)
+
 
 
 def pergunta(request, slug):
@@ -28,6 +31,7 @@ def pergunta(request, slug):
     return render(request, 'perguntas/pergunta.html', context)
 
 
+
 def categoria(request, slug):
     
     tag = Tag.objects.get(slug=slug)
@@ -38,3 +42,41 @@ def categoria(request, slug):
         'perguntas': perguntas,
     }
     return render(request, 'perguntas/tag.html', context)
+
+
+
+def upvote(request):
+    
+    perg_id = None
+    if request.method == "GET":
+        perg_id = request.GET['pergunta_id']
+    
+    votes = 0
+    if perg_id:
+        perg = Pergunta.objects.get(id=int(perg_id))
+        if perg:
+            votes = perg.votes + 1
+            perg.votes = votes
+            perg.save()
+            
+    return HttpResponse(votes)
+    
+    
+
+def downvote(request):
+    
+    perg_id = None
+    if request.method == "GET":
+        perg_id = request.GET['pergunta_id']
+    
+    votes = 0
+    if perg_id:
+        perg = Pergunta.objects.get(id=int(perg_id))
+        if perg:
+            votes = perg.votes - 1
+            perg.votes = votes
+            perg.save()
+            
+    return HttpResponse(votes)
+
+    

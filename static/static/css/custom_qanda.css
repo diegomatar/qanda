@@ -164,3 +164,57 @@ h6, .h6 {
 .blog-footer p:last-child {
   margin-bottom: 0;
 }
+
+
+
+/*
+ * Vote Buttons
+ */
+ 
+.upvote-off {
+  background-position: 0 -170px;
+}
+ 
+.upvote-on {
+  background-position:-40px -170px;
+}
+ 
+.downvote-off {
+  background-position: 0 -220px;
+}
+
+.downvote-on {
+  background-position:-40px -220px;
+}
+
+.votes_count {
+    margin: 8px 0;
+    display: block;
+    color: #777;
+    font-size: 20px;
+    padding: 0;
+    border: 0;
+    text-align: center;
+
+  
+}
+ 
+.upvote-off, .downvote-off, .upvote-on, .downvote-on {
+    background-repeat: no-repeat;
+    background-image: url("img/sprites.svg?v=1bc768be1b3c"),none;
+    background-size: initial;
+    height: 30px;
+    width: 40px;
+    text-indent: -9999em;
+    font-size: 1px;
+    color: #07c;
+    overflow: hidden;
+    display: block;
+    cursor: pointer;
+    text-decoration: none;
+    margin: 0 auto;
+    margin-bottom: 2px;
+    text-align: center;
+ }
+ 
+ 

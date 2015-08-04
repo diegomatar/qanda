@@ -1,0 +1,41 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+  
+<div class="blog-header">
+<h1 class="blog-title">Nova Conta</h1>
+<p class="lead blog-description">Já tem uma conta? Então <a href="{{ login_url }}">entre aqui</a>.</p>
+</div>
+
+<div class="row">
+
+      <div class="col-sm-8 blog-main">
+
+          <div class="blog-post">
+          <div class="row">
+                <div class="col-xs-1">
+                </div>
+                <div class="col-xs-11">
+                  <div class="panel panel-default">
+                  <div class="panel-body">
+
+                  <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    {% if redirect_field_value %}
+                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                    {% endif %}
+                    <button class="primaryAction btn btn-info btn-lg" type="submit">Criar Conta &raquo;</button>
+                  </form>
+                  </div><!-- /.panel-body -->
+                  </div><!-- /.panel-default -->
+                </div><!-- /.col-xs -->
+          </div><!-- /.row -->
+          </div><!-- /.blog-post -->
+      </div><!-- /.blog-main -->
+
+{% endblock %}

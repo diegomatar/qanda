@@ -12,8 +12,25 @@
         <div class="col-sm-8 blog-main">
 
           <div class="blog-post">
-            <p>{{ pergunta.descricao }}</p>
-            <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
+          <div class="row">
+                <div class="col-xs-1">
+                        
+                        <a class="upvote-off" id="upvote" data-pergid="{{ pergunta.id}}" title="Gostei: esta pergunta é relevante, clara e bem escrita." disabled >gostei</a>
+                        <p class="votes_count"><strong id="votes_count">{{ pergunta.votes }}</strong></p>
+                        <a class="downvote-off" id="downvote" data-pergid="{{ pergunta.id}}" title="Não Gostei: pergunta não é relevante, confusa e mau escrita.">não gostei</a>
+                        
+                </div>
+                <div class="col-xs-11">
+                
+                        <p>{{ pergunta.descricao }}</p>
+                        <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
+                  
+                        
+        
+                
+                </div>
+          
+          </div>
           </div><!-- /.blog-post -->
 
           <div class="blog-post">
