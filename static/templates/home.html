@@ -15,7 +15,7 @@
 {% for pergunta in perguntas %}
     <div class="blog-post">
         <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a></h2>
-        <p class="blog-post-meta"><i>em:</i> {{ pergunta.data }} | <i>por:</i> <a href="#">{{ pergunta.autor }}</a> | <i>vista:</i> {{ pergunta.views }} vezes</p>
+        <p class="blog-post-meta"><i>em:</i> {{ pergunta.data }} | <i>por:</i> <a href="{% url 'public_profile' pergunta.autor.id %}">{{ pergunta.autor }}</a> | <i>vista:</i> {{ pergunta.views }} vezes</p>
         <p>{{ pergunta.descricao|truncatechars:200 }} <a href="{% url 'pergunta' pergunta.slug %}">ver pergunta ></a></p>
         <p><b>Categorias:</b> {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}</a>, {% endfor %}</p>
         <br>
@@ -26,9 +26,12 @@
           <p>{{ resp.resposta|truncatechars:100 }} - por <a href='#'>{{ resp.autor }}</a></p>       
         </blockquote>
         {% endfor %}
+        <blockquote>
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
+        </blockquote>
         {% else %}
         <h3>Sabe a resposta?</h3>
-        <a href="#" class="btn btn-info btn-lg">Responda Aqui</a>
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responda Aqui</a>
         
         {% endif %}
         

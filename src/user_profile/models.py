@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import hashlib
+
+from allauth.socialaccount.models import SocialAccount
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -10,14 +13,11 @@ from perguntas.models import Pergunta, Resposta, Tag
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    email = models.EmailField(verbose_name='email')
-    first_name = models.CharField(max_length=30, blank=True, null=True, verbose_name='Nome')
-    last_name = models.CharField(max_length=30, blank=True, null=True, verbose_name='Sobrenome')
     about = models.TextField(max_length=500, blank=True, null=True, verbose_name='Sobre')
     twitter = models.CharField(max_length=200, blank=True, null=True, verbose_name='Twitter')
     facebook = models.URLField(max_length=200, blank=True, null=True, verbose_name='Facebook')
     linkedin = models.URLField(max_length=200, blank=True, null=True, verbose_name='Linked In')
-    picture = models.ImageField(upload_to='profile_pictures', verbose_name='Imagem de Perfil')
+    picture = models.ImageField(upload_to='profile_pictures', verbose_name='Imagem de Perfil', blank=True, null=True)
     points = models.IntegerField(default=0)
     perg_upvotes = models.ManyToManyField(Pergunta, related_name='perg_upvotes')
     perg_downvotes = models.ManyToManyField(Pergunta, related_name='perg_downvotes')
@@ -25,6 +25,21 @@ class UserProfile(models.Model):
     resp_downvotes = models.ManyToManyField(Resposta, related_name='resp_downvotes')
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
+    def profile_image_url(self):
+        if self.picture:
+            return "/media/" + str(self.picture)
+        
+        else:
+            fb_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='facebook')
+         
+            if len(fb_uid):
+                return "http://graph.facebook.com/{}/picture?".format(fb_uid[0].uid)
+         
+            return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())
+    
+    def name(self):
+        return self.user.first_name + ' ' + self.user.last_name
     
     def perguntas(self):
         pergs = Pergunt.objects.filter(autor=self.user)

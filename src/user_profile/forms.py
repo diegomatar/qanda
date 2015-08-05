@@ -22,10 +22,17 @@ class SignupForm(forms.Form):
         perfil.save()
 
         
-        
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ('email', 'first_name', 'last_name')
 
 class EditProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
-        fields = ('email', 'first_name', 'last_name', 'about', 'twitter', 'facebook', 'linkedin', 'picture')
+        fields = ('about', 'twitter', 'facebook', 'linkedin', 'picture')
+        
+        
+
+
         

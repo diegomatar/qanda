@@ -1,0 +1,47 @@
+{% extends "account/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+  
+<div class="blog-header">
+<h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> {{ profile.name }}</h1>
+</div>
+
+<div class="row">
+
+      <div class="col-sm-8 blog-main">
+
+          <div class="blog-post">
+          <div class="row">
+                <div class="col-xs-1">
+                </div>
+                <div class="col-xs-11">
+               <p><b>Pontos:</b> {{ profile.points }}</p>
+               <p><b>Sobre:</b> {{ profile.about }}</p>
+               <br>
+                  <h2>Atividades Recentes:</h2>
+            {% for ativ in atividades %}
+                  {% if ativ.classe = 'pergunta' %}
+                  <p>Perguntou:</p>
+                  <p><a href="{% url 'pergunta' ativ.slug %}">"{{ ativ.titulo }}"</a></p>
+                  <p><i> - {{ ativ.timestamp }}</i></p>
+                  <hr>
+                  {% elif ativ.classe = 'resposta' %}
+                  <p>Respondeu:</p>
+                  <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">"{{ ativ.resposta|truncatechars:200 }}"</a></p>
+                  <p><i> - {{ ativ.timestamp }}</i></p>
+                  <hr>
+                  {% endif %}
+            {% endfor %}
+               
+               
+                        
+                </div><!-- /.col-xs -->
+          </div><!-- /.row -->
+          </div><!-- /.blog-post -->
+      </div><!-- /.blog-main -->
+
+{% endblock %}

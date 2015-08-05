@@ -5,7 +5,7 @@ from django.contrib import admin
 from .models import UserProfile
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['email', 'username', 'points', 'num_perg', 'num_resp', 'p_upvotes', 'p_downvotes', 'r_upvotes', 'r_downvotes']
+    list_display = ['email', 'first_name', 'points', 'num_perg', 'num_resp', 'p_upvotes', 'p_downvotes', 'r_upvotes', 'r_downvotes']
     search_fields = ['user__email', 'user_userbame', 'autor', 'tags__nome']
     list_filter = ['points', 'perg_upvotes', 'perg_downvotes', 'resp_upvotes', 'resp_downvotes']
     readonly_fields = ['timestamp', 'updated', 'points', 'num_perg', 'num_resp', 'perg_upvotes', 'perg_downvotes', 'resp_upvotes', 'resp_downvotes']
@@ -17,9 +17,9 @@ class UserProfileAdmin(admin.ModelAdmin):
         email = obj.user.email
         return email
     
-    def username(self, obj):
-        username = obj.user.username
-        return username
+    def first_name(self, obj):
+        first_name = obj.user.first_name
+        return first_name
         
     def num_resp(self, obj):
         resp = []

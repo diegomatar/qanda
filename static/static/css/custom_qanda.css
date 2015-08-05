@@ -217,4 +217,12 @@ h6, .h6 {
     text-align: center;
  }
  
+ .nav-img {
+    width: 25px;
+    border-radius: 100px;
+ }
  
+.profile-pic {
+    width: 150px;
+    border-radius: 100%;
+}

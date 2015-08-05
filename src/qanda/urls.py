@@ -24,6 +24,8 @@ from user_profile import urls as profile_urls
 urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^pergunta/(?P<slug>.*)$', views.pergunta, name='pergunta'),
+    url(r'perguntar/$', views.perguntar, name='perguntar'),
+    url(r'responder/(?P<pk>.*)$', views.responder, name='responder'),
     url(r'upvote/$', views.upvote, name='upvote'),
     url(r'downvote/$', views.downvote, name='downvote'),
     url(r'^categoria/(?P<slug>.*)$', views.categoria, name='categoria'),

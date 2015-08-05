@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<div class="blog-header">
+        <h1 class="blog-title">Nova Resposta</h1>
+        <p class="lead blog-description">{{ pergunta.titulo }}</p>
+        <p class="lead blog-description">{{ pergunta.descricao }}</p>
+      </div>
+
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+
+          <div class="blog-post">
+            
+            <form class="perguntar" id="perguntar" method="post" action="{% url 'responder' pergunta.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button class="btn btn-info btn-lg" type="submit">Enviar Resposta &raquo;</button>
+                  </form>
+                        
+        </div><!-- /.blog-post -->
+
+   </div><!-- /.blog-main -->
+
+
+{% endblock %}

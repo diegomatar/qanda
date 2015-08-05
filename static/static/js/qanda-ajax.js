@@ -1,3 +1,8 @@
+// initialize all popovers on page
+$(function () {
+  $('[data-toggle="popover"]').popover({html:true})
+})
+
 
 // votes-up control
 $('#upvote').click(function(){

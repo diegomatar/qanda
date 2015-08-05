@@ -15,13 +15,20 @@
           <div class="row">
                 <div class="col-xs-1">
                         
-                        <a class="upvote-off" id="upvote" data-pergid="{{ pergunta.id}}" title="Gostei: esta pergunta é relevante, clara e bem escrita." disabled >gostei</a>
+                        <a class="{% if upvoted %}active upvote-on{% else %}upvote-off{% endif %}"
+                           {% if user.is_authenticated %}id="upvote" title="Gostei: esta pergunta é relevante, clara e bem escrita."
+                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+                           {% endif %}
+                           data-pergid="{{ pergunta.id}}"  >gostei</a>
                         <p class="votes_count"><strong id="votes_count">{{ pergunta.votes }}</strong></p>
-                        <a class="downvote-off" id="downvote" data-pergid="{{ pergunta.id}}" title="Não Gostei: pergunta não é relevante, confusa e mau escrita.">não gostei</a>
+                        <a class="{% if downvoted %}active downvote-on{% else %}downvote-off{% endif %}"
+                           {% if user.is_authenticated %}id="downvote" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
+                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+                           {% endif %}
+                           data-pergid="{{ pergunta.id}}" >não gostei</a>
                         
                 </div>
                 <div class="col-xs-11">
-                
                         <p>{{ pergunta.descricao }}</p>
                         <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
                   
@@ -43,10 +50,13 @@
             <p>{{ resp.resposta }}</p>
             <p class="blog-post-meta">por: <a href="#">{{ resp.autor }}</a> em {{ resp.data }}</p>
           </div><!-- /.blog-post -->
-          {% endfor %}
+        {% endfor %}
+        <div class="blog-post">
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
+        </div><!-- /.blog-post -->
           {% else %}
           <h3>Nenhuma resposta...</h3>
-          <a href="#" class="btn btn-info btn-lg">Seja o primeiro a responder</a>
+          <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Seja o primeiro a responder</a>
           </div><!-- /.blog-post -->
           {% endif %}
           

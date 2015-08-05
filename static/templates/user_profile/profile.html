@@ -24,12 +24,16 @@
 
                   <form class="editprofile" id="editprofile" method="post" action="{% url 'profile' %}" enctype="multipart/form-data">
                     {% csrf_token %}
-                    {{ form.as_p }}
-                    {% if redirect_field_value %}
-                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-                    {% endif %}
-                    <button class="primaryAction btn btn-info btn-lg" type="submit">Salvar Alterações &raquo;</button>
+                    {{ user_form.as_p }}
+                    {{ profile_form.as_p }}
+                    
+                    
+                    
+                    <button class="btn btn-info btn-lg" type="submit">Salvar Alterações &raquo;</button>
                   </form>
+                  <br>
+                    <p>Picture: {{ user.profile_image_url }}</p>
+                    <img src='{{ user.profile_image_url }}'>
                   </div><!-- /.panel-body -->
                   </div><!-- /.panel-default -->
                 </div><!-- /.col-xs -->
