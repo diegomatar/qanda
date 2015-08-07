@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 
+from user_profile.models import UserProfile
+
 
 # Create your models here.
 
@@ -61,6 +63,25 @@ class Pergunta(models.Model):
         resp = self.resposta_set.all()
         return resp
     
+    def upvoted(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.perg_upvotes.all():
+            return 1
+        else:
+            return 0
+    
+    def downvoted(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.perg_downvotes.all():
+            return 1
+        else:
+            return 0
 
 class Resposta(models.Model):
     pergunta = models.ForeignKey(Pergunta)
@@ -74,3 +95,26 @@ class Resposta(models.Model):
     
     def __unicode__(self):
         return 'Por %s em %s' % (self.autor, self.data)
+    
+    
+    def upvoted(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.resp_upvotes.all():
+            return 1
+        else:
+            return 0
+        
+    def downvoted(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.resp_downvotes.all():
+            return 1
+        else:
+            return 0
+        
+        

@@ -30,25 +30,13 @@ def pergunta(request, slug):
     try:
         profile = request.user.userprofile
     except:
-        pass
-    
-    upvoted = 0
-    downvoted = 0
-    if profile:
-        if pergunta in profile.perg_upvotes.all():
-            upvoted = 1
-             
-        if pergunta in profile.perg_downvotes.all():
-            downvoted = 1
-            
+        pass            
     
     pergunta.views += 1
     pergunta.save()
     
     context = {
         'pergunta': pergunta,
-        'upvoted': upvoted,
-        'downvoted': downvoted,
     }
     return render(request, 'perguntas/pergunta.html', context)
 
@@ -65,84 +53,134 @@ def categoria(request, slug):
     }
     return render(request, 'perguntas/tag.html', context)
 
-
+# Upvotes a question
 @login_required
 def upvote(request):
-    print 'upvote 1'
     # Get the data being passed by get
     perg_id = None
     if request.method == "GET":
         perg_id = request.GET['pergunta_id']
-        print 'upvote 2'
     votes = 0
     # If was passed any value on get
     if perg_id:
-        print 'upvote 3'
         # Get the question with the id received
         perg = Pergunta.objects.get(id=int(perg_id))
         
         # Get the user profile
         profile = request.user.userprofile
-        print 'upvote 4'
         # upvotes the question
         if perg:
-            print 'upvote 5'
             votes = perg.votes + 1
             perg.votes = votes
             perg.save()
-            print 'upvote 6'
 
             # forst removes from downvotes
             if perg in profile.perg_downvotes.all():
-                print 'upvote 8'
                 profile.perg_downvotes.remove(perg)
                 profile.save()
             else:
                 # after adds question to upvotes
-                print 'upvote 7'
                 profile.perg_upvotes.add(perg)
                 profile.save()
             
     return HttpResponse(votes)
     
-    
+# Downvotes a question
 @login_required
 def downvote(request):
-    print 'downvote 1'
     # Get the data being passed by get
     perg_id = None
     if request.method == "GET":
         perg_id = request.GET['pergunta_id']
-        print 'downvote 2'
     
     votes = 0
     # If was passed any value on get
     if perg_id:
-        print 'downvote 3'
         # Get the question with the id received
         perg = Pergunta.objects.get(id=int(perg_id))
         # Get the user profile
         profile = request.user.userprofile
-        print 'downvote 4'
         # downvote the question
         if perg:
-            print 'downvote 5'
             votes = perg.votes - 1
             perg.votes = votes
             perg.save()
-            print 'downvote 6'
             
             # removes from upvotes
             if perg in profile.perg_upvotes.all():
-                print 'downvote 8'
                 profile.perg_upvotes.remove(perg)
                 profile.save()
             else:
                 # add question to downvotes
-                print 'downvote 7'
                 profile.perg_downvotes.add(perg)
                 profile.save()
             
+    return HttpResponse(votes)
+
+
+# Upvotes an answer
+@login_required
+def resp_upvote(request):
+    # Get the data being passed by get
+    resp_id = None
+    if request.method == "GET":
+        resp_id = request.GET['resposta_id']
+    votes = 0
+    # If was passed any value on get
+    if resp_id:
+        # Get the answer with the id received
+        resp = Resposta.objects.get(id=int(resp_id))
+        
+        # Get the user profile
+        profile = request.user.userprofile
+        # upvotes the question
+        if resp:
+            votes = resp.votes + 1
+            resp.votes = votes
+            resp.save()
+
+            # first removes from downvotes
+            if resp in profile.resp_downvotes.all():
+                profile.resp_downvotes.remove(resp)
+                profile.save()
+            else:
+                # after adds question to upvotes
+                profile.resp_upvotes.add(resp)
+                profile.save()
+            
+    return HttpResponse(votes)
+
+
+# Downvotes an answer
+@login_required
+def resp_downvote(request):
+    # Get the data being passed by get
+    resp_id = None
+    if request.method == "GET":
+        resp_id = request.GET['resposta_id']
+    
+    votes = 0
+    # If was passed any value on get
+    if resp_id:
+        # Get the question with the id received
+        resp = Resposta.objects.get(id=int(resp_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # downvote the question
+        if resp:
+            votes = resp.votes - 1
+            resp.votes = votes
+            resp.save()
+            
+            # first removes from upvotes
+            if resp in profile.resp_upvotes.all():
+                profile.resp_upvotes.remove(resp)
+                profile.save()
+            else:
+                # add question to downvotes
+                profile.resp_downvotes.add(resp)
+                profile.save()
+
     return HttpResponse(votes)
 
 

@@ -8,7 +8,6 @@ from allauth.socialaccount.models import SocialAccount
 from django.db import models
 from django.contrib.auth.models import User
 
-from perguntas.models import Pergunta, Resposta, Tag
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -19,10 +18,10 @@ class UserProfile(models.Model):
     linkedin = models.URLField(max_length=200, blank=True, null=True, verbose_name='Linked In')
     picture = models.ImageField(upload_to='profile_pictures', verbose_name='Imagem de Perfil', blank=True, null=True)
     points = models.IntegerField(default=0)
-    perg_upvotes = models.ManyToManyField(Pergunta, related_name='perg_upvotes')
-    perg_downvotes = models.ManyToManyField(Pergunta, related_name='perg_downvotes')
-    resp_upvotes = models.ManyToManyField(Resposta, related_name='resp_upvotes')
-    resp_downvotes = models.ManyToManyField(Resposta, related_name='resp_downvotes')
+    perg_upvotes = models.ManyToManyField('perguntas.Pergunta', related_name='perg_upvotes')
+    perg_downvotes = models.ManyToManyField('perguntas.Pergunta', related_name='perg_downvotes')
+    resp_upvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_upvotes')
+    resp_downvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_downvotes')
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     
