@@ -52,6 +52,7 @@ INSTALLED_APPS = (
     'allauth.socialaccount.providers.facebook',
     'perguntas',
     'user_profile',
+    'notifications',
 )
 
 SITE_ID = 1
@@ -76,6 +77,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'notifications.processors.unread_notifications',
                 'perguntas.processors.atividades_recentes',
                 'perguntas.processors.tags',
                 'django.template.context_processors.debug',

@@ -47,6 +47,7 @@
             <li><a href="#">Responder</a></li>
             <li><a href="#">Membros</a></li>
             {% if request.user.is_authenticated %}
+            <li><a href='{% url "view_notification" %}'>Menssagens <span class="badge">{{ num_unread }}</span></a></li>
             <li><a href="{% url 'profile' %}">Meu Perfil <img class="nav-img" src="{{ request.user.userprofile.profile_image_url }}"></a></li>
             <li><a href="{% url 'account_logout' %}">Sair</a></li>
             {% else %}

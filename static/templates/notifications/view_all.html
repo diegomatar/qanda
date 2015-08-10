@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load app_filters %}
+
+{% block content %}
+
+
+<div class="blog-header">
+    <h1 class="blog-title">Suas notificações:</h1>
+    <p class="lead blog-description">Encontre a resposta para suas dúvidas em um só lugar.</p>
+</div>
+<hr>
+
+<div class="row">
+
+<div class="col-sm-8 blog-main">
+    <div class="blog-post">
+        <h3>
+            {% if num_notif = 1 %}{{ num_notif }} nova notificação{% elif num_notif > 1 %}{{ num_notif }} novas notificações{% else %}Nenhuma nova notificação{% endif %}:</h3>
+        {% for notif in unread %}
+        <blockquote>
+          <p>{{ notif.note }} | {{ notif.timestamp }}</p>
+          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta }}{% endif %}</p>
+        </blockquote>
+        {% endfor %} 
+            
+    </div><!-- /.blog-post -->
+    <hr>
+        
+        <div class="blog-post">
+        <h3>Notificações anteriores:</h3>
+        {% for notif in read %}
+        <blockquote>
+          <p>{{ notif.note }} | {{ notif.timestamp }}</p>
+          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta }}{% endif %}</p>
+        </blockquote>
+        {% endfor %} 
+            
+    </div><!-- /.blog-post -->
+
+</div><!-- /.blog-main -->
+
+{% endblock %}

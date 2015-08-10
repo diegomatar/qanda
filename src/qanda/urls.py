@@ -20,6 +20,7 @@ from django.contrib import admin
 
 from perguntas import views
 from user_profile import urls as profile_urls
+from notifications import urls as notifications_urls
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
@@ -34,4 +35,5 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^conta/', include('allauth.urls')),
     url(r'^perfil/', include(profile_urls)),
+    url(r'^notificacoes/', include(notifications_urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -8,7 +8,7 @@ def atividades_recentes(request):
     respostas = Resposta.objects.all()
     
     atividades = list(chain(perguntas, respostas))
-    ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)[0:3]
+    ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)[0:6]
     
     return {'atividades_recentes': ativ_em_ordem}
 

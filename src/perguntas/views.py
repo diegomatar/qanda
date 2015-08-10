@@ -4,6 +4,7 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 
 
 from user_profile.models import UserProfile
+from notifications.views import new_Answer, new_Vote
 from .forms import PerguntaForm, RespostaForm, TagForm
 from .models import Pergunta, Resposta, Tag
 
@@ -65,11 +66,11 @@ def upvote(request):
     if perg_id:
         # Get the question with the id received
         perg = Pergunta.objects.get(id=int(perg_id))
-        
+        votes = perg.votes
         # Get the user profile
         profile = request.user.userprofile
         # upvotes the question
-        if perg:
+        if perg and perg not in profile.perg_upvotes.all():
             votes = perg.votes + 1
             perg.votes = votes
             perg.save()
@@ -82,7 +83,9 @@ def upvote(request):
                 # after adds question to upvotes
                 profile.perg_upvotes.add(perg)
                 profile.save()
-            
+                # Send a notification to the autor of the question
+                new_Vote(request.user, perg.autor, 1, perg, None)
+        
     return HttpResponse(votes)
     
 # Downvotes a question
@@ -98,10 +101,11 @@ def downvote(request):
     if perg_id:
         # Get the question with the id received
         perg = Pergunta.objects.get(id=int(perg_id))
+        votes = perg.votes
         # Get the user profile
         profile = request.user.userprofile
         # downvote the question
-        if perg:
+        if perg and perg not in profile.perg_downvotes.all():
             votes = perg.votes - 1
             perg.votes = votes
             perg.save()
@@ -114,7 +118,9 @@ def downvote(request):
                 # add question to downvotes
                 profile.perg_downvotes.add(perg)
                 profile.save()
-            
+                # Send a notification to the autor of the question
+                new_Vote(request.user, perg.autor, 0, perg, None)
+        
     return HttpResponse(votes)
 
 
@@ -130,11 +136,11 @@ def resp_upvote(request):
     if resp_id:
         # Get the answer with the id received
         resp = Resposta.objects.get(id=int(resp_id))
-        
+        votes = resp.votes
         # Get the user profile
         profile = request.user.userprofile
         # upvotes the question
-        if resp:
+        if resp and resp not in profile.resp_upvotes.all():
             votes = resp.votes + 1
             resp.votes = votes
             resp.save()
@@ -147,6 +153,10 @@ def resp_upvote(request):
                 # after adds question to upvotes
                 profile.resp_upvotes.add(resp)
                 profile.save()
+                # Send a notification to the autor of the answer
+                new_Vote(request.user, resp.autor, 1, None, resp)
+                
+
             
     return HttpResponse(votes)
 
@@ -164,10 +174,11 @@ def resp_downvote(request):
     if resp_id:
         # Get the question with the id received
         resp = Resposta.objects.get(id=int(resp_id))
+        votes = resp.votes
         # Get the user profile
         profile = request.user.userprofile
         # downvote the question
-        if resp:
+        if resp and resp not in profile.resp_downvotes.all():
             votes = resp.votes - 1
             resp.votes = votes
             resp.save()
@@ -180,6 +191,7 @@ def resp_downvote(request):
                 # add question to downvotes
                 profile.resp_downvotes.add(resp)
                 profile.save()
+                new_Vote(request.user, resp.autor, 0, None, resp)
 
     return HttpResponse(votes)
 
@@ -215,6 +227,7 @@ def responder(request, pk):
             form_data.pergunta = pergunta
             form_data.autor = request.user
             form_data.save()
+            notif = new_Answer(pergunta.autor, request.user, pergunta)
             url = pergunta.get_absolute_url()
             return HttpResponseRedirect(url)
     else:
