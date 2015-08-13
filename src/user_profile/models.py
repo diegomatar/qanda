@@ -7,6 +7,7 @@ from allauth.socialaccount.models import SocialAccount
 
 from django.db import models
 from django.contrib.auth.models import User
+from perguntas.models import Pergunta, Resposta
 
 
 # Create your models here.
@@ -22,6 +23,8 @@ class UserProfile(models.Model):
     perg_downvotes = models.ManyToManyField('perguntas.Pergunta', related_name='perg_downvotes')
     resp_upvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_upvotes')
     resp_downvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_downvotes')
+    follow_users = models.ManyToManyField(User, related_name='follow_users')
+    followers_num = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     
@@ -41,11 +44,11 @@ class UserProfile(models.Model):
         return self.user.first_name + ' ' + self.user.last_name
     
     def perguntas(self):
-        pergs = Pergunt.objects.filter(autor=self.user)
+        pergs = Pergunta.objects.filter(autor=self.user)
         return pergs
     
     def num_pergs(self):
-        pergs = Pergunt.objects.filter(autor=self.user)
+        pergs = Pergunta.objects.filter(autor=self.user)
         return len(pergs)
     
     def respostas(self):

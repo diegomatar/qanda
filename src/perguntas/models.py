@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models
 
-from user_profile.models import UserProfile
+#from user_profile.models import UserProfile
 
 
 # Create your models here.
@@ -41,7 +41,7 @@ class Pergunta(models.Model):
     data = models.DateField(default=datetime.now)
     titulo = models.CharField(max_length=300, verbose_name='Título')
     slug = models.SlugField(unique=True)
-    descricao = models.TextField(verbose_name='Descrição', max_length=5000)
+    descricao = models.TextField(verbose_name='Descrição', max_length=5000, blank=True, null=True)
     views = models.IntegerField(default=0)
     votes = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, blank=True)

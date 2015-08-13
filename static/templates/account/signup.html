@@ -1,6 +1,7 @@
 {% extends "account/base.html" %}
 
 {% load i18n %}
+{% load account socialaccount %}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
@@ -20,6 +21,22 @@
                 <div class="col-xs-1">
                 </div>
                 <div class="col-xs-11">
+                  
+                  {% get_providers as socialaccount_providers %}
+        {% if socialaccount_providers %}
+          <p class="lead blog-description">Crie sua conta usando as redes sociais abaixo:</p>          
+          <div class="socialaccount_ballot">
+            <ul class="socialaccount_providers">
+              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+            </ul>
+            <br>
+            <p class="lead blog-description"> Ou crie uma nova conta usando seu email:</p>
+          </div>
+          
+          {% include "socialaccount/snippets/login_extra.html" %}
+          
+        {% endif %}
+                  
                   <div class="panel panel-default">
                   <div class="panel-body">
 

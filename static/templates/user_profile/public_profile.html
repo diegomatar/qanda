@@ -19,6 +19,7 @@
                 <div class="col-xs-1">
                 </div>
                 <div class="col-xs-11">
+               <p><a class='user_{{ profile.user.id }} btn btn-danger {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='follow_user' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a> | <span id='followers_count'>{{ profile.followers_num }}</span> seguidores</p>
                <p><b>Pontos:</b> {{ profile.points }}</p>
                <p><b>Sobre:</b> {{ profile.about }}</p>
                <br>

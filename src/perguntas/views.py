@@ -156,8 +156,6 @@ def resp_upvote(request):
                 # Send a notification to the autor of the answer
                 new_Vote(request.user, resp.autor, 1, None, resp)
                 
-
-            
     return HttpResponse(votes)
 
 
@@ -195,7 +193,8 @@ def resp_downvote(request):
 
     return HttpResponse(votes)
 
-
+# User asks a new question
+@login_required
 def perguntar(request):
     if request.method == 'POST':
         form = PerguntaForm(request.POST)
@@ -215,8 +214,8 @@ def perguntar(request):
     
     return render(request, 'perguntas/perguntar.html', context)
 
-
-
+# User answer a question
+@login_required
 def responder(request, pk):
     pergunta = Pergunta.objects.get(pk=pk)
     
@@ -242,4 +241,52 @@ def responder(request, pk):
             
     
 
+# Parametrised function, creating a list of topics that starts_with
+def get_topics_list(max_results=0, starts_with=''):
+
+        top_list = []
+        if starts_with:
+                top_list = Tag.objects.filter(nome__istartswith=starts_with)
+
+        if max_results > 0:
+                if len(top_list) > max_results:
+                        top_list = top_list[:max_results]
+        
+        return top_list
+
+# Retirn sugestions of existing topics, based on the user inputs
+def suggest_topic(request):
+        top_list = []
+        starts_with = ''
+        # get the user tipping
+        if request.method == 'GET':
+                starts_with = request.GET['suggestion']
+                
+        # make a list
+        top_list = get_topics_list(8, starts_with)
+        
+        top_list_html = '<br><p>'
+        for top in top_list:
+            x = '<button data-topid="%s" class="topic-add btn btn-mini btn-default" type="button">%s  +</button> ' % (top.id, top.nome)
+            top_list_html += x
+        top_list_html + '</p>'
+        
+
+        return HttpResponse(top_list_html)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     

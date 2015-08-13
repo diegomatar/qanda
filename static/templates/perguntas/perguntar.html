@@ -14,10 +14,21 @@
           <div class="blog-post">
             
             <form class="perguntar" id="perguntar" method="post" action="{% url 'perguntar' %}" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button class="btn btn-info btn-lg" type="submit">Enviar Pergunta &raquo;</button>
-                  </form>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-info btn-lg" type="submit">Enviar Pergunta &raquo;</button>
+             </form>
+             <br>
+        <ul class="nav nav-list">
+                <li class="nav-header">Adicionar Tópicos</li>
+                <form>
+                        <label></label>
+                        <li><input  class="search-query span10" type="text" name="suggestion" value="" id="suggestion" /></li>
+                </form>
+        </ul>
+
+<div id="tops">
+</div>
                         
         </div><!-- /.blog-post -->
 

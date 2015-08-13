@@ -1,6 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+ Actions that will create a new notification:
+ - Someone answered your question
+ - Someone voted in your answer
+ - Someone voted in your question
+ - Unread notifications will be displaied on page reload
+ - Someone starts following you
+ '''
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -86,10 +94,23 @@ class NotiVote(models.Model):
         return unicode(self.to_user)
 
 
-'''
- Actions that will create a new notification:
- - Someone answered your question
- - Someone voted in your answer
- - Someone voted in your question
- - Unread notifications will be displaied on page reload
- '''
+
+class NotiFollow(models.Model):
+    to_user = models.ForeignKey(User, related_name='fnotif_to_user')
+    from_user = models.ForeignKey(User, related_name='fnotif_from_user')
+    unread = models.IntegerField(default=1, choices=unread_status)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    kind = models.CharField(max_length=50, default='follow')
+    
+    @property
+    def note(self,):
+        return self.from_user.first_name + " comecou a seguir voce!"
+    
+    @property
+    def note_full(self, ):
+         return self.from_user.first_name + " comecou a seguir voce!"
+    
+    def __unicode__(self):
+        return unicode(self.to_user)
+

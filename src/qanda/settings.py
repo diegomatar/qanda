@@ -139,7 +139,7 @@ MEDIA_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static', 'media')
 
 
 # Allauth Setting
-#LOGIN_URL = ''
+LOGIN_URL = '/conta/entrar'
 LOGIN_REDIRECT_URL = '/'
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True

@@ -19,6 +19,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 
 from perguntas import views
+from user_profile import views as user_profile_views
 from user_profile import urls as profile_urls
 from notifications import urls as notifications_urls
 
@@ -32,6 +33,8 @@ urlpatterns = [
     url(r'^resp-upvote/$', views.resp_upvote, name='resp_upvote'),
     url(r'^resp-downvote/$', views.resp_downvote, name='resp_downvote'),
     url(r'^categoria/(?P<slug>.*)$', views.categoria, name='categoria'),
+    url(r'^membros/$', user_profile_views.members, name='members'),
+    url(r'sugest-topic/$', views.suggest_topic, name='suggest_topic'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^conta/', include('allauth.urls')),
     url(r'^perfil/', include(profile_urls)),

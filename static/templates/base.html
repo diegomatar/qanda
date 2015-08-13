@@ -45,7 +45,7 @@
           <ul class="nav navbar-nav navbar-right">
             <li><a href="{% url 'perguntar' %}">Perguntar</a></li>
             <li><a href="#">Responder</a></li>
-            <li><a href="#">Membros</a></li>
+            <li><a href="{% url 'members' %}">Membros</a></li>
             {% if request.user.is_authenticated %}
             <li><a href='{% url "view_notification" %}'>Menssagens <span class="badge">{{ num_unread }}</span></a></li>
             <li><a href="{% url 'profile' %}">Meu Perfil <img class="nav-img" src="{{ request.user.userprofile.profile_image_url }}"></a></li>

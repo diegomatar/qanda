@@ -8,7 +8,7 @@
 {% block content %}
   
 <div class="blog-header">
-        <h1 class="blog-title">{% trans "Sign In" %}</h1>
+        <h1 class="blog-title">Entrar</h1>
         {% get_providers as socialaccount_providers %}
         {% if socialaccount_providers %}
           <p class="lead blog-description">Acesse sua conta pelas redes sociais abaixo. Ou, caso ainda nõ tenha uma conta <a href="{{ signup_url }}">crie sua conta aqui</a>
@@ -20,7 +20,7 @@
               {% include "socialaccount/snippets/provider_list.html" with process="login" %}
             </ul>
           
-            <div class="login-or">{% trans 'ou' %}</div>
+            <p class="lead blog-description">ou</p>
           
           </div>
           
@@ -43,17 +43,22 @@
                 <div class="col-xs-11">
                   <div class="panel panel-default">
                   <div class="panel-body">
-                  <form class="login" method="POST" action="{% url 'account_login' %}">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <p><a class="button secondaryAction" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a></p>
-                    {% if redirect_field_value %}
-                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-                    {% endif %}
-                    <button class="primaryAction btn btn-info btn-lg" type="submit">{% trans "Sign In" %} &raquo;</button>
-                    
-                    
-                  </form>
+                    <form class="login" method="POST" action="{% url 'account_login' %}">
+                        {% csrf_token %}
+                        {{ form.non_field_errors }}
+                        <input id="id_login" class="login-input" maxlength="30" name="login" placeholder="Email" type="text" />{{ form.login.errors }}<br>
+                        <input id="id_password"  class="login-input" name="password" placeholder="Senha" type="password" />{{ form.password.errors }}<br>
+                        <div class="remember-forgot-section">
+                        <input id="id_remember" name="remember" type="checkbox" />
+                        <label for="id_remember">Lembrar de mim</label>
+                        <br>
+                        <a class="forgot" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
+                        </div>
+                        {% if redirect_field_value %}
+                        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                        {% endif %}
+                        <button class="btn btn-info btn-lg" type="submit">{% trans "Sign In" %}</button>
+                    </form>
                   </div><!-- /.panel-body -->
                   </div><!-- /.panel-default -->
                 </div><!-- /.col-xs -->

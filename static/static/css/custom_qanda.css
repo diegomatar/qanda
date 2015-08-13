@@ -224,5 +224,33 @@ h6, .h6 {
  
 .profile-pic {
     width: 150px;
+    height: 150px;
     border-radius: 100%;
 }
+
+.socialaccount_providers li {
+  list-style-type: none;
+}
+
+.socialaccount_providers a {
+    width: 250px;
+    height: 50px;
+    border-radius: 100px;
+    text-align: left;
+    padding: 12px 65px;
+    color: #ffffff;
+    vertical-align: middle;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 500;
+    font-size: 18px; 
+}
+
+a.facebook {
+  background-color: #507cc0;
+  background-image: url("img/face-longin.png");
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  background-position-x: 25px;
+  background-position-y: center;
+}
+
