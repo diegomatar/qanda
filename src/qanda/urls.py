@@ -39,4 +39,5 @@ urlpatterns = [
     url(r'^conta/', include('allauth.urls')),
     url(r'^perfil/', include(profile_urls)),
     url(r'^notificacoes/', include(notifications_urls)),
+    url(r'^select2/', include('django_select2.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

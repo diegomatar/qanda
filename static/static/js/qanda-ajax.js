@@ -260,14 +260,6 @@ $('a#follow_user').click(function(){
 });
 
 
-// Topic sugestions
-$('#suggestion').keyup(function(){
-        var query;
-        query = $(this).val();
-        $.get('/sugest-topic/', {suggestion: query}, function(data){
-         $('#tops').html(data);
-        });
-});
 
 
 

@@ -1,5 +1,9 @@
 {% extends 'base.html' %}
 
+{% load django_select2_tags %}
+
+{% block head %}{% import_django_select2_js_css %}{% endblock%}
+
 {% block content %}
 
 
@@ -13,26 +17,20 @@
 
           <div class="blog-post">
             
-            <form class="perguntar" id="perguntar" method="post" action="{% url 'perguntar' %}" enctype="multipart/form-data">
+            <form class="perguntar" id="perguntar" method="post" action="/perguntar/" enctype="multipart/form-data">
                 {% csrf_token %}
                 {{ form.as_p }}
-                <button class="btn btn-info btn-lg" type="submit">Enviar Pergunta &raquo;</button>
+                <button class="btn btn-info btn-lg" type="submit">Enviar Pergunta »</button>
              </form>
-             <br>
-        <ul class="nav nav-list">
-                <li class="nav-header">Adicionar Tópicos</li>
-                <form>
-                        <label></label>
-                        <li><input  class="search-query span10" type="text" name="suggestion" value="" id="suggestion" /></li>
-                </form>
-        </ul>
-
-<div id="tops">
-</div>
+            
                         
         </div><!-- /.blog-post -->
 
    </div><!-- /.blog-main -->
 
+{% endblock %}
+
+
+{% block script %}
 
 {% endblock %}

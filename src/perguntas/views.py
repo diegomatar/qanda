@@ -197,7 +197,9 @@ def resp_downvote(request):
 @login_required
 def perguntar(request):
     if request.method == 'POST':
+
         form = PerguntaForm(request.POST)
+        
         if form.is_valid():
             form_data = form.save(commit=False)
             form_data.autor = request.user

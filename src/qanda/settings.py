@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'perguntas',
     'user_profile',
     'notifications',
+    'django_select2',
 )
 
 SITE_ID = 1
@@ -182,3 +183,6 @@ SOCIALACCOUNT_PROVIDERS = \
         'VERSION': 'v2.4'}}
 
 
+# Delect2 config
+SELECT2_BOOTSTRAP = True
+AUTO_RENDER_SELECT2_STATICS = False
