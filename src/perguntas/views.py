@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+
 from random import randint
 
 from django.contrib import messages
@@ -8,9 +12,9 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect, Http404
 
 
 from user_profile.models import UserProfile
-from notifications.views import new_Answer, new_Vote
-from .forms import PerguntaForm, RespostaForm, TagForm
-from .models import Pergunta, Resposta, Tag
+from notifications.views import new_Answer, new_Vote, new_Comment
+from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm
+from .models import Pergunta, Resposta, Tag, Comment
 
 
 
@@ -280,8 +284,57 @@ def edit_answer(request, pk):
     
     return render(request, 'perguntas/editar-resposta.html', context)
     
+    
+@login_required
+def add_comment(request, pk=0):
+    
+    resp = Resposta.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.autor = request.user
+            form_data.answer = resp
+            form_data.save()
+            new_Comment(resp.autor, request.user, resp)
+            return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
+    else:
+        form = CommentForm()
+    
+    context = {
+        'form': form,
+        'answer': answer,
+        'edit': 0,
+    }
+    
+    return render(request, 'perguntas/comment.html', context)    
 
 
+@login_required
+def edit_comment(request, pk=0):
+    
+    comment = Comment.objects.get(pk=pk)
+    answer = comment.answer
+    if comment and comment.autor == request.user:
+        if request.method == 'POST':
+            form = CommentForm(request.POST, instance=comment)
+            if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Comentário editado com sucesso!')
+                    return HttpResponseRedirect(reverse('pergunta', args=[comment.answer.pergunta.slug]))
+        else:
+            form = CommentForm(instance=comment)
+    
+        
+    
+    
+    context = {
+        'form': form,
+        'answer': answer,
+        'edit': 1,
+    }
+    
+    return render(request, 'perguntas/comment.html', context)
 
     
     

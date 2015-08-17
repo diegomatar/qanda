@@ -65,6 +65,15 @@
                 <p>{{ resp.resposta|safe }}</p>
                 {% if resp.autor == request.user %}<p><a href='{% url 'editar_resposta' resp.id %}' class='btn btn-danger btn-sm'>Editar</a></p>{% endif %}
                 <p class="blog-post-meta">por: <a href="{% url 'public_profile' resp.autor.id %}">{{ resp.autor }}</a> {{ resp.data|post_date }}</p>
+                <p>{{ resp.comment_num }} comentários | <a href='{% url "add_comment" resp.id %}'>comentar</a></p>
+                <div class="row">
+                        <div class="col-md-8 col-md-offset-1">
+                                {% for com in resp.comment_set.all   %}
+                                        <p><i>{{ com.comment }}</i> {% if com.autor == request.user %}<a href='{% url 'edit_comment' com.pk %}' class='btn btn-danger btn-xs'>editar</a>{% endif %} - por <a href='{% url 'public_profile' com.autor.id %}'>{{ com.autor }}</a></p>
+                                {% endfor %}
+                        </div>
+                        
+                </div>
               </div><!-- /.col-11 -->
             </div><!-- /.row -->
           </div><!-- /.blog-post -->

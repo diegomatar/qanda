@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+
+
+<div class="blog-header">
+        <h1 class="blog-title">{% if edit %}Editar COmentário{% else %}Novo Comentário{% endif %}</h1>
+        <p class="lead blog-description">{{ answer.resposta }}</p>
+      </div>
+
+      <div class="row">
+
+        <div class="col-sm-8 blog-main">
+
+          <div class="blog-post">
+            
+            {% crispy form form.helper %}
+                        
+        </div><!-- /.blog-post -->
+
+   </div><!-- /.blog-main -->
+
+
+{% endblock %}

@@ -117,4 +117,23 @@ class Resposta(models.Model):
         else:
             return 0
         
+    def comment_num(self, ):
+        comments = self.comment_set.all()
+        num_comments = len(comments)
+        return num_comments
+    
+        
+
+class Comment(models.Model):
+    answer = models.ForeignKey(Resposta)
+    autor = models.ForeignKey(User)
+    data = models.DateField(default=datetime.now)
+    comment = models.TextField(max_length=5000)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    classe = models.CharField(max_length=100, default='comment')
+    
+    def __unicode__(self):
+        return 'Por %s em %s' % (self.autor, self.data)
+        
         

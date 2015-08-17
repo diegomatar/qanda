@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 from django.template.defaultfilters import slugify
 
-from .models import Pergunta, Resposta, Tag
+from .models import Pergunta, Resposta, Tag, Comment
 
 
 
@@ -93,8 +93,38 @@ class RespostaForm(forms.ModelForm):
         )
         
         
-        
 class TagForm(forms.ModelForm):
     class Meta:
         model = Tag
         fields = ['nome',]
+        
+        
+        
+class CommentForm(forms.ModelForm):
+    comment = forms.CharField(widget=SummernoteInplaceWidget(), label="Comentário", required=True)
+    
+    class Meta:
+        model = Comment
+        fields = ['comment',]
+        
+    def __init__(self, *args, **kwargs):
+        super(CommentForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'comentar'
+        self.helper.form_class = 'comentar'
+        self.helper.form_method = 'post'
+        
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-8'
+        self.helper.layout = Layout(
+     
+            HTML("""
+                <p>Seja sempre respeitoso e claro em seus comentarios</p>
+            """),
+            'comment',
+            Div(
+                Submit('submit', 'Enviar Comentario >', css_class='btn-info btn-lg'),
+                css_class='col-lg-offset-3 col-lg-9',
+            )
+        )

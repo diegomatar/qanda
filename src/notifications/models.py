@@ -113,4 +113,24 @@ class NotiFollow(models.Model):
     
     def __unicode__(self):
         return unicode(self.to_user)
+    
 
+class NotiComment(models.Model):
+    to_user = models.ForeignKey(User, related_name='cnotif_to_user')
+    from_user = models.ForeignKey(User, related_name='cnotif_from_user')
+    answer = models.ForeignKey(Resposta)
+    unread = models.IntegerField(default=1, choices=unread_status)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    kind = models.CharField(max_length=50, default='comment')
+
+    @property
+    def note(self,):
+        return self.from_user.first_name + " comentou sua resposta."
+    
+    @property
+    def note_full(self, ):
+         return self.from_user.first_name + " comentou sua resposta."
+    
+    def __unicode__(self):
+        return unicode(self.to_user)
