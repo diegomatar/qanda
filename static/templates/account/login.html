@@ -1,5 +1,5 @@
 {% extends "account/base.html" %}
-
+{% load crispy_forms_tags %}
 {% load i18n %}
 {% load account socialaccount %}
 
@@ -11,8 +11,7 @@
         <h1 class="blog-title">Entrar</h1>
         {% get_providers as socialaccount_providers %}
         {% if socialaccount_providers %}
-          <p class="lead blog-description">Acesse sua conta pelas redes sociais abaixo. Ou, caso ainda nõ tenha uma conta <a href="{{ signup_url }}">crie sua conta aqui</a>
-          </p>
+          <p class="lead blog-description">Acesse sua conta pelas redes sociais abaixo. Ou, caso ainda nõ tenha uma conta <a href="{{ signup_url }}">crie sua conta aqui</a></p>
           
           <div class="socialaccount_ballot">
           

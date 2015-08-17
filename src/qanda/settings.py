@@ -54,6 +54,7 @@ INSTALLED_APPS = (
     'user_profile',
     'notifications',
     'django_select2',
+    'crispy_forms',
 )
 
 SITE_ID = 1
@@ -159,7 +160,7 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_PASSWORD_MIN_LENGTH = 5
 SOCIALACCOUNT_ADAPTER = 'qanda.my_adapter.SocialAccountAdapter'
 
-
+# Allauth Social Settings
 SOCIALACCOUNT_PROVIDERS = \
     {'facebook':
        {'METHOD': 'oauth2',
@@ -183,6 +184,10 @@ SOCIALACCOUNT_PROVIDERS = \
         'VERSION': 'v2.4'}}
 
 
-# Delect2 config
+# Delect2 settings
 SELECT2_BOOTSTRAP = True
 AUTO_RENDER_SELECT2_STATICS = False
+
+# Crispy Forms settings
+CRISPY_TEMPLATE_PACK = 'bootstrap3'
+CRISPY_FAIL_SILENTLY = not DEBUG

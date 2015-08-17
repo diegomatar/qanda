@@ -261,6 +261,4 @@ $('a#follow_user').click(function(){
 
 
 
-
-
 }); // document ready

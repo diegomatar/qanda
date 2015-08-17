@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load crispy_forms_tags %}
 {% load django_select2_tags %}
 
 {% block head %}{% import_django_select2_js_css %}{% endblock%}
@@ -17,11 +17,7 @@
 
           <div class="blog-post">
             
-            <form class="perguntar" id="perguntar" method="post" action="/perguntar/" enctype="multipart/form-data">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button class="btn btn-info btn-lg" type="submit">Enviar Pergunta »</button>
-             </form>
+            {% crispy form form.helper %}
             
                         
         </div><!-- /.blog-post -->

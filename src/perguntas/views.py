@@ -1,4 +1,7 @@
+from random import randint
+
 from django.contrib.auth.decorators import login_required
+from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 
@@ -204,9 +207,18 @@ def perguntar(request):
             form_data = form.save(commit=False)
             form_data.autor = request.user
             form_data.slug = slugify(form_data.titulo)
+            slug = form_data.slug
+            # If slug is already taken, add a random number at the end of it
+            try:
+                Pergunta.objects.get(slug=slug)
+                form_data.slug = slug + str(randint(0,100))
+            except:
+                pass
+            
             form_data.save()
             form.save_m2m()
-            return HttpResponseRedirect('/')
+            
+            return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
     else:
         form = PerguntaForm()
         
@@ -223,6 +235,7 @@ def responder(request, pk):
     
     if request.method == 'POST':
         form = RespostaForm(request.POST)
+        form.helper.form_action = reverse('responder', args=[pergunta.id])
         if form.is_valid():
             form_data = form.save(commit=False)
             form_data.pergunta = pergunta

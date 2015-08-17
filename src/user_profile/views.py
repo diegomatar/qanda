@@ -19,7 +19,6 @@ from .models import UserProfile
 def user_profile(request):
     
     user_data = UserProfile.objects.get(user=request.user)
-    print user_data.profile_image_url()
 
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=request.user)
