@@ -31,7 +31,7 @@
                         
                 </div>
                 <div class="col-xs-11">
-                        <p>{{ pergunta.descricao }}</p>
+                        <p>{{ pergunta.descricao|safe }}</p>
                         <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
                 </div>
           
@@ -62,9 +62,8 @@
                 
               </div>
               <div class="col-xs-11">
-                <p>{{ resp|upvoted:request.user }}</p>
-                <p>{{ resp|downvoted:request.user }}</p>
-                <p>{{ resp.resposta }}</p>
+                <p>{{ resp.resposta|safe }}</p>
+                {% if resp.autor == request.user %}<p><a href='{% url 'editar_resposta' resp.id %}' class='btn btn-danger btn-sm'>Editar</a></p>{% endif %}
                 <p class="blog-post-meta">por: <a href="{% url 'public_profile' resp.autor.id %}">{{ resp.autor }}</a> {{ resp.data|post_date }}</p>
               </div><!-- /.col-11 -->
             </div><!-- /.row -->

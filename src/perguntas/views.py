@@ -1,9 +1,10 @@
 from random import randint
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
-from django.shortcuts import render, HttpResponse, HttpResponseRedirect
+from django.shortcuts import render, HttpResponse, HttpResponseRedirect, Http404
 
 
 from user_profile.models import UserProfile
@@ -252,42 +253,36 @@ def responder(request, pk):
         'pergunta': pergunta,
     }
      
-    return render(request, 'perguntas/responder.html', context)       
-            
+    return render(request, 'perguntas/responder.html', context)
+
+@login_required
+def edit_answer(request, pk):
+    answer = Resposta.objects.get(pk=pk)
+    # Checks user permission to edit the answer
+    if request.user == answer.autor:
+        # If is post, gets the data and save the edited answer
+        if request.method == 'POST':
+            form = RespostaForm(request.POST, request.FILES, instance=answer)
+            if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Resposta editada com sucesso!!')
+                    return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug]))
+        # Otherwise, just display the form to edit:
+        else:
+            form = RespostaForm(instance=answer)
+    else:
+            raise Http404
+        
+    context = {
+        'form': form,
+        'resposta': answer,
+    }
+    
+    return render(request, 'perguntas/editar-resposta.html', context)
     
 
-# Parametrised function, creating a list of topics that starts_with
-def get_topics_list(max_results=0, starts_with=''):
 
-        top_list = []
-        if starts_with:
-                top_list = Tag.objects.filter(nome__istartswith=starts_with)
 
-        if max_results > 0:
-                if len(top_list) > max_results:
-                        top_list = top_list[:max_results]
-        
-        return top_list
-
-# Retirn sugestions of existing topics, based on the user inputs
-def suggest_topic(request):
-        top_list = []
-        starts_with = ''
-        # get the user tipping
-        if request.method == 'GET':
-                starts_with = request.GET['suggestion']
-                
-        # make a list
-        top_list = get_topics_list(8, starts_with)
-        
-        top_list_html = '<br><p>'
-        for top in top_list:
-            x = '<button data-topid="%s" class="topic-add btn btn-mini btn-default" type="button">%s  +</button> ' % (top.id, top.nome)
-            top_list_html += x
-        top_list_html + '</p>'
-        
-
-        return HttpResponse(top_list_html)
     
     
     

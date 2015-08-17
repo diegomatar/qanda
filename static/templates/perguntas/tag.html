@@ -28,7 +28,7 @@
         {% endfor %}
         {% else %}
         <h3>Sabe a resposta?</h3>
-        <a href="#" class="btn btn-info btn-lg">Responda Aqui</a>
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
         
         {% endif %}
         

@@ -55,6 +55,7 @@ INSTALLED_APPS = (
     'notifications',
     'django_select2',
     'crispy_forms',
+    'django_summernote',
 )
 
 SITE_ID = 1
@@ -191,3 +192,23 @@ AUTO_RENDER_SELECT2_STATICS = False
 # Crispy Forms settings
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 CRISPY_FAIL_SILENTLY = not DEBUG
+
+
+# Summernote Wysiwyg Editor Settings
+# Using Summernote Air-mode
+
+SUMMERNOTE_CONFIG = {
+    'airMode': False,
+    'width': '100%',
+    'height': '280',
+    'lang': 'pt-BR',
+     'toolbar': [
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['para', ['ul', 'ol']],
+        ['insert', ['link', 'picture', 'video', 'hr']],
+        ['view', ['fullscreen', 'codeview']],
+    ],
+    'attachment_require_authentication': True,
+    #'attachment_upload_to': my_custom_upload_to_func(),
+    #'attachment_storage_class': 'my.custom.storage.class.name',
+}

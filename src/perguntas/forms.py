@@ -5,6 +5,7 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Fieldset, HTML, Field, Button, Div
 from django_select2 import AutoModelSelect2TagField
+from django_summernote.widgets import SummernoteWidget, SummernoteInplaceWidget
 
 from django import forms
 from django.core.urlresolvers import reverse
@@ -27,7 +28,7 @@ class TagField(AutoModelSelect2TagField):
 
 class PerguntaForm(forms.ModelForm):
     titulo = forms.CharField(label="Pergunta")
-    descricao = forms.CharField(widget=forms.Textarea, label="Detalhes", required=False)
+    descricao = forms.CharField(widget=SummernoteWidget(), label="Detalhes", required=False)
     tags = TagField(label="Tópicos")
     
     class Meta:
@@ -63,6 +64,8 @@ class PerguntaForm(forms.ModelForm):
              
 
 class RespostaForm(forms.ModelForm):
+    resposta = forms.CharField(widget=SummernoteInplaceWidget(), label="Resposta", required=True)
+    
     class Meta:
         model = Resposta
         fields = ['resposta',]
