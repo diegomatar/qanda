@@ -261,6 +261,12 @@ def responder(request, pk):
             form_data.save()
             notif = new_Answer(pergunta.autor, request.user, pergunta)
             url = pergunta.get_absolute_url()
+            
+            # Add the first two topics of question to user knowledge
+            question_tags = pergunta.tags.all()[0:2]
+            profile = request.user.userprofile
+            profile.knows_about.add(question_tags[0], question_tags[1])
+            profile.save()
             return HttpResponseRedirect(url)
     else:
         form = RespostaForm()
