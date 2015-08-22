@@ -6,6 +6,7 @@ from random import randint
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect, Http404
@@ -22,7 +23,19 @@ from .models import Pergunta, Resposta, Tag, Comment
 def home(request):
     
     perguntas = Pergunta.objects.all()
+    perguntas = sorted(perguntas, key=lambda pergunta: pergunta.score(), reverse=True)
+    paginator = Paginator(perguntas, 10) # Show 10 contacts per page
     tags = Tag.objects.all()
+    
+    page = request.GET.get('page')
+    try:
+        perguntas = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        perguntas = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        perguntas = paginator.page(paginator.num_pages)
     
     context = {
         'perguntas': perguntas,
@@ -303,7 +316,7 @@ def add_comment(request, pk=0):
     
     context = {
         'form': form,
-        'answer': answer,
+        'answer': resp,
         'edit': 0,
     }
     

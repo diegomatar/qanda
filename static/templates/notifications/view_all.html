@@ -19,7 +19,7 @@
         {% for notif in unread %}
         <blockquote>
           <p>{{ notif.note }} | {{ notif.timestamp }}</p>
-          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta }}{% endif %}</p>
+          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta|safe|truncatewords_html:100 }}{% endif %}</p>
         </blockquote>
         {% endfor %} 
             
@@ -31,7 +31,7 @@
         {% for notif in read %}
         <blockquote>
           <p>{{ notif.note }} | {{ notif.timestamp }}</p>
-          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta }}{% endif %}</p>
+          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta|safe|truncatewords_html:100 }}{% endif %}</p>
         </blockquote>
         {% endfor %} 
             

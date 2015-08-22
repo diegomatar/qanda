@@ -89,13 +89,13 @@
             <h4>Atividades Recentes</h4>
             {% for ativ in atividades_recentes %}
             {% if ativ.classe = 'pergunta' %}
-            <p><a href='{% url 'public_profile' ativ.autor.id %}'>{{ ativ.autor }}</a> perguntou:</p>
-            <p><a href="{% url 'pergunta' ativ.slug %}">"{{ ativ.titulo }}"</a></p>
+            <p><a href='{% url 'public_profile' ativ.autor.id %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
+            <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
             <p><i> - {{ ativ.timestamp }}</i></p>
             <hr>
             {% elif ativ.classe = 'resposta' %}
-            <p><a href="{% url 'public_profile' ativ.autor.id %}">{{ ativ.autor }}</a> respondeu:</p>
-            <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">"{{ ativ.resposta|truncatechars:200 }}"</a></p>
+            <p><a href="{% url 'public_profile' ativ.autor.id %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
+            <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
             <p><i> - {{ ativ.timestamp }}</i></p>
             <hr>
             {% endif %}

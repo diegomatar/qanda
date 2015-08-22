@@ -23,7 +23,7 @@
                         <p>{% if profile.about %}{{ profile.about }}{% endif %}</p>
                         <p>Membro desde: {{ profile.timestamp }}</p>
                         <p>{% if profile.facebook %}<a href='{{ profile.facebook }}' target='blank'>Facebook</a>{% endif %} {% if profile.facebook %}| <a href='{{ profile.twitter }}' target='blank'>Twitter</a>{% endif %} {% if profile.linkedin %}| <a href='{{ profile.linkedin }}' target='blank'>Linked In</a>{% endif %}</p>
-                        <p>Seguidores: <b>100</b> | Respostas: <b>{{ profile.num_respostas }}</b> | Perguntas: <b>{{ profile.num_pergs }}</b></p>
+                        <p>Seguidores: <b>{{ profile.followers_num }}</b> | Respostas: <b>{{ profile.num_respostas }}</b> | Perguntas: <b>{{ profile.num_pergs }}</b></p>
                         <br>
                     </div>
                 </div><!-- /row -->

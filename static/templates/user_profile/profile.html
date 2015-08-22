@@ -1,7 +1,10 @@
 {% extends "account/base.html" %}
 {% load crispy_forms_tags %}
+{% load django_select2_tags %}
 
 {% load i18n %}
+
+{% block head %}{% import_django_select2_js_css %}{% endblock%}
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
@@ -28,12 +31,11 @@
                     {% crispy profile_form %}
                     
                     
-                    
+                    <div style='text-align: center'>
                     <button class="btn btn-info btn-lg" type="submit">Salvar Alterações &raquo;</button>
+                    </div>
                   </form>
                   <br>
-                    <p>Picture: {{ user.profile_image_url }}</p>
-                    <img src='{{ user.profile_image_url }}'>
                   </div><!-- /.panel-body -->
                   </div><!-- /.panel-default -->
                 </div><!-- /.col-xs -->

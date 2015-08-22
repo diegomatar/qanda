@@ -25,6 +25,8 @@ class UserProfile(models.Model):
     resp_downvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_downvotes')
     follow_users = models.ManyToManyField(User, related_name='follow_users')
     followers_num = models.IntegerField(default=0)
+    interests = models.ManyToManyField('perguntas.Tag', related_name='interests')
+    knows_about = models.ManyToManyField('perguntas.Tag', related_name='knows_about')
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     
@@ -36,7 +38,7 @@ class UserProfile(models.Model):
             fb_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='facebook')
          
             if len(fb_uid):
-                return "http://graph.facebook.com/{}/picture?".format(fb_uid[0].uid)
+                return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)
          
             return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())
     

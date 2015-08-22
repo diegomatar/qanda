@@ -5,9 +5,9 @@ from datetime import datetime
 
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db import models
+from django.db import models, IntegrityError
 
-#from user_profile.models import UserProfile
+from .rank import score_question
 
 
 # Create your models here.
@@ -34,6 +34,19 @@ class Tag(models.Model):
     def num_perguntas(self, ):
         perg = self.pergunta_set.all()
         return len(perg)
+    
+    def save(self, *args, **kwargs):
+        self.nome = self.nome.lower()
+        
+        try: #create a new Tag object
+            super(Tag, self).save(*args, **kwargs)
+        
+        except IntegrityError: # in case of errors, replace the instance by the existing one
+            existing_tag = Tag.objects.get(slug=self.slug)
+            self.pk = existing_tag.pk
+            # Now pk != 0 and objects should be updated:
+            self.save()
+
 
 
 class Pergunta(models.Model):
@@ -82,6 +95,12 @@ class Pergunta(models.Model):
             return 1
         else:
             return 0
+        
+    def score(self, ):
+        score = score_question(self)
+        return score
+    
+
 
 class Resposta(models.Model):
     pergunta = models.ForeignKey(Pergunta)
