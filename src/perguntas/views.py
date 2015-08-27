@@ -24,7 +24,7 @@ def home(request):
     
     perguntas = Pergunta.objects.all()
     perguntas = sorted(perguntas, key=lambda pergunta: pergunta.score(), reverse=True)
-    paginator = Paginator(perguntas, 10) # Show 10 contacts per page
+    paginator = Paginator(perguntas, 30) # Show 30 questions per page
     tags = Tag.objects.all()
     
     page = request.GET.get('page')
@@ -56,6 +56,10 @@ def pergunta(request, slug):
     
     pergunta.views += 1
     pergunta.save()
+    
+    for resp in pergunta.resposta_set.all():
+        resp.views += 1
+        resp.save()
     
     context = {
         'pergunta': pergunta,

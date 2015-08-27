@@ -2,17 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import hashlib
-
 from allauth.socialaccount.models import SocialAccount
 
 from django.db import models
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
+
 from perguntas.models import Pergunta, Resposta
 
 
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
+    slug = models.SlugField(default="slug")
     about = models.TextField(max_length=500, blank=True, null=True, verbose_name='Sobre')
     twitter = models.CharField(max_length=200, blank=True, null=True, verbose_name='Twitter')
     facebook = models.URLField(max_length=200, blank=True, null=True, verbose_name='Facebook')
@@ -23,8 +25,7 @@ class UserProfile(models.Model):
     perg_downvotes = models.ManyToManyField('perguntas.Pergunta', related_name='perg_downvotes')
     resp_upvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_upvotes')
     resp_downvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_downvotes')
-    follow_users = models.ManyToManyField(User, related_name='follow_users')
-    followers_num = models.IntegerField(default=0)
+    follow_users = models.ManyToManyField(User, related_name='follows')
     interests = models.ManyToManyField('perguntas.Tag', related_name='interests')
     knows_about = models.ManyToManyField('perguntas.Tag', related_name='knows_about')
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
@@ -38,9 +39,9 @@ class UserProfile(models.Model):
             fb_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='facebook')
          
             if len(fb_uid):
-                return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)
+                return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)+"?type=large"
          
-            return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())
+            return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())+"?s=200"
     
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
@@ -60,6 +61,10 @@ class UserProfile(models.Model):
     def num_respostas(self):
         resp = Resposta.objects.filter(autor=self.user)
         return len(resp)
+    
+    def followers_num(self):
+        followers = self.user.follows.all()
+        return len(followers)
         
         
     def __unicode__(self):

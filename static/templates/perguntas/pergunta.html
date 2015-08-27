@@ -6,7 +6,7 @@
 
 <div class="blog-header">
         <h1 class="blog-title">{{ pergunta.titulo }}</h1>
-        <p class="lead blog-description">{{ pergunta.data|post_date }} | por <a href='{% url 'public_profile' pergunta.autor.id %}'>{{ pergunta.autor.userprofile.name }}</a> | vista: {{ pergunta.views }} vezes</p>
+        <p class="lead blog-description">{{ pergunta.data|post_date }} | por <a href='{% url 'profile' pergunta.autor.userprofile.slug %}'>{{ pergunta.autor.userprofile.name }}</a> | vista: {{ pergunta.views }} vezes |<a href="{% url 'report_question' pergunta.pk 1 %}"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a></p>
       </div>
 
       <div class="row">
@@ -64,12 +64,12 @@
               <div class="col-xs-11">
                 <p>{{ resp.resposta|safe }}</p>
                 {% if resp.autor == request.user %}<p><a href='{% url 'editar_resposta' resp.id %}' class='btn btn-danger btn-sm'>Editar</a></p>{% endif %}
-                <p class="blog-post-meta">por: <a href="{% url 'public_profile' resp.autor.id %}">{{ resp.autor.userprofile.name }}</a> {{ resp.data|post_date }}</p>
+                <p class="blog-post-meta">por: <a href="{% url 'profile' resp.autor.userprofile.slug %}">{{ resp.autor.userprofile.name }}</a> | {{ resp.data|post_date }} | vista: {{ resp.views }} vezes |<a href="{% url 'report_answer' resp.pk 1 %}"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a></p>
                 <p>{{ resp.comment_num }} comentários | <a href='{% url "add_comment" resp.id %}'>comentar</a></p>
                 <div class="row">
                         <div class="col-md-8 col-md-offset-1">
                                 {% for com in resp.comment_set.all   %}
-                                        <p><i>{{ com.comment }}</i> {% if com.autor == request.user %}<a href='{% url 'edit_comment' com.pk %}' class='btn btn-danger btn-xs'>editar</a>{% endif %} - por <a href='{% url 'public_profile' com.autor.id %}'>{{ com.autor.userprofile.name }}</a></p>
+                                        <p><i>{{ com.comment }}</i> {% if com.autor == request.user %}<a href='{% url 'edit_comment' com.pk %}' class='btn btn-danger btn-xs'>editar</a>{% endif %} - por <a href='{% url 'profile' com.autor.userprofile.slug %}'>{{ com.autor.userprofile.name }}</a></p>
                                 {% endfor %}
                         </div>
                         

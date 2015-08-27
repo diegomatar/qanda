@@ -26,7 +26,7 @@
                   <div class="panel panel-default">
                   <div class="panel-body">
 
-                  <form class="editprofile" id="editprofile" method="post" action="{% url 'profile' %}" enctype="multipart/form-data">
+                  <form class="editprofile" id="editprofile" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
                     {% crispy user_form %}
                     {% crispy profile_form %}
                     

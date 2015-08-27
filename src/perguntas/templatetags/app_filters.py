@@ -20,7 +20,7 @@ def post_date(value):
     elif delta.days > 1 and delta.days < 10 :
         return "%s dias atrás" % delta.days
     else:
-        return "em {:%d de %b %Y}".format(data)
+        return "{:%d de %b}".format(data)
     
     
 @register.filter

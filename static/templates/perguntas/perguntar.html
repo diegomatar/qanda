@@ -4,29 +4,48 @@
 
 {% block head %}{% import_django_select2_js_css %}{% endblock%}
 
+{% block perguntar_active %}active{% endblock %}
+
+{% block header %}
+<div class="blog-header">
+<h1 class="blog-title">Nova Pergunta</h1>
+</div>
+{% endblock %}
+
 {% block content %}
 
-
-<div class="blog-header">
-        <h1 class="blog-title">Nova Pergunta</h1>
-      </div>
-
-      <div class="row">
-
-        <div class="col-sm-8 blog-main">
-
-          <div class="blog-post">
-            
-            {% crispy form form.helper %}
-            
-                        
-        </div><!-- /.blog-post -->
-
-   </div><!-- /.blog-main -->
+<div class="blog-post">
+  <div class="panel panel-default">
+     <div class="panel-body">
+      {% crispy form form.helper %}
+    </div>
+  </div>
+      
+</div><!-- /.blog-post -->
 
 {% endblock %}
 
 
 {% block script %}
 
+{% endblock %}
+
+
+{% block sidebar %}
+    <div class="sidebar-module sidebar-module-inset">
+        <h4>Atividades Recentes</h4>
+        {% for ativ in atividades_recentes %}
+            {% if ativ.classe = 'pergunta' %}
+                <p><a href='{% url 'profile' ativ.autor.userprofile.slug %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
+                <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
+                <p><i> - {{ ativ.timestamp }}</i></p>
+                <hr>
+            {% elif ativ.classe = 'resposta' %}
+                <p><a href="{% url 'profile' ativ.autor.userprofile.slug %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
+                <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
+                <p><i> - {{ ativ.timestamp }}</i></p>
+                <hr>
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endblock %}

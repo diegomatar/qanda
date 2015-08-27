@@ -108,6 +108,7 @@ class Resposta(models.Model):
     data = models.DateField(default=datetime.now)
     resposta = models.TextField(max_length=5000)
     votes = models.IntegerField(default=0)
+    views = models.IntegerField(default=0)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     classe = models.CharField(max_length=100, default='resposta')

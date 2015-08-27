@@ -3,7 +3,7 @@
  */
 
 body {
-  font-family: Georgia, "Times New Roman", Times, serif;
+  padding-top: 40px;
   color: #555;
 }
 
@@ -19,6 +19,9 @@ h6, .h6 {
   color: #333;
 }
 
+a {
+    color: #e67e22;
+}
 
 /*
  * Override Bootstrap's default container.
@@ -31,15 +34,140 @@ h6, .h6 {
 }
 
 
+
 /*
- * Masthead for nav
+ * Navbar
  */
 
-.blog-masthead {
-  background-color: #428bca;
-  -webkit-box-shadow: inset 0 -2px 5px rgba(0,0,0,.1);
-          box-shadow: inset 0 -2px 5px rgba(0,0,0,.1);
+.navbar-default {
+  background-color: #e67e22;
 }
+
+.navbar-brand {
+  color: #ecf0f1 !important;
+}
+
+.logo {
+  font-size: 90px;
+}
+ 
+ 
+.navbar-default .navbar-nav>li>a {
+  color: #ecf0f1;
+}
+
+.active {
+  color: #f1c40f !important;
+}
+
+.navbar-default .navbar-text {
+  color: #ecf0f1;
+}
+
+.badge {
+  background-color: #f1c40f;
+}
+
+.dropdown-menu>li>a {
+  color: #e67e22;
+}
+
+.nav-img {
+  width: 25px;
+  height: 25px;
+  border-radius: 100px;
+}
+
+.user-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 100px;
+}
+
+
+
+/* Buttons */
+
+.btn-warning {
+  color: #fff;
+  background-color: #f1c40f;
+  border-color: #f39c12;
+}
+
+
+.btn-default {
+  color: #7f8c8d;
+  background-color: #fff;
+  border-color: #B6B6B6;
+  font-weight: 600;
+}
+
+.btn-link {
+  font-weight: 400;
+  color: #7f8c8d;
+  border-radius: 0;
+}
+
+
+.btn>a {
+  color: #fff;
+}
+
+
+/* Jumbotrone */
+
+.jumbotron {
+  background-image: url("img/home-back-dark.jpg");
+  background-size: cover;
+  background-color: #ecf0f1;
+  padding-top: 70px;
+  margin-top: 30px;
+}
+
+.jumbotron h1{
+  color: #ecf0f1;
+  font-size: 37px;
+}
+
+.jumbotron .btn-lg {
+  height: 46px;
+}
+
+
+/* Label for Tag */
+
+.label-tag {
+  background-color: #ecf0f1;
+  color: #7f8c8d;
+  font-size: 14px;
+}
+
+/* Paragraphs and texts */
+
+.info-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: #95a5a6;
+}
+
+
+.autor-info {
+  color: #7f8c8d;
+}
+
+.text {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.4;
+  word-wrap: break-word;
+  font-weight: 400;
+}
+
+a>p.text:hover {
+  text-decoration: none !important;
+}
+
+
 
 /* Nav links */
 .blog-nav-item {
@@ -83,10 +211,11 @@ h6, .h6 {
   padding-bottom: 20px;
 }
 .blog-title {
-  margin-top: 30px;
-  margin-bottom: 0;
-  font-size: 60px;
-  font-weight: normal;
+    margin-top: 15px;
+    margin-bottom: 0;
+    font-size: 50px;
+    font-weight: normal;
+    color: #95a5a6;
 }
 .blog-description {
   font-size: 20px;
@@ -119,6 +248,10 @@ h6, .h6 {
   margin-bottom: 0;
 }
 
+.sidebar-tags {
+  line-height: 1.4;
+}
+
 
 /* Pagination */
 .pager {
@@ -138,11 +271,13 @@ h6, .h6 {
  */
 
 .blog-post {
-  margin-bottom: 60px;
+  margin-bottom: 0px;
 }
 .blog-post-title {
   margin-bottom: 5px;
-  font-size: 40px;
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.4px;
 }
 .blog-post-meta {
   margin-bottom: 20px;
@@ -155,16 +290,22 @@ h6, .h6 {
  */
 
 .blog-footer {
-  padding: 40px 0;
-  color: #999;
+  padding-top: 20px;
+  color: #95a5a6;
   text-align: center;
-  background-color: #f9f9f9;
-  border-top: 1px solid #e5e5e5;
+  background-color: #ecf0f1;
+  border-top: 1px solid #7f8c8d;
 }
 .blog-footer p:last-child {
   margin-bottom: 0;
 }
 
+.footer-bar {
+  background-color: #f1c40f;
+  color: #e67e22;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
 
 
 /*
@@ -217,10 +358,6 @@ h6, .h6 {
     text-align: center;
  }
  
- .nav-img {
-    width: 25px;
-    border-radius: 100px;
- }
  
 .profile-pic {
     width: 150px;

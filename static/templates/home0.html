@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block home_active %}active{% endblock %}
+
+
+{% block header %}
+    <h1 class="blog-title">QANDA - Pergunte o que quiser!</h1>
+    <p class="lead blog-description">Encontre a resposta para suas dúvidas em um só lugar.</p>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="row">
+
+<div class="col-sm-8 blog-main">
+{% for pergunta in perguntas %}
+    <div class="blog-post">
+        <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> {{ pergunta.score }}</h2>
+        <p class="blog-post-meta"><i>em:</i> {{ pergunta.data }} | <i>por:</i> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}">{{ pergunta.autor.userprofile.name }}</a> | <i>vista:</i> {{ pergunta.views }} vezes</p>
+        <p>{{ pergunta.descricao|safe|truncatewords_html:100 }} <a href="{% url 'pergunta' pergunta.slug %}">ver pergunta ></a></p>
+        <p><b>Categorias:</b> {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}</a>, {% endfor %}</p>
+        <br>
+        {% if pergunta.num_respostas != 0 %}
+        <h3>{{ pergunta.num_respostas }} respostas:</h3>
+        {% for resp in pergunta.respostas|slice:":3" %}
+        <blockquote>
+          <p>{{ resp.resposta|safe|truncatewords_html:100 }} - por <a href='{% url 'profile' resp.autor.userprofile.slug %}'>{{ resp.autor.userprofile.name }}</a></p>       
+        </blockquote>
+        {% endfor %}
+        <blockquote>
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
+        </blockquote>
+        {% else %}
+        <h3>Sabe a resposta?</h3>
+        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responda Aqui</a>
+        
+        {% endif %}
+        
+            
+    </div><!-- /.blog-post -->
+    <hr>
+{% endfor %}
+
+<div class="pagination">
+    <span class="step-links">
+        {% if perguntas.has_previous %}
+            <a href="?page={{ perguntas.previous_page_number }}">anterior</a>
+        {% endif %}
+
+        <span class="current">
+            Página {{ perguntas.number }} de {{ perguntas.paginator.num_pages }}.
+        </span>
+
+        {% if perguntas.has_next %}
+            <a href="?page={{ perguntas.next_page_number }}">próxima</a>
+        {% endif %}
+    </span>
+</div>
+
+</div><!-- /.blog-main -->
+
+{% endblock %}

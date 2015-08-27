@@ -7,7 +7,7 @@
 {% block content %}
   
 <div class="blog-header">
-<h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> <a href='{% url "profile" profile.slug %}'>{{ profile.name }}</a></h1>
+<h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> {{ profile.name }}</h1>
 </div>
 
 <div class="row">
@@ -24,22 +24,13 @@
                {%else%}
                <p><a class='user_{{ profile.user.id }} btn btn-danger {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='follow_user' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a> | <span id='followers_count'>{{ profile.followers_num }}</span> seguidores</p>
                {% endif %}
-               <p><a href="{% url 'followers' profile.slug %}"><b>Seguidores:</b></a>  {{ profile.followers_num }} | <a href="{% url 'answers' profile.slug %}"><b>Respostas:</b></a> {{ profile.num_respostas }} | <a href="{% url 'questions' profile.slug %}"><b>Perguntas:</b></a> {{ profile.num_pergs }}  </p>
+               <p><a href="{% url 'followers' profile.slug %}"><b>Seguidores:</b></a>  {{ profile.followers_num }} | <b>Respostas:</b> {{ profile.num_respostas }} | <b>Perguntas:</b> {{ profile.num_pergs }}  </p>
                <p><b>Sobre:</b> {{ profile.about }}</p>
                <br>
-                  <h2>Atividades Recentes:</h2>
-            {% for ativ in atividades %}
-                  {% if ativ.classe = 'pergunta' %}
-                  <p>Perguntou:</p>
-                  <p><a href="{% url 'pergunta' ativ.slug %}">"{{ ativ.titulo }}"</a></p>
-                  <p><i> - {{ ativ.timestamp }}</i></p>
+                  <h2>Respostas:</h2>
+            {% for resp in answers %}
+                  <p>{{ resp.resposta }}</p>
                   <hr>
-                  {% elif ativ.classe = 'resposta' %}
-                  <p>Respondeu:</p>
-                  <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">"{{ ativ.resposta|truncatechars:200 }}"</a></p>
-                  <p><i> - {{ ativ.timestamp }}</i></p>
-                  <hr>
-                  {% endif %}
             {% endfor %}
                
                

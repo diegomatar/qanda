@@ -1,61 +1,116 @@
 {% extends 'base.html' %}
+{% load app_filters %}
+
+{% block home_active %}active{% endblock %}
+
+
+{% block jumbotrone %}    
+    <div class="jumbotron">
+        <div class="container">
+            <h1><i>encontre a melhor resposta para sua pergunta:</i></h1>
+            <form>
+                <div class="row">
+                <div class="col-lg-10">
+                <div class="form-group">
+                    <div class="input-group">
+                        <input type="text" class="form-control input-lg" id="perguntar" placeholder="O que você quer saber hoje?">
+                        <span class="input-group-btn">
+                            <button class="btn btn-warning btn-lg" type="button">PERGUNTAR</button>
+                        </span>
+                    </div>
+                </div><!-- form-group -->
+                </div><!-- col-lg-10 -->
+                </div><!-- row -->
+            </form>
+            <br><br>
+    
+        </div>
+    </div>
+
+{% endblock %}
+
+
+{% block header %}
+    
+    <div class="blog-header">
+        <h2 class="blog-title">Perguntas em destaque:</h2>
+        <a href="#"><p class="lead blog-description">veja perguntas de outros tópicos >></p></a>
+    </div>
+{% endblock %}
+
 
 {% block content %}
 
-
-<div class="blog-header">
-    <h1 class="blog-title">QANDA - Pergunte o que quiser!</h1>
-    <p class="lead blog-description">Encontre a resposta para suas dúvidas em um só lugar.</p>
-</div>
-<hr>
-
-<div class="row">
-
-<div class="col-sm-8 blog-main">
 {% for pergunta in perguntas %}
+    
     <div class="blog-post">
-        <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> {{ pergunta.score }}</h2>
-        <p class="blog-post-meta"><i>em:</i> {{ pergunta.data }} | <i>por:</i> <a href="{% url 'public_profile' pergunta.autor.id %}">{{ pergunta.autor.userprofile.name }}</a> | <i>vista:</i> {{ pergunta.views }} vezes</p>
-        <p>{{ pergunta.descricao|safe|truncatewords_html:100 }} <a href="{% url 'pergunta' pergunta.slug %}">ver pergunta ></a></p>
-        <p><b>Categorias:</b> {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}</a>, {% endfor %}</p>
-        <br>
-        {% if pergunta.num_respostas != 0 %}
-        <h3>{{ pergunta.num_respostas }} respostas:</h3>
-        {% for resp in pergunta.respostas|slice:":3" %}
-        <blockquote>
-          <p>{{ resp.resposta|safe|truncatewords_html:100 }} - por <a href='#'>{{ resp.autor.userprofile.name }}</a></p>       
-        </blockquote>
-        {% endfor %}
-        <blockquote>
-        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
-        </blockquote>
-        {% else %}
-        <h3>Sabe a resposta?</h3>
-        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responda Aqui</a>
-        
-        {% endif %}
-        
+        <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.data|post_date }}</p>
+        <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> <small>{{ pergunta.score }}</small></h2>        
+        {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
+        <p class="info-text"> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/> <span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span></a></p>
+        <p>
+            <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Escrever Resposta</a>
+            {% if pergunta.num_respostas > 1 %}
+                <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
+            {% elif pergunta.num_respostas = 1 %}
+                <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} resposta</a>
+            {% endif %}
+        </p>
             
     </div><!-- /.blog-post -->
     <hr>
 {% endfor %}
 
+
+
 <div class="pagination">
     <span class="step-links">
         {% if perguntas.has_previous %}
-            <a href="?page={{ perguntas.previous_page_number }}">anterior</a>
+            <a href="?page={{ perguntas.previous_page_number }}"  class="btn btn-default"><i class="fa fa-arrow-left"></i> anterior</a>
         {% endif %}
 
-        <span class="current">
-            Página {{ perguntas.number }} de {{ perguntas.paginator.num_pages }}.
+        <span class="info-text">
+            página {{ perguntas.number }} de {{ perguntas.paginator.num_pages }} 
         </span>
 
         {% if perguntas.has_next %}
-            <a href="?page={{ perguntas.next_page_number }}">próxima</a>
+            <a href="?page={{ perguntas.next_page_number }}" class="btn btn-default">próxima <i class="fa fa-arrow-right"></i></a>
         {% endif %}
     </span>
 </div>
 
-</div><!-- /.blog-main -->
+{% endblock %}
 
+
+{% block sidebar %}
+    <div class="sidebar-module sidebar-module-inset">
+        <h4>Atividades Recentes</h4>
+        {% for ativ in atividades_recentes %}
+            {% if ativ.classe = 'pergunta' %}
+                <p><a href='{% url 'profile' ativ.autor.userprofile.slug %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
+                <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
+                <p><i> - {{ ativ.timestamp }}</i></p>
+                <hr>
+            {% elif ativ.classe = 'resposta' %}
+                <p><a href="{% url 'profile' ativ.autor.userprofile.slug %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
+                <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
+                <p><i> - {{ ativ.timestamp }}</i></p>
+                <hr>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="sidebar-module">
+        <h4>Tópicos am Alta</h4>
+        {% for tg in tags_todas %}
+            <p class="sidebar-tags"><a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome }}</span></a></p>
+        {% endfor %}
+    </div>
+    <div class="sidebar-module">
+      <h4>Membros Mais Ativos</h4>
+      <ol class="list-unstyled">
+        <li><a href="#">GitHub</a></li>
+        <li><a href="#">Twitter</a></li>
+        <li><a href="#">Facebook</a></li>
+      </ol>
+    </div>
 {% endblock %}

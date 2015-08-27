@@ -4,49 +4,72 @@
 
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
-{% block content %}
-  
+{% block membros_active %}active{% endblock %}
+
+{% block header %}
 <div class="blog-header">
 <h1 class="blog-title">Membros</h1>
 </div>
+{% endblock %}
 
-          <div class="blog-post">
-
-                  
-                {% for profile in profiles %}
-                <div class='row'>
-                    <div class='col-md-3'>
-                        <img class='profile-pic' src='{{profile.profile_image_url}}'/>
-                    </div>
-                    <div class='col-md-6'>
-                        <p><a href='{% url "public_profile" profile.user.id %}'><b>{{ profile.user.first_name }} {{  profile.user.last_name  }}</b></a></p>
-                        <p>{% if profile.about %}{{ profile.about }}{% endif %}</p>
-                        <p>Membro desde: {{ profile.timestamp }}</p>
-                        <p>{% if profile.facebook %}<a href='{{ profile.facebook }}' target='blank'>Facebook</a>{% endif %} {% if profile.facebook %}| <a href='{{ profile.twitter }}' target='blank'>Twitter</a>{% endif %} {% if profile.linkedin %}| <a href='{{ profile.linkedin }}' target='blank'>Linked In</a>{% endif %}</p>
-                        <p>Seguidores: <b>{{ profile.followers_num }}</b> | Respostas: <b>{{ profile.num_respostas }}</b> | Perguntas: <b>{{ profile.num_pergs }}</b></p>
-                        <br>
-                    </div>
-                </div><!-- /row -->
-                <hr>
-                {% endfor %}
+{% block content %}
+         
+      {% for profile in profiles %}
+      <div class="blog-post">
+            <div class='row'>
+                <div class='col-md-3'>
+                    <img class='profile-pic' src='{{profile.profile_image_url}}'/>
+                </div>
+                <div class='col-md-9'>
+                    <p class="blog-post-title"><a href='{% url "profile" profile.slug %}'><b>{{ profile.user.first_name }} {{  profile.user.last_name  }}</b></a></p>
+                    {% if profile.about %}<p class="text">{{ profile.about }}</p>{% endif %}
+                    <p class="info-text">Membro desde: {{ profile.timestamp }}</p>
+                    <p class="info-text">{% if profile.facebook %}<a href='{{ profile.facebook }}' target='blank'>Facebook</a>{% endif %} {% if profile.facebook %}| <a href='{{ profile.twitter }}' target='blank'>Twitter</a>{% endif %} {% if profile.linkedin %}| <a href='{{ profile.linkedin }}' target='blank'>Linked In</a>{% endif %}</p>
+                    <p class="info-text"><a href='{% url "followers" profile.slug %}'>Seguidores: <b>{{ profile.followers_num }}</a></b> | Respostas: <b>{{ profile.num_respostas }}</b> | Perguntas: <b>{{ profile.num_pergs }}</b></p>
+                    <br>
+                </div>
+            </div><!-- /row -->
+      </div><!-- /.blog-post -->
+      <hr>
+      {% endfor %}
                 
-                <div class="pagination">
-                    <span class="step-links">
-                        {% if profiles.has_previous %}
-                            <a href="?page={{ profiles.previous_page_number }}">anterior</a>
-                        {% endif %}
                 
-                        <span class="current">
-                            Página {{ profiles.number }} de {{ profiles.paginator.num_pages }}.
-                        </span>
-                
-                        {% if profiles.has_next %}
-                            <a href="?page={{ profiles.next_page_number }}">próxima</a>
-                        {% endif %}
-                    </span>
-                </div><!-- /.pagination -->
+                          
+<div class="pagination">
+    <span class="step-links">
+        {% if profiles.has_previous %}
+            <a href="?page={{ profiles.previous_page_number }}"  class="btn btn-default"><i class="fa fa-arrow-left"></i> anterior</a>
+        {% endif %}
 
-          </div><!-- /.blog-post -->
-      </div><!-- /.blog-main -->
+        <span class="info-text">
+            página {{ profiles.number }} de {{ profiles.paginator.num_pages }} 
+        </span>
 
+        {% if profiles.has_next %}
+            <a href="?page={{ profiles.next_page_number }}" class="btn btn-default">próxima <i class="fa fa-arrow-right"></i></a>
+        {% endif %}
+    </span>
+</div>
+          
+          
+
+{% endblock %}
+
+
+{% block sidebar %}
+    
+    <div class="sidebar-module">
+        <h4>Tópicos am Alta</h4>
+        {% for tg in tags_todas %}
+            <p class="sidebar-tags"><a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome }}</span></a></p>
+        {% endfor %}
+    </div>
+    <div class="sidebar-module">
+      <h4>Membros Mais Ativos</h4>
+      <ol class="list-unstyled">
+        <li><a href="#">GitHub</a></li>
+        <li><a href="#">Twitter</a></li>
+        <li><a href="#">Facebook</a></li>
+      </ol>
+    </div>
 {% endblock %}

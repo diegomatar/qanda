@@ -22,6 +22,7 @@ from perguntas import views
 from user_profile import views as user_profile_views
 from user_profile import urls as profile_urls
 from notifications import urls as notifications_urls
+from report import urls as report_urls
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
@@ -39,6 +40,7 @@ urlpatterns = [
     url(r'^membros/$', user_profile_views.members, name='members'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^conta/', include('allauth.urls')),
+    url(r'^reportar/', include(report_urls)),
     url(r'^perfil/', include(profile_urls)),
     url(r'^notificacoes/', include(notifications_urls)),
     url(r'^select2/', include('django_select2.urls')),

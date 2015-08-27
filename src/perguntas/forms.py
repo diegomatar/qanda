@@ -57,7 +57,7 @@ class PerguntaForm(forms.ModelForm):
             'descricao',
             'tags',
             Div(
-                Submit('submit', 'Enviar Pergunta >', css_class='btn-info btn-lg'),
+                Submit('submit', 'Enviar Pergunta >', css_class='btn-warning btn-lg'),
                 css_class='col-lg-offset-3 col-lg-9',
             )
         )

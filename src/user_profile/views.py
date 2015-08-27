@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.dispatch import receiver
 from django.shortcuts import render, HttpResponse
+from django.template.defaultfilters import slugify
 
 
 from perguntas.models import Pergunta, Resposta, Tag
@@ -26,6 +27,10 @@ def user_profile(request):
         if profile_form.is_valid and user_form.is_valid:
             user_form.save()
             profile_form.save()
+            slug = str(user_data.user.first_name) +' '+ str(user_data.user.last_name)
+            slug = slugify(slug)
+            user_data.slug = slug
+            user_data.save()
     else:
         user_form = EditUserForm(instance=request.user)
         profile_form = EditProfileForm(instance=user_data)
@@ -47,15 +52,16 @@ def populate_profile(request, user, sociallogin=None, **kwargs):
             user.last_name = sociallogin.account.extra_data['last_name']
         user.save()
         perfil = UserProfile(user=user)
+        perfil.facebook = sociallogin.account.extra_data['link']
         perfil.save()
         
         
         
 
-def public_profile(request, pk):
+def public_profile(request, slug):
     
-    user = User.objects.get(pk=pk)
-    profile = UserProfile.objects.get(user=user)
+    profile = UserProfile.objects.get(slug=slug)
+    user = profile.user
     
     perguntas = Pergunta.objects.filter(autor=user)
     respostas = Resposta.objects.filter(autor=user)
@@ -111,7 +117,6 @@ def follow_user(request):
         user_id = request.GET['userprofile_id']
         follow_user = User.objects.get(id=int(user_id))
         follow_user_profile = follow_user.userprofile
-        followers = 0
         
         # Get the logedin user
         profile = request.user.userprofile
@@ -119,11 +124,9 @@ def follow_user(request):
         
         # Add user to be followed to the current user list
         if follow_user and follow_user not in user_follows:
-            followers = follow_user_profile.followers_num + 1
-            follow_user_profile.followers_num = followers
-            follow_user_profile.save()
             profile.follow_users.add(follow_user)
             profile.save()
+            followers = follow_user_profile.followers_num()
             notif = new_Follow(follow_user, request.user)
             
     return HttpResponse(followers)
@@ -139,8 +142,7 @@ def unfollow_user(request):
         # Get the user to be followed and its profile
         user_id = request.GET['userprofile_id']
         unfollow_user = User.objects.get(id=int(user_id))
-        follow_user_profile =unfollow_user.userprofile
-        followers = 0
+        unfollow_user_profile = unfollow_user.userprofile
         
         # Get the logedin user
         profile = request.user.userprofile
@@ -148,11 +150,67 @@ def unfollow_user(request):
         
         # Remove user to be followed to the current user list
         if unfollow_user and unfollow_user in user_follows:
-            followers = follow_user_profile.followers_num - 1
-            follow_user_profile.followers_num = followers
-            follow_user_profile.save()
             profile.follow_users.remove(unfollow_user)
             profile.save()
+            followers = unfollow_user_profile.followers_num()
             
     return HttpResponse(followers)
+
+
+def user_followers(request, slug):
+    profile = UserProfile.objects.get(slug=slug)
+    followers = profile.user.follows.all()
+    
+    if profile.user in request.user.userprofile.follow_users.all():
+        is_followed = 1
+    else:
+        is_followed = 0
+    
+    context = {
+        'profile': profile,
+        'followers': followers,
+        'is_followed': is_followed,
+    }
+    
+    return render(request, 'user_profile/followers.html', context)
+
+
+
+def user_questions(request, slug):
+    profile = UserProfile.objects.get(slug=slug)
+    questions = Pergunta.objects.filter(autor=profile.user)
+    
+    if profile.user in request.user.userprofile.follow_users.all():
+        is_followed = 1
+    else:
+        is_followed = 0
+        
+        
+    context = {
+        'profile': profile,
+        'questions': questions,
+        'is_followed': is_followed,
+    }
+    
+    return render(request, 'user_profile/questions.html', context)
+
+
+def user_answers(request, slug):
+    profile = UserProfile.objects.get(slug=slug)
+    answers = Resposta.objects.filter(autor=profile.user)
+    
+    if profile.user in request.user.userprofile.follow_users.all():
+        is_followed = 1
+    else:
+        is_followed = 0
+        
+        
+    context = {
+        'profile': profile,
+        'answers': answers,
+        'is_followed': is_followed,
+    }
+    
+    return render(request, 'user_profile/answers.html', context)
+        
         

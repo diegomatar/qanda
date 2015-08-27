@@ -1,29 +1,45 @@
 <!DOCTYPE html>
 {% load staticfiles %}
 
-<html lang="en">
+<html lang="pt-br">
+  
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="{% block description %}Um site com todas as respostas que você procura.{% endblock %}">
     <meta name="author" content="">
     <link rel="icon" href="{% static 'img/favicon.ico' %}">
-
-    <title>{% block title %}Pergunte o que deseja saber!{% endblock %}</title>
+    <title>{% block title %}As melhores respostas.{% endblock %}</title>
     
     <!-- Load Jquery -->
+    <!-- Local Version -->
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <!-- Production Version
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+     -->
+    
     {% block head %}{% endblock%}
 
-    <!-- Bootstrap core CSS -->
+    <!-- Load CSS -->
+    <!-- Local Version -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <!-- Latest compiled and minified CSS
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"> -->
-    
+    <!-- Production Version
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+     -->
+     
     <!-- Custom styles for this template -->
     <link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
+      
+    <!-- Load Font Awasome -->
+    <!-- Local Version
+    <link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+     -->
+    <!-- Production Version-->  
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+     
       
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -34,7 +50,7 @@
 
   <body>
     
-    <nav class="navbar navbar-inverse navbar-fixed-top">
+    <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -43,91 +59,92 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'home' %}">QANDA - Todas as respostas estão aqui.</a>
+          <a class="navbar-brand" href="{% url 'home' %}"><span class="logo {% block home_active %}{% endblock %}">Qanda</span></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
+          
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="{% url 'perguntar' %}">Perguntar</a></li>
-            <li><a href="#">Responder</a></li>
-            <li><a href="{% url 'members' %}">Membros</a></li>
+            <p class="navbar-text"> | </p>
+            <li><a href="{% url 'perguntar' %}" class="{% block perguntar_active %}{% endblock %}"><i class="fa fa-pencil"></i> Perguntar</a></li>
+            <li><a href="#" class="{% block responder_active %}{% endblock %}"><i class="fa fa-comment"></i> Responder</a></li>
+            <li><a href="{% url 'members' %}" class="{% block membros_active %}{% endblock %}"><i class="fa fa-users"></i> Membros</a></li>
             {% if request.user.is_authenticated %}
-            <li><a href='{% url "view_notification" %}'>Menssagens <span class="badge">{{ num_unread }}</span></a></li>
-            <li><a href="{% url 'profile' %}">Meu Perfil <img class="nav-img" src="{{ request.user.userprofile.profile_image_url }}"></a></li>
-            <li><a href="{% url 'account_logout' %}">Sair</a></li>
+            <li><a href='{% url "view_notification" %}' class="{% block avisos_active %}{% endblock %}"><i class="fa fa-bell"></i> Avisos <span class="badge">{{ num_unread }}</span></a></li>
+            <p class="navbar-text"> | </p>
+            
+            <li class="dropdown">
+              <a href="" class="dropdown-toggle img" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img class="nav-img" src="{{ request.user.userprofile.profile_image_url }}"> <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                <li><a href="{% url 'profile' request.user.userprofile.slug %}"><i class="fa fa-user"></i> Meu Perfil</a></li>
+                <li><a href="#"><i class="fa fa-cog"></i> Configurações</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="{% url 'account_logout' %}"><i class="fa fa-sign-out"></i> Sair</a></li>
+              </ul>
+            </li>
             {% else %}
-            <li><a href="{% url 'account_login' %}">Entrar</a></li>
+            <p class="navbar-text"> | </p>
+            <li><button type="button" class="btn btn-warning navbar-btn"><a href="{% url 'account_login' %}"><i class="fa fa-sign-in"></i> Entrar</a></button></li>
             <li><a href="{% url 'account_signup' %}">Criar Conta</a></li>
-            {% endif %}
-            
-            
+            {% endif %}  
           </ul>
-          <form class="navbar-form navbar-right">
-            <input type="text" class="form-control" placeholder="Buscar...">
+          
+          <form class="navbar-form navbar-right" role="search">
+            <div class="form-group">
+              <div class="input-group">
+                <div class="input-group-addon">
+                  <i class="fa fa-search"></i>
+                </div>
+                <input type="text" class="form-control " placeholder="Buscar...">
+              </div>
+            </div>
+            
           </form>
+          
         </div>
       </div>
     </nav>
 
-    <div class="blog-masthead">
-      <div class="container">
-        <nav class="blog-nav">
-          <a class="blog-nav-item active" href="#">Home</a>
-          <a class="blog-nav-item" href="#">New features</a>
-          <a class="blog-nav-item" href="#">Press</a>
-          <a class="blog-nav-item" href="#">New hires</a>
-          <a class="blog-nav-item" href="#">About</a>
-        </nav>
-      </div>
-    </div>
 
+    
+    {% block jumbotrone %}{% endblock %}
+    
     <div class="container">
-  
-  {% block content %}{% endblock %}
+      
+    {% block header %}{% endblock %}
+    
+      <div class="row">
+        
+        <div class="col-sm-8 blog-main">
+          {% block content %}{% endblock %}
+        </div><!-- /.blog-main -->
 
         <div class="col-sm-3 col-sm-offset-1 blog-sidebar">
-          <div class="sidebar-module sidebar-module-inset">
-            <h4>Atividades Recentes</h4>
-            {% for ativ in atividades_recentes %}
-            {% if ativ.classe = 'pergunta' %}
-            <p><a href='{% url 'public_profile' ativ.autor.id %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
-            <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
-            <p><i> - {{ ativ.timestamp }}</i></p>
-            <hr>
-            {% elif ativ.classe = 'resposta' %}
-            <p><a href="{% url 'public_profile' ativ.autor.id %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
-            <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
-            <p><i> - {{ ativ.timestamp }}</i></p>
-            <hr>
-            {% endif %}
-            {% endfor %}
-          </div>
-          <div class="sidebar-module">
-            <h4>Categorias</h4>
-            <ol class="list-unstyled">
-              {% for tg in tags_todas %}
-              <li><a href="{% url 'categoria' tg.slug %}"><button class="btn btn-primary btn-xs" type="button">{{ tg.nome }} <span class="badge">{{ tg.num_perguntas }}</span></button></a></li>
-              {% endfor %}
-            </ol>
-          </div>
-          <div class="sidebar-module">
-            <h4>Membros Mais Ativos</h4>
-            <ol class="list-unstyled">
-              <li><a href="#">GitHub</a></li>
-              <li><a href="#">Twitter</a></li>
-              <li><a href="#">Facebook</a></li>
-            </ol>
-          </div>
+          {% block sidebar %}{% endblock %}
         </div><!-- /.blog-sidebar -->
 
       </div><!-- /.row -->
-
     </div><!-- /.container -->
 
     <footer class="blog-footer">
-      <p>Blog template built for <a href="http://getbootstrap.com">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>
-      <p>
-        <a href="#">Back to top</a>
-      </p>
+      <div class="row">
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+        </div>
+      </div>
+      <div class="row footer-bar">
+        <div class="col-xs-2">
+          <p>Qanda - a melhor resposta.</p>
+        </div>
+        <div class="col-xs-4">
+          2015 - todos os direitos reservados
+        </div>
+        <div class="col-xs-2 col-xs-offset-3">
+          <a href="#"><i class="fa fa-angle-up fa-3"></i> topo</a>
+        </div>
+      </div>
     </footer>
 
 
@@ -136,9 +153,12 @@
     <!-- Placed at the end of the document so the pages load faster -->
     
     
-    <!-- Latest compiled and minified JavaScript
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script> -->
+    <!-- Load JavaScript -->
+    <!-- Local Version -->
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <!-- Production Version
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+     -->
     
     <!-- Custom Ajax js file -->
     <script src="{% static 'js/qanda-ajax.js' %}"></script>

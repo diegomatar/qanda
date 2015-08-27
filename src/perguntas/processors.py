@@ -15,7 +15,7 @@ def atividades_recentes(request):
 
 def tags(request):
     tags = Tag.objects.all()
-    em_ordem = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)
+    em_ordem = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)[:15]
     
     return {'tags_todas': em_ordem}
     

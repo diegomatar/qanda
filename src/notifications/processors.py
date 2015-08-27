@@ -12,6 +12,11 @@ def unread_notifications(request):
         unread = list(chain(a_unread, v_unread, f_unread, c_unread))
         num_unread = len(unread)
         
-        return {'num_unread': num_unread}
+        if num_unread > 0: 
+            return {'num_unread': num_unread}
+        else:
+            return {'num_unread':''}
+
+    
     else:
-        return {'num_unread': 0}
+        return {'num_unread': ''}
