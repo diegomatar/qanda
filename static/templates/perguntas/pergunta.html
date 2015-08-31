@@ -32,7 +32,7 @@
     
     <div class="col-xs-10">      
       <p class="blog-post-title">{{ pergunta.titulo }}</p>
-      <p>{{ pergunta.descricao|safe }}</p>
+      <p class="text">{{ pergunta.descricao|safe }}</p>
       <p class="info-text">Tópicos: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}</p>          
       <div class="row"><!-- views and time, comments and options menu -->
             <div class="col-xs-9"><!-- views and time -->
@@ -113,9 +113,9 @@
                         <span class='autor-info'> {{ resp.autor.userprofile.name }}{% if resp.autor.userprofile.about %}, {{ resp.autor.userprofile.about }}{% endif %}</span>
                 </a>
           </p> 
-          
+          <div class="text">
           <p class='text'>{{ resp.resposta|safe }}</p>
-            
+            </div>
             <div class="row"><!-- views and time, comments and options menu -->
             <div class="col-xs-9"><!-- views and time -->
               <p class="info-text">
