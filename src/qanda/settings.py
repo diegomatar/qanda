@@ -201,13 +201,13 @@ CRISPY_FAIL_SILENTLY = not DEBUG
 SUMMERNOTE_CONFIG = {
     'airMode': False,
     'width': '100%',
-    'height': '280',
+    'height': '230',
     'lang': 'pt-BR',
      'toolbar': [
         ['style', ['bold', 'italic', 'underline', 'clear']],
         ['para', ['ul', 'ol']],
         ['insert', ['link', 'picture', 'video', 'hr']],
-        ['view', ['fullscreen', 'codeview']],
+        ['view', ['fullscreen',]],
     ],
     'attachment_require_authentication': True,
     #'attachment_upload_to': my_custom_upload_to_func(),

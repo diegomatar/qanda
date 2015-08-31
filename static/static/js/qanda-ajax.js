@@ -260,5 +260,47 @@ $('a#follow_user').click(function(){
 });
 
 
+// Toggle answer icon
+$('#responder').click(function(){
+    $(this).find('i').toggleClass('fa-toggle-on fa-toggle-off')
+});
+
+
+
+// Sugests questions
+
+$(function(){
+    $("#collapseQsts").hide();
+    $("#newquestion").hide();
+    $("#collapseDetails").hide();
+    $("div#newquestion").on("click", function(){
+        $("#collapseQsts, #collapseDetails").toggle();
+        $(this).hide();
+    });
+    $("#entendi1").on("click", function(){
+        $("div#dicas").hide();
+    });
+    $("#entendi2").on("click", function(){
+        $("div#dicas").hide();
+    });
+});
+
+
+$('#id_titulo').keyup(function(){
+    var query;
+    query = $(this).val();
+    $('#collapseQsts').show();
+    $("#newquestion").show();
+    $("#collapseDetails").hide();
+    $.get('/sugerir-pergunta/', {suggestion: query}, function(data){
+    $('#collapseQsts').html(data);
+    });
+});
+
+
+
+
+
+
 
 }); // document ready

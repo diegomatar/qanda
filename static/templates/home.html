@@ -47,14 +47,15 @@
         <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.data|post_date }}</p>
         <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> <small>{{ pergunta.score }}</small></h2>        
         {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
-        <p class="info-text"> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/> <span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span></a></p>
-        <p>
+        <p class="info-text"> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/></a> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span></a></p>
+        <p class="info-text">
             <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Escrever Resposta</a>
             {% if pergunta.num_respostas > 1 %}
                 <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
             {% elif pergunta.num_respostas = 1 %}
                 <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} resposta</a>
             {% endif %}
+             {{ pergunta.views }} visualizações
         </p>
             
     </div><!-- /.blog-post -->

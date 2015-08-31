@@ -35,8 +35,8 @@ def report_answer(request, pk, kind):
     report, created = Answer_Report.objects.get_or_create(answer=answer, kind=kind)
     
     #manipulate the report
-    if request.user not in report.from_users:
-        report.from_users.append(request.user)
+    if request.user not in report.from_users.all():
+        report.from_users.add(request.user)
     report.status = 1
     report.save()
     
@@ -50,11 +50,11 @@ def report_comment(request, pk, kind):
     comment = Comment.objects.get(pk=pk)
     
     # get or create the report
-    report, created = Answer_Report.objects.get_or_create(comment=comment, kind=kind)
+    report, created = Comment_Report.objects.get_or_create(comment=comment, kind=kind)
     
     #manipulate the report
-    if request.user not in report.from_users:
-        report.from_users.append(request.user)
+    if request.user not in report.from_users.all():
+        report.from_users.add(request.user)
     report.status = 1
     report.save()
     
@@ -67,11 +67,11 @@ def report_profile(request, pk, kind):
     profile = UserProfile.objects.get(pk=pk)
     
     # get or create the report
-    report, created = Answer_Report.objects.get_or_create(profile=profile, kind=kind)
+    report, created = Profile_Report.objects.get_or_create(profile=profile, kind=kind)
     
     #manipulate the report
-    if request.user not in report.from_users:
-        report.from_users.append(request.user)
+    if request.user not in report.from_users.all():
+        report.from_users.add(request.user)
     report.status = 1
     report.save()
     

@@ -10,7 +10,6 @@
 {% block add_script %}
 <link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-
 {% import_django_select2_js_css %}
 {% endblock %}
 
@@ -18,28 +17,7 @@
 {% block content %}
         
 
-<div class="blog-post">
-        
-<div id="dicas" class="well info-text">
-<div class="row">
-<div class="col-xs-10">
-<p>Aumente as chances de sua pergunta ser respondida:</p>
-</div>
-<div class="col-xs-2">
-<button class="btn btn-link ligth"><i id="entendi1" class="fa fa-times fa-lg" title="Ok, entendi!"></i></button>
-</div>
-</div>
-<ul>
-<li>Seja claro e objetivo</li>
-<li>Pergunte uma coisa por vez</li>
-<li>Seja respeitoso</li>
-<li>Dê detalhes sobre o que deseja saber</li>
-<li>Marque os assuntos relevantes</li>
-</ul>
-<button id="entendi2" class="btn btn-link"><i class="fa fa-check"></i> Ok, entendi! <i class="fa fa-smile-o"></i></button>
-</div>
-        
-        
+<div class="blog-post">        
 <div class="row">
     <div class="col-sm-7">
         <h1 class="sm-title">NOVA PERGUNTA:<span class="lead blog-description bullet"></h1>
@@ -49,7 +27,6 @@
 
 
 <div class="blog-post">
-
   
       {% crispy form form.helper %}
       

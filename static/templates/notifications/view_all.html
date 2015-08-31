@@ -5,37 +5,63 @@
 
 
 {% block content %}
-
-
-<div class="blog-header">
-    <h1 class="blog-title">Suas notificações:</h1>
-    <p class="lead blog-description">Encontre a resposta para suas dúvidas em um só lugar.</p>
-</div>
-<hr>
-
+<div class="blog-post">        
 <div class="row">
-
-<div class="col-sm-8 blog-main">
-    <div class="blog-post">
-        <h3>
-            {% if num_notif = 1 %}{{ num_notif }} nova notificação{% elif num_notif > 1 %}{{ num_notif }} novas notificações{% else %}Nenhuma nova notificação{% endif %}:</h3>
-        {% for notif in unread %}
-        <blockquote>
-          <p>{{ notif.note }} | {{ notif.timestamp }}</p>
-          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta|safe|truncatewords_html:100 }}{% endif %}</p>
-        </blockquote>
-        {% endfor %} 
-            
-    </div><!-- /.blog-post -->
-    <hr>
-        
+    <div class="col-sm-7">
+        <h1 class="sm-title">SUAS NOTIFICAÇÕES:<span class="lead blog-description bullet">{% if num_notif %} {{ num_notif }} não lidas{% endif %}</span></h1>
+    </div>
+    <div class="col-sm-5">
+        <p class="text-right"><a href="{% url 'mark_all_read' %}" class="btn btn-link pull-rigth"><i class="fa fa-check-square-o"></i> Marcar Todas Como Lidas </a></p>
+    </div>
+</div>
+</div>
+                
         <div class="blog-post">
-        <h3>Notificações anteriores:</h3>
-        {% for notif in read %}
-        <blockquote>
-          <p>{{ notif.note }} | {{ notif.timestamp }}</p>
-          <p>{% if notif.question %}{{ notif.question }}{% else %}{{ notif.answer.resposta|safe|truncatewords_html:100 }}{% endif %}</p>
-        </blockquote>
+        {% for notif in notifications %}
+        <div class="well {% if notif.unread %}unread{% endif %}">
+        <div class="row">
+            
+            <div class="col-sm-1">
+                <a href="{% url 'profile' notif.from_user.userprofile.slug %}"><img class="user-pic" src="{{ notif.from_user.userprofile.profile_image_url }}" /></a>
+                
+                <p class="notif-icon text-center">{{ notif.icon|safe }}</p>
+            </div>
+            <div class="col-sm-10">
+                <p class="info-text">
+                  <a href="{% url 'profile' notif.from_user.userprofile.slug %}" class="top-link"><span class="autor-info"><b>{{ notif.from_user.userprofile.name }}</b></span></a>
+                  {{ notif.note }}
+                  {% if notif.kind = 'answer' %}
+                  <a href="{% url 'pergunta' notif.question.slug %}">{{ notif.question.titulo }}<span class="over-link"></span></a>
+                  {% elif notif.kind = 'vote' and notif.item = 'question' %}
+                  <a href="{% url 'pergunta' notif.question.slug %}">{{ notif.question.titulo }}<span class="over-link"></span></a>
+                  {% elif notif.kind = 'vote' and notif.item = 'answer' %}
+                  <a href="{% url 'pergunta' notif.answer.pergunta.slug %}">{{ notif.answer.pergunta.titulo }}<span class="over-link"></span></a>
+                  {% elif notif.kind = 'comment' %}
+                  <a href="{% url 'pergunta' notif.answer.pergunta.slug %}">{{ notif.answer.resposta|striptags|truncatewords:12 }}<span class="over-link"></span></a>
+                  {% endif %}
+                  <span class="bullet"> • </span>
+                  {{ notif.timestamp }}
+                </p>
+                <p class="text">
+                    {% if notif.kind = 'answer' %}
+                    {{ notif.answer.resposta|striptags|truncatewords:30 }}
+                    {% elif notif.kind = 'vote' and notif.item = 'answer' %}
+                    {{ notif.answer.resposta|striptags|truncatewords:30 }}
+                    {% elif notif.kind = 'comment' %}
+                    {{ notif.comment.comment|truncatewords:30 }}
+                    {% elif notif.kind = 'follow' %}
+                    {% if notif.from_user.userprofile.about %}<p class="text">{{ notif.from_user.userprofile.about }}</p>{% endif %}
+                    <p class="info-text"><a href='{% url "followers" notif.from_user.userprofile.slug %}'>Seguidores: <b>{{ notif.from_user.userprofile.followers_num }}</a></b> | Respostas: <b>{{ notif.from_user.userprofile.num_respostas }}</b> | Perguntas: <b>{{ notif.from_user.userprofile.num_pergs }}</b></p>
+                    {% endif %}
+                </p>
+            </div><!-- .col-sm-10-->
+            <div class="col-sm-1">
+                {% if notif.unread %}
+                <p class="info-text"><a href="{% url 'mark_as_read' notif.kind notif.pk %}" title="Marcar Como Lida"><i class="fa fa-times fa-lg"></i></a></p>
+                {% endif %}
+            </div>
+        </div><!-- .row-->
+        </div><!--.well-->
         {% endfor %} 
             
     </div><!-- /.blog-post -->

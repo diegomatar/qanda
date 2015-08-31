@@ -36,7 +36,7 @@ class Question_Report(models.Model):
         return len(self.from_users)
     
     def __unicode__(self):
-        return 'Pergunta: %s ' % self.question.titulo
+        return 'Em %s para pergunta: %s ' % (self.timestamp, self.question.titulo)
     
     
 
@@ -53,7 +53,7 @@ class Answer_Report(models.Model):
         return len(self.from_users)
     
     def __unicode__(self):
-        return 'Pergunta: %s ' % self.answer.resposta
+        return 'Em %s para resposta: %s ' % (self.timestamp, self.answer.resposta)
     
     
     
@@ -71,7 +71,7 @@ class Comment_Report(models.Model):
         return len(self.from_users)
     
     def __unicode__(self):
-        return 'Pergunta: %s ' % self.comment.comment
+        return 'Em %s para comentário: %s ' % (self.timestamp, self.comment.comment)
     
     
     
@@ -90,4 +90,7 @@ class Profile_Report(models.Model):
         return len(self.from_users)
     
     def __unicode__(self):
-        return 'Pergunta: %s ' % self.profile.name
+        return 'Em %s para perfil: %s ' % (self.timestamp, self.profile.name)
+    
+    
+    

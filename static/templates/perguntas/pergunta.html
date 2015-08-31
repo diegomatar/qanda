@@ -1,92 +1,204 @@
 {% extends 'base.html' %}
+{% load staticfiles %}
 {% load app_filters %}
+{% load crispy_forms_tags %}
+
+
+{% block add_script %}
+<link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+{% endblock %}
 
 
 {% block content %}
-
-<div class="blog-header">
-        <h1 class="blog-title">{{ pergunta.titulo }}</h1>
-        <p class="lead blog-description">{{ pergunta.data|post_date }} | por <a href='{% url 'profile' pergunta.autor.userprofile.slug %}'>{{ pergunta.autor.userprofile.name }}</a> | vista: {{ pergunta.views }} vezes |<a href="{% url 'report_question' pergunta.pk 1 %}"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a></p>
-      </div>
-
-      <div class="row">
-
-        <div class="col-sm-8 blog-main">
-
-          <div class="blog-post">
-          <div class="row">
-                <div class="col-xs-1">
-                        
-                        <a class="{% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
-                           {% if user.is_authenticated %}id="perg_upvote" title="Gostei: esta pergunta é relevante, clara e bem escrita."
-                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-                           {% endif %}
-                           data-pergid="{{ pergunta.id}}"  >gostei</a>
-                        <p class="votes_count"><strong id="votes_count">{{ pergunta.votes }}</strong></p>
-                        <a class="{% if pergunta|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
-                           {% if user.is_authenticated %}id="perg_downvote" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
-                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-                           {% endif %}
-                           data-pergid="{{ pergunta.id}}" >não gostei</a>
-                        
-                </div>
-                <div class="col-xs-11">
-                        <p>{{ pergunta.descricao|safe }}</p>
-                        <p>Categorias: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}">{{ tag }}, </a>{% endfor %}</p>
-                </div>
-          
-          </div>
-          </div><!-- /.blog-post -->
-
-          <div class="blog-post">
-            {% if pergunta.num_respostas != 0 %}
-            <h2 class="blog-post-title">{{ pergunta.num_respostas }} respostas:</h2>
-          </div><!-- /.blog-post -->
+<div class="blog-post">
+  <div class="row">
+    
+    <div class="col-xs-2"><!-- Vote Buttons -->
+      <a class="{% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
+        {% if user.is_authenticated %}id="perg_upvote" title="Gostei: esta pergunta é relevante, clara e bem escrita."
+        {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+        {% endif %}
+        data-pergid="{{ pergunta.id}}"  >gostei
+      </a>
+      <p class="votes_count"><span id="votes_count">{{ pergunta.votes }}</span></p>
+      <a class="{% if pergunta|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
+        {% if user.is_authenticated %}id="perg_downvote" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
+        {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+        {% endif %}
+        data-pergid="{{ pergunta.id}}" >não gostei
+      </a>
+    </div><!-- col-xs-1 -->
+    
+    <div class="col-xs-10">      
+      <p class="blog-post-title">{{ pergunta.titulo }}</p>
+      <p>{{ pergunta.descricao|safe }}</p>
+      <p class="info-text">Tópicos: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}</p>          
+      <div class="row"><!-- views and time, comments and options menu -->
+            <div class="col-xs-9"><!-- views and time -->
+              <p class="info-text">
+                {{ pergunta.data|post_date }}
+                <span class="bullet"> • </span> 
+                vista: {{ pergunta.views }} vezes
+              </p>
+            </div>
             
-          {% for resp in pergunta.respostas %}
-          <div class="blog-post">
-            <div class="row">
-              <div class="col-xs-1">
+            <div class="col-xs-1"><!-- options button -->
+                <div class="btn-group"><!-- Options button -->
+                  <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Opções">
+                    <i class="fa fa-ellipsis-h fa-lg"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a href="{% url 'report_question' pergunta.pk 1 %}">Reportar Pergunta</a></li>
+                    <li><a href="{% url 'report_profile' pergunta.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
+                    {% if pergunta.autor == request.user %}
+                    <li role="separator" class="divider"></li>
+                    <li><a href='#'>Editar Pergunta</a></li>
+                    {% endif %}
+                  </ul>
+                </div><!-- .btn-group -->
                 
-                         <a class="resp_{{ resp.id }} {% if resp|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
-                           {% if user.is_authenticated %}id="resp_upvote" title="Gostei: esta resposta é relevante, clara e bem escrita."
-                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-                           {% endif %}
-                           data-respid="{{ resp.id}}"  >gostei</a>
-                        <p class="resp_{{ resp.id }} votes_count"><b id="resp_votes_count">{{ resp.votes }}</b></p>
-                        <a class="resp_{{ resp.id }} {% if resp|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
-                           {% if user.is_authenticated %}id="resp_downvote" title="Não Gostei: resposta não é relevante, confusa e mau escrita."
-                           {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-                           {% endif %}
-                           data-respid="{{ resp.id}}" >não gostei</a>
-                
-              </div>
-              <div class="col-xs-11">
-                <p>{{ resp.resposta|safe }}</p>
-                {% if resp.autor == request.user %}<p><a href='{% url 'editar_resposta' resp.id %}' class='btn btn-danger btn-sm'>Editar</a></p>{% endif %}
-                <p class="blog-post-meta">por: <a href="{% url 'profile' resp.autor.userprofile.slug %}">{{ resp.autor.userprofile.name }}</a> | {{ resp.data|post_date }} | vista: {{ resp.views }} vezes |<a href="{% url 'report_answer' resp.pk 1 %}"><span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span></a></p>
-                <p>{{ resp.comment_num }} comentários | <a href='{% url "add_comment" resp.id %}'>comentar</a></p>
-                <div class="row">
-                        <div class="col-md-8 col-md-offset-1">
-                                {% for com in resp.comment_set.all   %}
-                                        <p><i>{{ com.comment }}</i> {% if com.autor == request.user %}<a href='{% url 'edit_comment' com.pk %}' class='btn btn-danger btn-xs'>editar</a>{% endif %} - por <a href='{% url 'profile' com.autor.userprofile.slug %}'>{{ com.autor.userprofile.name }}</a></p>
-                                {% endfor %}
-                        </div>
-                        
-                </div>
-              </div><!-- /.col-11 -->
-            </div><!-- /.row -->
-          </div><!-- /.blog-post -->
-        {% endfor %}
-        <div class="blog-post">
-        <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Responder</a>
-        </div><!-- /.blog-post -->
-          {% else %}
-          <h3>Nenhuma resposta...</h3>
-          <a href="{% url 'responder' pergunta.id %}" class="btn btn-info btn-lg">Seja o primeiro a responder</a>
-          </div><!-- /.blog-post -->
-          {% endif %}
+            </div>
+            
+      </div>
+      
+      <a class="btn btn-default" id='responder' role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Responder <i class="fa fa-toggle-off"></i></a>
+      <div class="collapse" id="collapseExample">
+      {% crispy form form.helper %}
+      </div>
+    </div>
+
+  </div><!-- /.row -->
+</div><!-- /.blog-post -->
+<hr>
+
+<div class="blog-post">
+  {% if pergunta.num_respostas != 0 %}
+    <h2 class="lead blog-description">{{ pergunta.num_respostas }} respostas:</h2>
+  {% else %}
+    <h2 class="lead blog-description"><b>Ainda sem respostas...</b></h2>
+    <a data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><h2 class="lead blog-description" >Seja o primeiro a responder!</h2></a>
+  {% endif %}
+</div><!-- /.blog-post -->
+
+
+{% if pergunta.num_respostas != 0 %}<!-- Display Answers -->
+  {% for resp in respostas %}
+  <div class="well">
+    <div class="blog-post">
+      <div class="row">
+        
+        <div class="col-xs-2"><!-- Vote Buttons -->
+          <a class="resp_{{ resp.id }} {% if resp|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
+            {% if user.is_authenticated %}id="resp_upvote" title="Gostei: esta resposta é relevante, clara e bem escrita."
+            {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+            {% endif %}
+            data-respid="{{ resp.id}}"  >gostei
+          </a>
+          <p class="resp_{{ resp.id }} votes_count"><span id="resp_votes_count">{{ resp.votes }}</span></p>
+          <a class="resp_{{ resp.id }} {% if resp|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
+            {% if user.is_authenticated %}id="resp_downvote" title="Não Gostei: resposta não é relevante, confusa e mau escrita."
+            {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
+            {% endif %}
+            data-respid="{{ resp.id}}" >não gostei
+          </a>
+        </div><!-- .col-xs-2 -->
+        
+        <div class="col-xs-10"><!-- Answer Content -->
+          <p class="info-text">
+                <a href="{% url 'profile' resp.autor.userprofile.slug %}">
+                        <img class="user-pic" src='{{ resp.autor.userprofile.profile_image_url }}'/>
+                </a>
+                <a href="{% url 'profile' resp.autor.userprofile.slug %}">
+                        <span class='autor-info'> {{ resp.autor.userprofile.name }}{% if resp.autor.userprofile.about %}, {{ resp.autor.userprofile.about }}{% endif %}</span>
+                </a>
+          </p> 
           
-        </div><!-- /.blog-main -->
+          <p class='text'>{{ resp.resposta|safe }}</p>
+            
+            <div class="row"><!-- views and time, comments and options menu -->
+            <div class="col-xs-9"><!-- views and time -->
+              <p class="info-text">
+                {{ resp.data|post_date }}
+                <span class="bullet"> • </span> 
+                vista: {{ resp.views }} vezes
+                <a class="btn btn-link" role="button" data-toggle="collapse" href="#collapse{{resp.id}}" aria-expanded="false" aria-controls="collapseExample">comentários <span class="badge badge-c">{{ resp.comment_num }}</span></a>
+              </p>
+            </div>
+            
+            <div class="col-xs-1"><!-- options button -->
+                <div class="btn-group"><!-- Options button -->
+                  <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Opções">
+                    <i class="fa fa-ellipsis-h fa-lg"></i>
+                  </button>
+                  <ul class="dropdown-menu">
+                    <li><a href="{% url 'report_answer' resp.pk 1 %}">Reportar Resposta</a></li>
+                    <li><a href="{% url 'report_profile' resp.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
+                    {% if resp.autor == request.user %}
+                    <li role="separator" class="divider"></li>
+                    <li><a href='{% url 'editar_resposta' resp.id %}'>Editar Resposta</a></li>
+                    {% endif %}
+                  </ul>
+                </div><!-- .btn-group -->
+            </div>
+            </div><!-- .row -->
+            
+                
+        <div class="collapse" id="collapse{{resp.id}}" aria-expanded="true">
+        <div class="well">
+      
+            <div class="row">
+              <div class="col-md-10 col-md-offset-1"><!-- Answer Comments -->
+              <a class="btn btn-link" href='{% url "add_comment" resp.id %}'>comentar</a>
+              <hr>
+                {% for com in resp.comment_set.all   %}
+                <div class="well">
+                  <p class="info-text black"><img class="nav-img" src='{{ com.autor.userprofile.profile_image_url }}'/> <a href='{% url 'profile' com.autor.userprofile.slug %}'><b>{{ pergunta.autor.userprofile.name }}</b></a></p>
+                  <p class="text"><i>{{ com.comment }}</i></p>
+                  <div class="row">
+                    <div class=col-xs-10>
+                      <p class="info-text">
+                        {{ com.data|post_date }}                          
+                      </p>
+                    </div>
+                    <div class=col-xs-2>
+                      <div class="btn-group"><!-- Comment Options button -->
+                        <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Opções">
+                          <i class="fa fa-ellipsis-h fa-lg"></i>
+                        </button>
+                        <ul class="dropdown-menu">
+                          <li><a href="{% url 'report_comment' com.pk 1 %}">Reportar Comentário</a></li>
+                          <li><a href="{% url 'report_profile' com.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
+                          {% if com.autor == request.user %}
+                          <li role="separator" class="divider"></li>
+                          <li><a href='{% url 'edit_comment' com.pk %}'>Editar Comentário</a></li>
+                          {% endif %}
+                        </ul>
+                      </div><!-- .btn-group -->
+                      
+                      
+                    </div><!-- .col-xs-2 -->
+                  </div><!-- .row -->
+                </div><!-- .well -->
+                {% endfor %}
+              </div>
+            </div>
+            
+        </div>
+        </div>
+            
+            
+        </div><!-- /.col-10 -->
+</div><!-- /.row -->
+</div><!-- /.blog-post -->
+</div><!-- /.well -->
+        
+{% endfor %}
+
+{% endif %}
+
+<br>
+<br>
+<br>
 
 {% endblock %}

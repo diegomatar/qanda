@@ -48,21 +48,49 @@ def home(request):
 def pergunta(request, slug):
     
     pergunta = Pergunta.objects.get(slug=slug)
-    profile = 0
-    try:
-        profile = request.user.userprofile
-    except:
-        pass            
+    respostas = []
     
-    pergunta.views += 1
-    pergunta.save()
+    if request.method == 'POST':
+        form = RespostaForm(request.POST)
+        form.helper.form_action = reverse('responder', args=[pergunta.id])
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.pergunta = pergunta
+            form_data.autor = request.user
+            form_data.save()
+            answer = form_data
+            notif = new_Answer(pergunta.autor, request.user, pergunta, answer)
+            url = pergunta.get_absolute_url()
+            
+            # Add the first two topics of question to user knowledge
+            question_tags = pergunta.tags.all()[0:2]
+            profile = request.user.userprofile
+            profile.knows_about.add(*question_tags)
+            profile.save()
+            return HttpResponseRedirect(url)
+    else:
+        form = RespostaForm()
     
-    for resp in pergunta.resposta_set.all():
-        resp.views += 1
-        resp.save()
+        resps = pergunta.resposta_set.all()
+        respostas = perguntas = sorted(resps, key=lambda resposta: resposta.votes, reverse=True)
+        
+        profile = 0
+        try:
+            profile = request.user.userprofile
+        except:
+            pass            
+        
+        pergunta.views += 1
+        pergunta.save()
+        
+        for resp in pergunta.resposta_set.all():
+            resp.views += 1
+            resp.save()
     
     context = {
         'pergunta': pergunta,
+        'respostas': respostas,
+        'form': form,
     }
     return render(request, 'perguntas/pergunta.html', context)
 
@@ -241,6 +269,7 @@ def perguntar(request):
             form.save_m2m()
             
             return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
+    
     else:
         form = PerguntaForm()
         
@@ -319,7 +348,7 @@ def add_comment(request, pk=0):
             form_data.autor = request.user
             form_data.answer = resp
             form_data.save()
-            new_Comment(resp.autor, request.user, resp)
+            new_Comment(resp.autor, request.user, resp, form_data)
             return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
     else:
         form = CommentForm()
@@ -361,13 +390,83 @@ def edit_comment(request, pk=0):
 
     
     
+# Search questions to suggest on new question page
+def get_question_list(max_results=0, inputed_question=''):
+    qst_list = []
+    qst_list1 = []
+    qst_list2 = []
+    qst_list3 = []
+    qst_list4 = []
+    qst_list5 = []
+    
+    if inputed_question:
+        #qst_list = Pergunta.objects.filter(titulo__istartswith=inputed_question)
+        inputed = inputed_question.split()
+        word = []
+        for i in inputed:
+            x = i.lower()
+            word.append(x)
+            
+        perguntas = Pergunta.objects.all()
+        
+        # Starts only afther X words are typed
+        if len(word) < 0:
+            return None
+        
+        for perg in perguntas:
+            titulo = perg.titulo.lower()
+            for search in word:
+                result = titulo.find(search)
+                if result == -1:
+                    pass
+                elif perg not in qst_list1:
+                    qst_list1.append(perg)
+                elif perg not in qst_list2:
+                    qst_list2.append(perg)
+                elif perg not in qst_list3:
+                    qst_list3.append(perg)
+                elif perg not in qst_list4:
+                    qst_list4.append(perg)
+                elif perg not in qst_list5:
+                    qst_list5.append(perg)
+            
+        dup_qst_list = qst_list5 + qst_list4 + qst_list3 + qst_list2 + qst_list1
+        
+        for i in dup_qst_list:
+            if i not in qst_list:
+                qst_list.append(i)
+        
+    # Cuts the list to maximum results
+    if max_results > 0:
+        if len(qst_list) > max_results:
+            qst_list = qst_list[:max_results]
+        
+        ''' # Not working yet...
+        # Make the searched word bold    
+        for qst in qst_list:
+            for search in word:
+                titulo = qst.titulo.lower()
+                index1 = titulo.find(search)
+                index2 = index1 + len(search)
+                string0 = qst.titulo
+                string1 = string0[:index1]+'<b>'+string0[index1:index2]+ '</b>'+ string0[index2:]
+                qst.titulo = string1
+        '''
+        
+            
+    return qst_list
     
     
-    
-    
-    
-    
-    
+
+# Suggests the questions searched in previwes view
+def suggest_question(request):    
+    qst_list = []
+    inputed_question = ''
+    if request.method == 'GET':
+        inputed_question = request.GET['suggestion']
+    qst_list = get_question_list(5, inputed_question)
+
+    return render(request, 'perguntas/sugest_question.html', {'qst_list': qst_list,})
     
     
     

@@ -15,7 +15,7 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 from user_profile.models import UserProfile
-from perguntas.models import Pergunta, Resposta, Tag
+from perguntas.models import Pergunta, Resposta, Tag, Comment
 
 unread_status = (
     (1, 'unread'),
@@ -31,14 +31,19 @@ class NotiAnswer(models.Model):
     to_user = models.ForeignKey(User, related_name='anotif_to_user')
     from_user = models.ForeignKey(User, related_name='anotif_from_user')
     unread = models.IntegerField(default=1, choices=unread_status)
-    question = models.ForeignKey(Pergunta, related_name='question')
+    question = models.ForeignKey(Pergunta, related_name='anotif_question')
+    answer = models.ForeignKey(Resposta, related_name='anotif_answer', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     kind = models.CharField(max_length=50, default='answer')
     
     @property
+    def icon(self,):
+        return '<i class="fa fa-pencil fa-2x"></i>'
+    
+    @property
     def note(self,):
-        return self.from_user.first_name + " respondeu sua pergunta."
+        return "respondeu a pergunta:"
     
     @property
     def note_full(self, ):
@@ -59,36 +64,44 @@ class NotiVote(models.Model):
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     kind = models.CharField(max_length=50, default='vote')
     
+    
+    @property
+    def icon(self, ):
+        if self.question:
+            if self.vote:
+                return '<i class="fa fa-thumbs-o-up fa-2x"></i>'
+            else:
+                return '<i class="fa fa-thumbs-o-down fa-2x"></i>'
+            
+        elif self.answer:
+            if self.vote:
+                return '<i class="fa fa-thumbs-o-up fa-2x"></i>'
+            else:
+                return '<i class="fa fa-thumbs-o-down fa-2x"></i>'
+        
+    
     @property
     def note(self, ):
         if self.question:
             if self.vote:
-                return self.from_user.first_name + " gostou de sua pergunta!"
+                return "gostou de sua pergunta:"
             else:
-                return self.from_user.first_name + " nao gostou da sua pergunta..."
+                return "nao gostou de sua pergunta:"
             
         elif self.answer:
             if self.vote:
-                return self.from_user.first_name + " gostou de sua resposta!"
+                return "gostou de sua resposta para:"
             else:
-                return self.from_user.first_name + " nao gostou de sua resposta..."
+                return 'não gostou de sua resposta para:'
         else:
             return "Que tal melhorar o perfil seu clicando aqui!"
 
     @property
-    def note_full(self, ):
+    def item(self, ):
         if self.question:
-            if self.vote:
-                return self.from_user.first_name + " gostou de sua pergunta: " + self.question.titulo
-            else:
-                return self.from_user.first_name + " nao gostou de sua pergunta: " + self.question.titulo
+            return 'question'
         elif self.answer:
-            if self.vote:
-                return self.from_user.first_name + " gostou de sua resposta: " + self.answer.resposta
-            else:
-                return self.from_user.first_name + " nao gostou de sua resposta " + self.answer.resposta
-        else:
-            return "Que tal melhorar o perfil seu clicando aqui!"
+            return 'answer'
     
     def __unicode__(self):
         return unicode(self.to_user)
@@ -104,8 +117,12 @@ class NotiFollow(models.Model):
     kind = models.CharField(max_length=50, default='follow')
     
     @property
+    def icon(self,):
+        return '<i class="fa fa-user-plus fa-2x"></i>'
+    
+    @property
     def note(self,):
-        return self.from_user.first_name + " comecou a seguir voce!"
+        return "comecou a seguir voce!"
     
     @property
     def note_full(self, ):
@@ -119,14 +136,19 @@ class NotiComment(models.Model):
     to_user = models.ForeignKey(User, related_name='cnotif_to_user')
     from_user = models.ForeignKey(User, related_name='cnotif_from_user')
     answer = models.ForeignKey(Resposta)
+    comment = models.ForeignKey(Comment, blank=True, null=True)
     unread = models.IntegerField(default=1, choices=unread_status)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     kind = models.CharField(max_length=50, default='comment')
 
     @property
+    def icon(self,):
+        return '<i class="fa fa-commenting-o fa-2x"></i>'
+
+    @property
     def note(self,):
-        return self.from_user.first_name + " comentou sua resposta."
+        return "comentou sua resposta:"
     
     @property
     def note_full(self, ):

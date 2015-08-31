@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^pergunta/(?P<slug>.*)$', views.pergunta, name='pergunta'),
     url(r'^perguntar/$', views.perguntar, name='perguntar'),
+    url(r'^sugerir-pergunta/$', views.suggest_question, name='suggest_question'),
     url(r'^responder/(?P<pk>.*)$', views.responder, name='responder'),
     url(r'^editar-resposta/(?P<pk>.*)$', views.edit_answer, name='editar_resposta'),
     url(r'^comentar-resposta/(?P<pk>.*)$', views.add_comment, name='add_comment'),
