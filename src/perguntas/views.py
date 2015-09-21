@@ -405,8 +405,7 @@ def get_question_list(max_results=0, inputed_question=''):
         word = []
         for i in inputed:
             x = i.lower()
-            word.append(x)
-            
+            word.append(x)  
         perguntas = Pergunta.objects.all()
         
         # Starts only afther X words are typed
@@ -441,17 +440,18 @@ def get_question_list(max_results=0, inputed_question=''):
         if len(qst_list) > max_results:
             qst_list = qst_list[:max_results]
         
-        ''' # Not working yet...
+        # Not working yet...
         # Make the searched word bold    
         for qst in qst_list:
             for search in word:
                 titulo = qst.titulo.lower()
                 index1 = titulo.find(search)
-                index2 = index1 + len(search)
-                string0 = qst.titulo
-                string1 = string0[:index1]+'<b>'+string0[index1:index2]+ '</b>'+ string0[index2:]
-                qst.titulo = string1
-        '''
+                if index1 != -1:
+                    index2 = index1 + len(search)
+                    string0 = qst.titulo
+                    string1 = string0[:index1]+'<b>'+string0[index1:index2]+'</b>'+string0[index2:]
+                    qst.titulo = string1
+
         
             
     return qst_list

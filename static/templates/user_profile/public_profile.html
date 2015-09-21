@@ -6,15 +6,9 @@
 
 {% block content %}
   
-<div class="blog-header">
+
 <h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> <a href='{% url "profile" profile.slug %}'>{{ profile.name }}</a></h1>
-</div>
 
-<div class="row">
-
-      <div class="col-sm-8 blog-main">
-
-          <div class="blog-post">
           <div class="row">
                 <div class="col-xs-1">
                 </div>
@@ -45,8 +39,6 @@
                
                         
                 </div><!-- /.col-xs -->
-          </div><!-- /.row -->
-          </div><!-- /.blog-post -->
-      </div><!-- /.blog-main -->
+</div>
 
 {% endblock %}

@@ -69,10 +69,10 @@ def public_profile(request, slug):
     atividades = list(chain(perguntas, respostas))
     ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)[0:5]
     
-    if user in request.user.userprofile.follow_users.all():
-        is_followed = 1
-    else:
-        is_followed = 0
+    is_followed = 0
+    if request.user.is_authenticated():
+        if user in request.user.userprofile.follow_users.all():
+            is_followed = 1
     
     
     context = {

@@ -4,7 +4,7 @@ $(document).ready(function() {
 // initialize all popovers on page
 $(function () {
   $('[data-toggle="popover"]').popover({html:true})
-})
+});
 
 
 // questions votes-up control
