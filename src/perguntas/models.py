@@ -58,6 +58,7 @@ class Pergunta(models.Model):
     views = models.IntegerField(default=0)
     votes = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, blank=True)
+    asked_count = models.IntegerField(default=1)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     classe = models.CharField(max_length=100, default='pergunta')
@@ -99,6 +100,16 @@ class Pergunta(models.Model):
     def score(self, ):
         score = score_question(self)
         return score
+    
+    def followed(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.follow_questions.all():
+            return 1
+        else:
+            return 0
     
 
 

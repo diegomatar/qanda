@@ -30,4 +30,8 @@ def upvoted(obj, user):
 @register.filter
 def downvoted(obj, user):
     return obj.downvoted(user)
-    
+
+
+@register.filter
+def followed(obj, user):
+    return obj.followed(user)    

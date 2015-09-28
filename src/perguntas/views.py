@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+from datetime import datetime
 from random import randint
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -49,7 +50,7 @@ def pergunta(request, slug):
     
     pergunta = Pergunta.objects.get(slug=slug)
     respostas = []
-    
+    # If the user is answering the question
     if request.method == 'POST':
         form = RespostaForm(request.POST)
         form.helper.form_action = reverse('responder', args=[pergunta.id])
@@ -59,13 +60,17 @@ def pergunta(request, slug):
             form_data.autor = request.user
             form_data.save()
             answer = form_data
-            notif = new_Answer(pergunta.autor, request.user, pergunta, answer)
+            for usr in pergunta.follow_questions.all():
+                notif = new_Answer(usr.user, request.user, pergunta, answer)
+            
             url = pergunta.get_absolute_url()
             
             # Add the first two topics of question to user knowledge
             question_tags = pergunta.tags.all()[0:2]
             profile = request.user.userprofile
             profile.knows_about.add(*question_tags)
+            # Add question to followed questions
+            profile.follow_questions.add(pergunta)
             profile.save()
             return HttpResponseRedirect(url)
     else:
@@ -268,11 +273,19 @@ def perguntar(request):
             form_data.save()
             form.save_m2m()
             
+            # Add quetion to followed ones
+            profile = request.user.userprofile
+            profile.follow_questions.add(form_data)
+            profile.save()
+            
             return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
     
     else:
-        form = PerguntaForm()
-        
+        if request.GET.get('q', ''):
+            form = PerguntaForm(initial={'titulo': request.GET.get('q', '')})
+        else:
+            form = PerguntaForm()
+    
     context = {
         'form': form,
     }
@@ -299,6 +312,8 @@ def responder(request, pk):
             question_tags = pergunta.tags.all()[0:2]
             profile = request.user.userprofile
             profile.knows_about.add(*question_tags)
+            # Add the question to followed ones
+            profile.follow_questions.add(pergunta)
             profile.save()
             return HttpResponseRedirect(url)
     else:
@@ -467,6 +482,69 @@ def suggest_question(request):
     qst_list = get_question_list(5, inputed_question)
 
     return render(request, 'perguntas/sugest_question.html', {'qst_list': qst_list,})
+    
+    
+@login_required
+def follow_question(request):
+    # Get the data being passed by get
+    quest_id = None
+    if request.method == "GET":
+        quest_id = request.GET['pergunta_id']
+    # If was passed any value on get
+    if quest_id:
+        # Get the answer with the id received
+        quest = Pergunta.objects.get(id=int(quest_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # follows the question
+        if quest and quest not in profile.follow_questions.all():
+            profile.follow_questions.add(quest)
+            profile.save()
+            
+    return HttpResponse()
+    
+@login_required
+def unfollow_question(request):
+     # Get the data being passed by get
+    quest_id = None
+    if request.method == "GET":
+        quest_id = request.GET['pergunta_id']
+    # If was passed any value on get
+    if quest_id:
+        # Get the answer with the id received
+        quest = Pergunta.objects.get(id=int(quest_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # unfollows the question
+        if quest and quest in profile.follow_questions.all():
+            profile.follow_questions.remove(quest)
+            profile.save()
+            
+    return HttpResponse()
+
+
+@login_required
+def perguntar_novamente(request, slug):
+    pergunta = Pergunta.objects.get(slug=slug)
+    print pergunta
+    pergunta.data = datetime.today()
+    print pergunta.data
+    pergunta.asked_count += 1
+    pergunta.save()
+    profile = request.user.userprofile
+    profile.follow_questions.add(pergunta)
+    profile.save()
+
+    messages.success(request, 'Pronto! Você perguntou esta pergunta novamente!!')
+    
+    return HttpResponseRedirect(reverse('pergunta', args=[pergunta.slug]))
+    
+    
+    
+    
+    
+    
+    
     
     
     

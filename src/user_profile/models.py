@@ -26,6 +26,8 @@ class UserProfile(models.Model):
     resp_upvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_upvotes')
     resp_downvotes = models.ManyToManyField('perguntas.Resposta', related_name='resp_downvotes')
     follow_users = models.ManyToManyField(User, related_name='follows')
+    follow_questions = models.ManyToManyField('perguntas.Pergunta', related_name='follow_questions')
+    follow_topics = models.ManyToManyField('perguntas.Tag', related_name='follow_topics')
     interests = models.ManyToManyField('perguntas.Tag', related_name='interests')
     knows_about = models.ManyToManyField('perguntas.Tag', related_name='knows_about')
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)

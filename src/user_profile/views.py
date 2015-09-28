@@ -161,10 +161,11 @@ def user_followers(request, slug):
     profile = UserProfile.objects.get(slug=slug)
     followers = profile.user.follows.all()
     
-    if profile.user in request.user.userprofile.follow_users.all():
-        is_followed = 1
-    else:
-        is_followed = 0
+    is_followed = 0
+    if request.user.is_authenticated():
+        if profile.user in request.user.userprofile.follow_users.all():
+            is_followed = 1
+            
     
     context = {
         'profile': profile,
