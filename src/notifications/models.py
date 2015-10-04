@@ -4,10 +4,11 @@
 '''
  Actions that will create a new notification:
  - Someone answered your question
+ - Someone commented in your answer
  - Someone voted in your answer
  - Someone voted in your question
- - Unread notifications will be displaied on page reload
  - Someone starts following you
+ - Someone requests you to ask a question
  '''
 
 from django.db import models
@@ -156,3 +157,25 @@ class NotiComment(models.Model):
     
     def __unicode__(self):
         return unicode(self.to_user)
+    
+    
+
+class NotiAsk(models.Model):
+    to_user = models.ForeignKey(User, related_name='asknotif_to_user')
+    from_user = models.ForeignKey(User, related_name='asknotif_from_user', blank=True, null=True)
+    question = models.ForeignKey(Pergunta)
+    unread = models.IntegerField(default=1, choices=unread_status)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    kind = models.CharField(max_length=50, default='ask_to_answer')
+
+    def __unicode__(self):
+        return unicode(self.to_user)
+    
+    @property
+    def note(self,):
+        return "pediu que você responda a pergunta:"
+    
+    @property
+    def icon(self,):
+        return '<i class="fa fa-university fa-2x"></i>'

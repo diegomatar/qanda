@@ -10,6 +10,13 @@ from django.template.defaultfilters import slugify
 
 from perguntas.models import Pergunta, Resposta
 
+USER_ROLES = (
+    ('regular', 'regular'),
+    ('editor', 'editor'),
+    ('admin', 'admin'),
+)
+
+
 
 # Create your models here.
 class UserProfile(models.Model):
@@ -30,6 +37,7 @@ class UserProfile(models.Model):
     follow_topics = models.ManyToManyField('perguntas.Tag', related_name='follow_topics')
     interests = models.ManyToManyField('perguntas.Tag', related_name='interests')
     knows_about = models.ManyToManyField('perguntas.Tag', related_name='knows_about')
+    user_role = models.CharField(choices=USER_ROLES, default='regular', max_length=50)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated = models.DateTimeField(auto_now_add=False, auto_now=True)
     
@@ -67,6 +75,13 @@ class UserProfile(models.Model):
     def followers_num(self):
         followers = self.user.follows.all()
         return len(followers)
+    
+    def reputation(self):
+        resp = Resposta.objects.filter(autor=self.user)
+        reputation = 0
+        for rsp in resp:
+            reputation += rsp.votes
+        return reputation
         
         
     def __unicode__(self):

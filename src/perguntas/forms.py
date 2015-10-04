@@ -70,6 +70,39 @@ class PerguntaForm(forms.ModelForm):
             </div>
             """),
         )
+        
+
+class EditarPerguntaForm(forms.ModelForm):
+    titulo = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Qual é sua pergunta?'}))
+    descricao = forms.CharField(widget=SummernoteInplaceWidget(), label=" ", required=False)
+    tags = TagField(label=" ")
+    
+    class Meta:
+        model = Pergunta
+        fields = ['titulo', 'descricao', 'tags']
+        
+    def __init__(self, *args, **kwargs):
+        super(EditarPerguntaForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'perguntar'
+        self.helper.form_class = 'editar_pergunta'
+        self.helper.form_method = 'post'
+        
+
+        self.helper.layout = Layout(
+            'titulo',
+            'descricao',
+            HTML("""
+                <p class="sm-title close-to-next-line">Quais os assuntos desta perguta?</p>
+            """),
+            'tags',
+            Div(
+                Submit('submit', 'Alterar Pergunta >', css_class='btn-warning btn-lg'),
+                css_class='col-lg-offset-3 col-lg-9',
+            ),
+        )
+
+    
              
 
 class RespostaForm(forms.ModelForm):

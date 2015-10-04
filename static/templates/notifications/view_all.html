@@ -38,6 +38,8 @@
                   <a href="{% url 'pergunta' notif.answer.pergunta.slug %}">{{ notif.answer.pergunta.titulo }}<span class="over-link"></span></a>
                   {% elif notif.kind = 'comment' %}
                   <a href="{% url 'pergunta' notif.answer.pergunta.slug %}">{{ notif.answer.resposta|striptags|truncatewords:12 }}<span class="over-link"></span></a>
+                  {% elif notif.kind = 'ask_to_answer' %}
+                  <a href="{% url 'pergunta' notif.question.slug %}">{{ notif.question.titulo|striptags|truncatewords:12 }}<span class="over-link"></span></a>
                   {% endif %}
                   <span class="bullet"> • </span>
                   {{ notif.timestamp }}

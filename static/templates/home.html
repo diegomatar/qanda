@@ -8,14 +8,14 @@
     <div class="jumbotron">
         <div class="container">
             <h1><i>encontre a melhor resposta para qualquer pergunta:</i></h1>
-            <form>
+            <form action='{% url "perguntar" %}'>
                 <div class="row">
                 <div class="col-lg-10">
                 <div class="form-group">
                     <div class="input-group">
-                        <input type="text" class="form-control input-lg" id="perguntar" placeholder="O que você quer saber hoje?">
+                        <input type="text" class="form-control input-lg" name='q' id="perguntar" placeholder="O que você quer saber hoje?">
                         <span class="input-group-btn">
-                            <button class="btn btn-warning btn-lg" type="button">PERGUNTAR</button>
+                            <button type="submit" class="btn btn-warning btn-lg" type="button">PERGUNTAR</button>
                         </span>
                     </div>
                 </div><!-- form-group -->
@@ -28,6 +28,7 @@
     </div>
 
 {% endblock %}
+
 
 
 {% block header %}
@@ -50,6 +51,11 @@
         <p class="info-text"> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/></a> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span></a></p>
         <p class="info-text">
             <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Escrever Resposta</a>
+            <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
+                {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}
+            </a>
+        
+            
             {% if pergunta.num_respostas > 1 %}
                 <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
             {% elif pergunta.num_respostas = 1 %}

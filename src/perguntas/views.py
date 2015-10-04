@@ -6,7 +6,6 @@ from random import randint
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import slugify
@@ -14,8 +13,8 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect, Http404
 
 
 from user_profile.models import UserProfile
-from notifications.views import new_Answer, new_Vote, new_Comment
-from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm
+from notifications.views import new_Answer, new_Vote, new_Comment, new_AskAnswer
+from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm, EditarPerguntaForm
 from .models import Pergunta, Resposta, Tag, Comment
 
 
@@ -91,11 +90,38 @@ def pergunta(request, slug):
         for resp in pergunta.resposta_set.all():
             resp.views += 1
             resp.save()
+            
+            
+    # Get users who can answer the question
+    
+    ## Knows about question topics
+    topics = pergunta.tags.all()
+    ask_users = []
+    for tpc in topics:
+        for usr in tpc.knows_about.all():
+            if usr not in ask_users:
+                ask_users.append(usr)
+    
+    ## If it is too few user, include those with good reputation
+    if len(ask_users) < 5:
+        users = UserProfile.objects.all()
+        users = sorted(users, key= lambda t: t.reputation(), reverse=True)[:20]
+        for usr in users:
+            if usr not in ask_users:
+                ask_users.append(usr)
+
+    ## Remove those who alredy answered
+    answered = pergunta.resposta_set.all()
+    for ans in answered:
+        if ans.autor.userprofile in ask_users:
+            ask_users.remove(ans.autor.userprofile)
+
     
     context = {
         'pergunta': pergunta,
         'respostas': respostas,
         'form': form,
+        'ask_users': ask_users,
     }
     return render(request, 'perguntas/pergunta.html', context)
 
@@ -277,6 +303,7 @@ def perguntar(request):
             profile = request.user.userprofile
             profile.follow_questions.add(form_data)
             profile.save()
+            messages.success(request, 'Parabéns! Sua pergunta foi publicada com sucesso!!')
             
             return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
     
@@ -326,11 +353,42 @@ def responder(request, pk):
      
     return render(request, 'perguntas/responder.html', context)
 
+
+
+# Allow user to edit questions
+@login_required
+def edit_question(request, pk):
+    question = Pergunta.objects.get(pk=pk)
+    # Checks if user has permission to edit the question
+    if request.user == question.autor or request.user.userprofile.user_role == 'admin':
+        # If is post get the data and save the edited question
+        if request.method == 'POST':
+            form = EditarPerguntaForm(request.POST, request.FILES, instance=question)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Pergunta editada com sucesso!!')
+                return HttpResponseRedirect(reverse('pergunta', args=[question.slug]))
+        # Otherwise, display the form to edit question:
+        else:
+            form = EditarPerguntaForm(instance=question)
+    else:
+        raise Http404
+    
+    context = {
+        'form': form,
+        'question': question,
+    }
+    
+    return render(request, 'perguntas/editar_pergunta.html', context)
+
+
+
+# Allow user to edit its own answer
 @login_required
 def edit_answer(request, pk):
     answer = Resposta.objects.get(pk=pk)
     # Checks user permission to edit the answer
-    if request.user == answer.autor:
+    if request.user == answer.autor or request.user.userprofile.user_role == 'admin':
         # If is post, gets the data and save the edited answer
         if request.method == 'POST':
             form = RespostaForm(request.POST, request.FILES, instance=answer)
@@ -352,6 +410,7 @@ def edit_answer(request, pk):
     return render(request, 'perguntas/editar-resposta.html', context)
     
     
+# Allow users to comment answers
 @login_required
 def add_comment(request, pk=0):
     
@@ -377,6 +436,7 @@ def add_comment(request, pk=0):
     return render(request, 'perguntas/comment.html', context)    
 
 
+# Allow the author of the comment to edit it
 @login_required
 def edit_comment(request, pk=0):
     
@@ -483,7 +543,9 @@ def suggest_question(request):
 
     return render(request, 'perguntas/sugest_question.html', {'qst_list': qst_list,})
     
-    
+
+# Add the question to following list
+# User starts to receive notifications from question
 @login_required
 def follow_question(request):
     # Get the data being passed by get
@@ -502,7 +564,10 @@ def follow_question(request):
             profile.save()
             
     return HttpResponse()
-    
+
+
+# Removes the question from the followed topics
+# User stops to receive notifications from question
 @login_required
 def unfollow_question(request):
      # Get the data being passed by get
@@ -523,6 +588,7 @@ def unfollow_question(request):
     return HttpResponse()
 
 
+# Allow user to ask the question again
 @login_required
 def perguntar_novamente(request, slug):
     pergunta = Pergunta.objects.get(slug=slug)
@@ -532,8 +598,9 @@ def perguntar_novamente(request, slug):
     pergunta.asked_count += 1
     pergunta.save()
     profile = request.user.userprofile
-    profile.follow_questions.add(pergunta)
-    profile.save()
+    if pergunta not in profile.follow_questions.all():
+        profile.follow_questions.add(pergunta)
+        profile.save()
 
     messages.success(request, 'Pronto! Você perguntou esta pergunta novamente!!')
     
@@ -541,8 +608,30 @@ def perguntar_novamente(request, slug):
     
     
     
-    
-    
+# Send the request to ask question to the selcted user
+@login_required
+def ask_to_answer(request):
+    # Get the data being passed by get
+    quest_id = None
+    if request.method == "GET":
+        quest_id = request.GET['pergunta_id']
+        user_id = request.GET['user_id']
+    # If was passed any value on get
+    if quest_id and user_id:
+        to_user = UserProfile.objects.get(pk=user_id)
+        question = Pergunta.objects.get(pk=quest_id)
+        from_user = request.user
+        notif = new_AskAnswer(to_user.user, from_user, question)
+        notif.save()
+        profile = request.user.userprofile
+        print profile
+        
+        if question not in profile.follow_questions.all():
+            profile.follow_questions.add(question)
+            profile.save()
+        
+
+    return HttpResponse()
     
     
     

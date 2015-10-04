@@ -80,82 +80,6 @@ $('#perg_downvote').click(function(){
 });
 
 
-/*
-// answers votes-up control
-$('#resp_upvote').click(function(){
-    respid = $(this).attr("data-respid");
-    var $th = $(this);
-    
-    // if it is active, turn off and remove 1 vote
-    if($th.hasClass('active')) {    
-        $.get('/resp-downvote/', {resposta_id: respid}, function(data){
-            $('#resp_votes_count').html(data);
-            $('#resp_upvote').removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
-        });
-    }
-    
-    // if vote down is active, turn down off, turn up on and add 2 votes
-    else if ($('#resp_downvote').hasClass('active')) {
-     $.get('/resp-upvote/', {resposta_id: respid});
-     $.get('/resp-upvote/', {resposta_id: respid}, function(data){
-            $('#resp_votes_count').html(data);
-            $('#resp_downvote').removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
-            $('#resp_upvote').addClass('active').addClass( 'upvote-on' );
-            
-        });
-     
-    }
-    
-    // if none of votes are active, turn on and add a vote
-    else {
-        $th.addClass('active');
-        $.get('/resp-upvote/', {resposta_id: respid}, function(data){
-                   $('#resp_votes_count').html(data);
-                   $('#resp_upvote').removeClass( 'upvote-off' ).addClass( 'upvote-on' );
-                   $('#resp_downvote').removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
-        });
-    };
-});
-
-
-
-// answers down votes control
-$('#resp_downvote').click(function(){
-    respid = $(this).attr("data-respid");
-    var $th = $(this);
-    
-    // if is active, tur it off and remove one vote
-    if($th.hasClass('active')) {
-        $.get('/resp-upvote/', {resposta_id: respid}, function(data){
-            $('#resp_votes_count').html(data);
-            $('#resp_downvote').removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
-        });
-    }
-    
-    // if vote up is active, turn up off, turn down on and remove 2 votes
-    else if ($('#resp_upvote').hasClass('active')) {
-     $.get('/resp-downvote/', {resposta_id: respid});
-     $.get('/resp-downvote/', {resposta_id: respid}, function(data){
-            $('#resp_votes_count').html(data);
-            $('#resp_upvote').removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
-            $('#resp_downvote').addClass('active').addClass( 'downvote-on' );
-            
-        });   
-    }
-    
-    // if none is active, just turn down on and remove 1 vote.
-    else {
-    $th.addClass('active');
-    $.get('/resp-downvote/', {resposta_id: respid}, function(data){
-               $('#resp_votes_count').html(data);
-               $('#resp_downvote').removeClass( 'downvote-off' ).addClass( 'downvote-on' );
-               $('#resp_upvote').removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
-        });
-    };
-});
-*/
-// Test version with variables as id selector:
-
 
 // answers votes-up control
 $('a#resp_upvote').click(function(){
@@ -234,8 +158,6 @@ $('a#resp_downvote').click(function(){
 
 
 // follow and unfollow users control
-
-
 $('a#follow_user').click(function(){
     var $th = $(this);
     userid = $th.attr("data-userid");
@@ -258,6 +180,28 @@ $('a#follow_user').click(function(){
     }
     
 });
+
+
+// follow and unfollow questions control
+$('.follow_quest').click(function(){
+    questid = $(this).attr("data-questid");
+    var $th = $(this);
+    
+    // if is active, tur it off and unfollow question
+    if($th.hasClass('active')) {
+        $.get('/unfollow-question/', {pergunta_id: questid}, function(data){
+            $th.removeClass( 'active' ).html('Seguir');
+        });
+    }
+    // tur it on and follow question
+    else {
+        $.get('/follow-question/', {pergunta_id: questid}, function(data){
+            $th.addClass( 'active' ).html('Seguindo');
+        });
+    };
+});
+
+
 
 
 // Toggle answer icon
@@ -285,7 +229,6 @@ $(function(){
     });
 });
 
-
 $('#id_titulo').keyup(function(){
     var query;
     query = $(this).val();
@@ -295,6 +238,25 @@ $('#id_titulo').keyup(function(){
     $.get('/sugerir-pergunta/', {suggestion: query}, function(data){
     $('#collapseQsts').html(data);
     });
+});
+
+
+
+// Modal
+$('#myModal').on('shown.bs.modal', function () {
+  $('#myInput').focus()
+})
+
+
+// Ask to answer
+$('.ask-answer').click(function(){
+    questid = $(this).attr("data-questid");
+    userid = $(this).attr("data-userid");
+    var $th = $(this);
+
+    $.get('/pedir-resposta/', {pergunta_id: questid, user_id: userid}, function(data){
+            $th.addClass( 'active' ).html('Feito!');
+        });
 });
 
 

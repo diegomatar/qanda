@@ -40,6 +40,12 @@
     <!-- Production Version-->  
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
      
+    {% if messages %}
+      {% for message in messages %}
+        <div class='alert {% if message.tags %}alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}'{% endif %}>{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+        
     {% block head %}{% endblock%}
     
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->

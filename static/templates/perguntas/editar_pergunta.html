@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+{% load crispy_forms_tags %}
+{% load django_select2_tags %}
+
+
+{% block add_script %}
+<link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+{% import_django_select2_js_css %}
+{% endblock %}
+
+
+{% block content %}
+        
+
+<div class="blog-post">
+        
+<div class="row">
+    <div class="col-sm-7">
+        <h1 class="sm-title">EDITAR PERGUNTA:<span class="lead blog-description bullet"></h1>
+    </div>
+</div><!-- .col-sm-7 -->
+</div><!-- .row -->        
+
+
+<div class="blog-post">
+
+  
+      {% crispy form form.helper %}
+      
+</div><!-- /.blog-post -->
+
+{% endblock %}
+
+
+{% block script %}
+
+{% endblock %}
+
+
+{% block sidebar %}
+    <div class="sidebar-module sidebar-module-inset">
+        <h4>Atividades Recentes</h4>
+        <p>teste</p>
+        <p>teste</p>
+        <p>teste</p>
+        <p>teste</p>
+    </div>
+{% endblock %}

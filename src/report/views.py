@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from django.contrib import messages
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 
@@ -22,6 +23,7 @@ def report_question(request, pk, kind):
         report.from_users.add(request.user)
     report.status = 1
     report.save()
+    messages.warning(request, 'Obrigado, sua queixa contra esta pergunta será analisada por nossa equipe.')
     
     return HttpResponseRedirect(reverse('pergunta', args=[question.slug] ))
     
@@ -39,6 +41,7 @@ def report_answer(request, pk, kind):
         report.from_users.add(request.user)
     report.status = 1
     report.save()
+    messages.warning(request, 'Obrigado, sua queixa contra esta resposta será analisada por nossa equipe.')
     
     return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug] ))
         
@@ -57,6 +60,7 @@ def report_comment(request, pk, kind):
         report.from_users.add(request.user)
     report.status = 1
     report.save()
+    messages.warning(request, 'Obrigado, sua queixa contra este comentário será analisada por nossa equipe.')
     
     return HttpResponseRedirect(reverse('pergunta', args=[comment.answer.pergunta.slug] ))
     
@@ -74,5 +78,6 @@ def report_profile(request, pk, kind):
         report.from_users.add(request.user)
     report.status = 1
     report.save()
+    messages.warning(request, 'Obrigado, sua queixa contra este usuário será analisada por nossa equipe.')
     
     return HttpResponseRedirect(reverse('profile', args=[profile.slug] ))

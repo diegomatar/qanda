@@ -6,15 +6,12 @@
 
 {% block content %}
   
-<div class="blog-header">
+
 <h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> {{ profile.name }}</h1>
-</div>
+
 
 <div class="row">
 
-      <div class="col-sm-8 blog-main">
-
-          <div class="blog-post">
           <div class="row">
                 <div class="col-xs-1">
                 </div>
@@ -22,7 +19,9 @@
                {% if request.user.id = profile.user.id %}
                <p><a class='btn btn-warning' href='{% url "edit_profile" %}'>Editar Perfil</a></p>
                {%else%}
+               {% if request.user.is_authenticated %}
                <p><a class='user_{{ profile.user.id }} btn btn-danger {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='follow_user' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a> | <span id='followers_count'>{{ profile.followers_num }}</span> seguidores</p>
+               {% endif %}
                {% endif %}
                <p><a href="{% url 'followers' profile.slug %}"><b>Seguidores:</b></a>  {{ profile.followers_num }} | <b>Respostas:</b> {{ profile.num_respostas }} | <b>Perguntas:</b> {{ profile.num_pergs }}  </p>
                <p><b>Sobre:</b> {{ profile.about }}</p>
@@ -37,7 +36,6 @@
                         
                 </div><!-- /.col-xs -->
           </div><!-- /.row -->
-          </div><!-- /.blog-post -->
-      </div><!-- /.blog-main -->
+</div>
 
 {% endblock %}

@@ -9,7 +9,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, HttpResponseRedirect
 
 
-from .models import NotiAnswer, NotiVote, NotiFollow, NotiComment
+from .models import NotiAnswer, NotiVote, NotiFollow, NotiComment, NotiAsk
 # Create your views here.
 
 # Creates a new notification when a question is answered
@@ -40,23 +40,33 @@ def new_Comment(to_user, from_user, answer, comment):
     return notif
 
 
+# Creates a new notification whe someone asks to answer
+def new_AskAnswer(to_user, from_user, question):
+        notif = NotiAsk(to_user=to_user, from_user=from_user, question=question)
+        notif.save()
+        return notif
+        
+
 
 @login_required
 def view_notification(request):
     user = request.user
+    
     unread_a_notif = NotiAnswer.objects.filter(to_user=user).filter(unread=1).order_by('-timestamp')
     unread_v_notif = NotiVote.objects.filter(to_user=user).filter(unread=1).order_by('-timestamp')
     unread_f_notif = NotiFollow.objects.filter(to_user=user).filter(unread=1).order_by('-timestamp')
     unread_c_notif = NotiComment.objects.filter(to_user=user).filter(unread=1).order_by('-timestamp')
+    unread_ask_notif = NotiAsk.objects.filter(to_user=user).filter(unread=1).order_by('-timestamp')
     
     read_a_notif = NotiAnswer.objects.filter(to_user=user).filter(unread=0).order_by('-timestamp')
     read_v_notif = NotiVote.objects.filter(to_user=user).filter(unread=0).order_by('-timestamp')
     read_f_notif = NotiFollow.objects.filter(to_user=user).filter(unread=0).order_by('-timestamp')
     read_c_notif = NotiComment.objects.filter(to_user=user).filter(unread=0).order_by('-timestamp')
+    read_ask_notif = NotiAsk.objects.filter(to_user=user).filter(unread=0).order_by('-timestamp')
     
-    unread_num_notif = len(unread_a_notif) + len(unread_v_notif) + len(unread_f_notif) + len(unread_c_notif)
-    read_notif = list(chain(read_a_notif, read_v_notif, read_f_notif, read_c_notif))[:10]
-    notifications = list(chain(unread_a_notif, unread_v_notif, unread_f_notif, unread_c_notif, read_notif))
+    unread_num_notif = len(unread_a_notif) + len(unread_v_notif) + len(unread_f_notif) + len(unread_c_notif) + len(unread_ask_notif)
+    read_notif = list(chain(read_a_notif, read_v_notif, read_f_notif, read_c_notif, read_ask_notif))[:10]
+    notifications = list(chain(unread_a_notif, unread_v_notif, unread_f_notif, unread_c_notif, unread_ask_notif, read_notif))
 
     # Delete notifications older than 40 days
     days_to_delete = 60
@@ -93,6 +103,10 @@ def mark_as_read(request, kind, pk):
         notif = NotiComment.objects.get(pk=pk)
         notif.unread = 0
         notif.save()
+    elif kind == 'ask_to_answer':
+        notif = NotiAsk.objects.get(pk=pk)
+        notif.unread = 0
+        notif.save()
         
     return HttpResponseRedirect(reverse('view_notification'))
     
@@ -104,7 +118,8 @@ def mark_all_read(request):
     unread_v_notif = NotiVote.objects.filter(to_user=user).filter(unread=1)
     unread_f_notif = NotiFollow.objects.filter(to_user=user).filter(unread=1)
     unread_c_notif = NotiComment.objects.filter(to_user=user).filter(unread=1)
-    notifications = list(chain(unread_a_notif, unread_v_notif, unread_f_notif, unread_c_notif))
+    unread_ask_notif = NotiAsk.objects.filter(to_user=user).filter(unread=1)
+    notifications = list(chain(unread_a_notif, unread_v_notif, unread_f_notif, unread_c_notif, unread_ask_notif))
     
     for notif in notifications:
         notif.unread = 0

@@ -10,10 +10,49 @@
 {% endblock %}
 
 
+
+
+{% block jumbotrone %}
+<!-- Modal -->
+<div class="modal " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Peça para outras pessoas responderem esta pergunta:</h4>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          {% for usr in ask_users %}
+          <div class="row">
+            <div class="col-xs-2">
+                <a href="{% url 'profile' usr.slug %}" title="{{ usr.name }}" ><img class="user-pic" src="{{usr.profile_image_url}}"></a>
+            </div>
+            <div class="col-xs-7">
+                <p class="autor-info">{{ usr.name }}, {{ usr.about }}
+                <br><i>{{ usr.num_respostas }} perguntas respondidas</i></p>
+            </div>
+            <div class="col-sm-2">
+                <button class="ask-answer btn btn-default btn-sm" id="ask_{{usr.id}}" data-questid="{{ pergunta.id}}" data-userid="{{ usr.id}}" >Pedir Resposta</button>
+            </div>
+          </div><!-- row -->
+          {% endfor %}
+        </div><!-- container-fluid -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
 {% block content %}
 <div class="blog-post">
   <div class="row">
-    
+            
     <div class="col-xs-2"><!-- Vote Buttons -->
       <a class="{% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
         {% if user.is_authenticated %}id="perg_upvote" title="Gostei: esta pergunta é relevante, clara e bem escrita."
@@ -37,9 +76,17 @@
       <div class="row"><!-- views and time, comments and options menu -->
             <div class="col-xs-9"><!-- views and time -->
               <p class="info-text">
+                <a href="{% url 'perguntar_novamente' pergunta.slug %}">Perguntar Novamente</a>
+                <span class="bullet"> • </span> 
                 {{ pergunta.data|post_date }}
                 <span class="bullet"> • </span> 
                 vista: {{ pergunta.views }} vezes
+              </p>
+              <p class="info-text">
+                <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}" title="{% if pergunta|followed:request.user %}Deixar de seguir{% else %}Receba as atualizações desta pergunta{% endif %}" >
+                    {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}
+                </a>
+                    {{ pergunta.follow_questions.all|length }} seguindo: {% for seg in pergunta.follow_questions.all %}<a href="{% url 'profile' seg.slug %}" title="{{ seg.name }}" ><img class="user-pic-mini" src="{{seg.profile_image_url}}"></a>{% endfor %}
               </p>
             </div>
             
@@ -51,9 +98,9 @@
                   <ul class="dropdown-menu">
                     <li><a href="{% url 'report_question' pergunta.pk 1 %}">Reportar Pergunta</a></li>
                     <li><a href="{% url 'report_profile' pergunta.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
-                    {% if pergunta.autor == request.user %}
+                    {% if pergunta.autor == request.user or request.user.userprofile.user_role == 'admin' %}
                     <li role="separator" class="divider"></li>
-                    <li><a href='#'>Editar Pergunta</a></li>
+                    <li><a href='{% url 'editar_pergunta' pergunta.pk %}'>Editar Pergunta</a></li>
                     {% endif %}
                   </ul>
                 </div><!-- .btn-group -->
@@ -61,8 +108,10 @@
             </div>
             
       </div>
-      
+      <p>
       <a class="btn btn-default" id='responder' role="button" data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample">Responder <i class="fa fa-toggle-off"></i></a>
+      <button class="btn btn-link"  data-toggle="modal" data-target="#myModal" title="Peça para outras pessoas responderem.">Pedir Resposta</button>
+      </p>
       <div class="collapse" id="collapseExample">
       {% crispy form form.helper %}
       </div>
