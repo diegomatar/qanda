@@ -109,7 +109,7 @@ def pergunta(request, slug):
     return render(request, 'perguntas/pergunta.html', context)
 
 
-# returns a list with x sugested users to answer a question
+# returns a list with x suggested users to answer a question
 def user_to_answer(question, x):
     topics = question.tags.all()
     ask_users = []
@@ -158,7 +158,7 @@ def related_questions(question, x):
 
 
 # Sugest topics based in user profile
-def sugest_topics(profile):
+def suggest_topics(profile):
     sugestions = []
     if profile.knows_about.all():
         for tpc in profile.knows_about.all():
@@ -170,7 +170,7 @@ def sugest_topics(profile):
     
     if len(sugestions) < 30:
         tags = Tag.objects.all()
-        tags = sorted(tags, key= lambda t: t.num_perguntas())
+        tags = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)
         for tag in tags:
             if (tag not in sugestions) and (tag not in profile.knows_about.all()):
                 sugestions.append(tag)
@@ -178,13 +178,22 @@ def sugest_topics(profile):
     return sugestions[0:30]
 
 
-
-# Show questions that user can answer
+# Show questions that user can answer: menu responder
 @login_required
 def responder_perguntas(request):
     # get profile, topics of knowledge and aswered questions
     profile = request.user.userprofile
     topics = profile.knows_about.all()
+    if not topics:
+        sugestions = suggest_topics(profile)
+        
+        
+        context = {
+            'sugestions': sugestions,
+        }
+        
+        return render(request, 'perguntas/definir_topicos.html', context)
+        
     
     # Get questions that user already answered or asked
     answered = []
@@ -199,7 +208,6 @@ def responder_perguntas(request):
     sugested_questions = []
     for tpc in topics:
         questions = tpc.pergunta_set.all()
-        print questions
         for qst in questions:
             if (qst not in sugested_questions) and (qst not in answered):
                 sugested_questions.append(qst)
@@ -217,7 +225,7 @@ def responder_perguntas(request):
         
         
     # Get sugested topics
-    topics_sugestion = sugest_topics(profile)
+    topics_sugestion = suggest_topics(profile)
     
     # Paginator
     paginator = Paginator(sugested_questions, 15) # Show 25 sugested_questions per page
@@ -243,6 +251,18 @@ def responder_perguntas(request):
     }
     
     return render(request, 'perguntas/menu_responder.html', context)
+
+
+
+# Updates the suggested topic list
+def update_topics_sugestion(request):
+    profile = request.user.userprofile
+    sugestions = suggest_topics(profile)
+    
+    context = {
+            'sugestions': sugestions,
+        }    
+    return render(request, 'perguntas/sugest_topics.html', context)
 
 
 
@@ -711,9 +731,7 @@ def unfollow_question(request):
 @login_required
 def perguntar_novamente(request, slug):
     pergunta = Pergunta.objects.get(slug=slug)
-    print pergunta
     pergunta.data = datetime.today()
-    print pergunta.data
     pergunta.asked_count += 1
     pergunta.save()
     profile = request.user.userprofile
@@ -743,7 +761,6 @@ def ask_to_answer(request):
         notif = new_AskAnswer(to_user.user, from_user, question)
         notif.save()
         profile = request.user.userprofile
-        print profile
         
         if question not in profile.follow_questions.all():
             profile.follow_questions.add(question)
@@ -751,10 +768,111 @@ def ask_to_answer(request):
         
 
     return HttpResponse()
+
+
+
+def get_topic_list(max_results=0, inputed_topic=''):
+    topic_list = []
+    topic_list1 = []
+    topic_list2 = []
+    topic_list3 = []
+    topic_list4 = []
+    topic_list5 = []
+    topic_list6 = []
+    
+    if inputed_topic:
+        inputed = inputed_topic.split()
+        word = []
+        for i in inputed:
+            x = i.lower()
+            word.append(x)  
+        topicos = Tag.objects.all()
+        
+        # Starts only afther X words are typed
+        if len(word) < 0:
+            return None
+        
+        for tpc in topicos:
+            nome = tpc.nome.lower()
+            for search in word:
+                result = nome.find(search)
+                if result == -1:
+                    pass
+                elif tpc not in topic_list1:
+                    topic_list1.append(tpc)
+                elif tpc not in topic_list2:
+                    topic_list2.append(tpc)
+                elif tpc not in topic_list3:
+                    topic_list3.append(tpc)
+                elif tpc not in topic_list4:
+                    topic_list4.append(tpc)
+                elif tpc not in topic_list5:
+                    topic_list5.append(tpc)
+            
+        dup_topic_list = topic_list5 + topic_list4 + topic_list3 + topic_list2 + topic_list1
+        
+        for i in dup_topic_list:
+            if i not in topic_list:
+                topic_list.append(i)
+        
+    # Cuts the list to maximum results
+    if max_results > 0:
+        if len(topic_list) > max_results:
+            topic_list = topic_list[:max_results]
+        
+    return topic_list
+
+
+
+# Search topics to user add in its knows_abaout
+def search_topics(request):
+    topic_list = []
+    inputed_topic = ''
+    if request.method == 'GET':
+        inputed_topic = request.GET['suggestion']
+    topic_list = get_topic_list(15, inputed_topic)
+    
+    context = {
+        'inputed_topic': inputed_topic,
+        'topic_list': topic_list,
+    }
+    return render(request, 'perguntas/search_topic.html', context)
+    
+
+
+# Create a new topic and add to user knowledge
+def create_topic_known(request):
+    topic_name = ''
+    if request.method == 'GET':
+        topic_name = request.GET['topic_name']
+    
+    # create new topic
+    topic = Tag(nome=topic_name, slug=slugify(topic_name))
+    topic.save()
+    
+    profile = request.user.userprofile
+    profile.knows_about.add(topic)
+    profile.save()
+    
+    context = {
+    'topic': topic,
+    }
+    return HttpResponse()
     
     
-    
-    
+# Get the users curent known topics and return as a list
+def current_known_topics(request):
+    if request.method == 'GET':
+        current_topics = request.user.userprofile.knows_about.all()
+        
+        context = {
+            'current_topics': current_topics,
+        }
+        test = '<p>Funcionou!!!</p>'
+        
+        #return render(request, 'perguntas/user_topics.html', context)
+        #return HttpResponse(test)
+        return render(request, 'perguntas/user_topics.html', context)
     
     
     

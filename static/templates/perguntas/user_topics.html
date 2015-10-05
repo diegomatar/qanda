@@ -1,0 +1,8 @@
+
+<div class="row">
+    <p>
+        {% for tpcs in current_topics %}
+            <button class="add_topic_know btn btn-warning" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+        {% endfor %}
+    </p>
+</div>    

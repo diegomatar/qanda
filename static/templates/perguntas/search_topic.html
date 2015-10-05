@@ -1,0 +1,15 @@
+{% if inputed_topic %}
+<div class="well">
+<div class="row">
+{% for tpc in topic_list %}
+    <div class="col-sm-4 ">
+        <button class="add_topic_know btn btn-default" data-topicid='{{ tpc.pk }}'>{{ tpc.nome|title }}  <i class="fa fa-plus"></i></button>
+    </div>
+{% endfor %}
+    <div class="col-sm-4 ">
+        <button class="create_new_topic_known btn btn-default"><span id="newTopic"></span>  <i class="fa fa-plus"></i></button>
+    </div>
+</div>
+<hr>
+</div>
+{% endif %}

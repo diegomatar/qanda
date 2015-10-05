@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load app_filters %}
+
+{% block responder_active %}active{% endblock %}
+
+
+{% block content %}
+
+<h1>Quais temas você conhece bem?</h1>
+
+<h3 class="lead blog-description">Pesquisar temas:</h3>
+<form action='{% url "perguntar" %}'>
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-search"></i></div>
+            <input type="text" class="form-control input-lg" id="searchTopic" placeholder="Pesquise temas de conhecimento aqui.">
+        </div>
+  </div>
+</form>
+<div id="topicSearch">
+    
+</div>
+
+
+
+<h3 class="lead blog-description">Temas sugeridos:</h3>
+
+<div id="topicsSuggestions">
+    
+<div class="row">
+    {% for sgt in sugestions%}
+    <div class="col-sm-4 ">
+        <button class="add_topic_know btn btn-default" data-topicid='{{ sgt.pk }}'>{{ sgt.nome|title }}  <i class="fa fa-plus"></i></button>
+    </div>
+    {% endfor %}
+    
+</div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block sidebar %}
+    <div class="sidebar-module sidebar-module-inset">
+        <h4>Seus temas de conhecimento:</h4>
+       <div id="currentTopics">
+        
+       </div>
+        
+    </div>
+    
+{% endblock %}

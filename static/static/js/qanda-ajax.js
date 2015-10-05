@@ -254,24 +254,71 @@ $('.ask-answer').click(function(){
 });
 
 
-// add or remove topics of knowledge in modal
-$('.add_topic_know').click(function(){
-    topicid = $(this).attr("data-topicid");
+// add or remove topics in user knowledge
+$('body').on('click', '.add_topic_know', function(){
+    var topicid = $(this).attr("data-topicid");
     var $th = $(this);
     
-    // if is to add, remove warning class and add success
+    // if it is to add, remove warning class and add success
     if($th.hasClass('btn-default')) {
         $.get('/perfil/add-topic-known/', {topic_id: topicid}, function(data){
-            $th.removeClass( 'btn-default' ).addClass('btn-warning');
+            $th.parent().hide();
+        });
+        $.get('/conhecimentos-atuais/', {}, function(data){
+             $('#currentTopics').html(data);
+        });
+        $.get('/atualiza-sugestoes/', {}, function(data){
+            $('#topicsSuggestions').html(data);
         });
     }
     // if is to remove, add warning class and remove success
     else {
         $.get('/perfil/remove-topic-known/', {topic_id: topicid}, function(data){
-            $th.removeClass( 'btn-warning' ).addClass('btn-default');
+            $th.parent().hide();
+        });
+        $.get('/conhecimentos-atuais/', {}, function(data){
+            $('#currentTopics').html(data);
+        });
+        $.get('/atualiza-sugestoes/', {}, function(data){
+            $('#topicsSuggestions').html(data);
         });
     };
 });
+
+
+
+// Sugest topics of knowledge
+$(function(){
+    $("#topicSearch").hide();
+});
+
+$('#searchTopic').keyup(function(){
+    var query;
+    query = $(this).val();
+    $('#topicSearch').show();
+    $.get('/buscar-topicos/', {suggestion: query}, function(data){
+        $('#topicSearch').html(data);
+        $('#newTopic').html(query);
+    });
+});
+
+
+// Create new topic and add to user knowledge
+$('body').on('click', '.create_new_topic_known', function(){
+    var topic = $('#newTopic').text();
+    var $th = $(this);
+    $.get('/criar-topico-conhecimento/', {topic_name: topic}, function(data){
+        $th.parent().hide();
+    });
+    $.get('/conhecimentos-atuais/', {}, function(data){
+        $('#currentTopics').html(data);
+    });
+    $.get('/atualiza-sugestoes/', {}, function(data){
+        $('#topicsSuggestions').html(data);
+    });
+
+});
+
 
 
 
