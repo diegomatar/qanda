@@ -19,7 +19,7 @@ from .models import Pergunta, Resposta, Tag, Comment
 
 
 
-
+# Home view
 def home(request):
     
     perguntas = Pergunta.objects.all()
@@ -27,6 +27,7 @@ def home(request):
     paginator = Paginator(perguntas, 30) # Show 30 questions per page
     tags = Tag.objects.all()
     
+    # Paginator:
     page = request.GET.get('page')
     try:
         perguntas = paginator.page(page)
@@ -44,7 +45,7 @@ def home(request):
     return render(request, 'home.html', context)
 
 
-
+# view pergunta: user can see a question and all its answers and comments
 def pergunta(request, slug):
     
     pergunta = Pergunta.objects.get(slug=slug)
@@ -90,31 +91,12 @@ def pergunta(request, slug):
         for resp in pergunta.resposta_set.all():
             resp.views += 1
             resp.save()
-            
-            
+    
+    # Get related questions list
+    related = related_questions(pergunta, 15)
+    
     # Get users who can answer the question
-    
-    ## Knows about question topics
-    topics = pergunta.tags.all()
-    ask_users = []
-    for tpc in topics:
-        for usr in tpc.knows_about.all():
-            if usr not in ask_users:
-                ask_users.append(usr)
-    
-    ## If it is too few user, include those with good reputation
-    if len(ask_users) < 5:
-        users = UserProfile.objects.all()
-        users = sorted(users, key= lambda t: t.reputation(), reverse=True)[:20]
-        for usr in users:
-            if usr not in ask_users:
-                ask_users.append(usr)
-
-    ## Remove those who alredy answered
-    answered = pergunta.resposta_set.all()
-    for ans in answered:
-        if ans.autor.userprofile in ask_users:
-            ask_users.remove(ans.autor.userprofile)
+    ask_users = user_to_answer(pergunta, 10)
 
     
     context = {
@@ -122,11 +104,149 @@ def pergunta(request, slug):
         'respostas': respostas,
         'form': form,
         'ask_users': ask_users,
+        'related': related,
     }
     return render(request, 'perguntas/pergunta.html', context)
 
 
+# returns a list with x sugested users to answer a question
+def user_to_answer(question, x):
+    topics = question.tags.all()
+    ask_users = []
+    for tpc in topics:
+        for usr in tpc.knows_about.all():
+            if usr not in ask_users:
+                ask_users.append(usr)
+    
+    ## If it is too few user, include those with good reputation
+    if len(ask_users) < x:
+        users = UserProfile.objects.all()
+        users = sorted(users, key= lambda t: t.reputation(), reverse=True)[0:x+10]
+        for usr in users:
+            if usr not in ask_users:
+                ask_users.append(usr)
 
+    ## Remove those who alredy answered
+    answered = question.resposta_set.all()
+    for ans in answered:
+        if ans.autor.userprofile in ask_users:
+            ask_users.remove(ans.autor.userprofile)
+    
+    return ask_users[0:x]
+
+
+
+# returns a list with x related questions:
+def related_questions(question, x):
+    topics = question.tags.all()
+    related = []
+    for tpc in topics:
+        questions = tpc.pergunta_set.all()
+        for qst in questions:
+            if qst not in related and qst != question:
+                related.append(qst)
+        
+    related.sort(key=lambda x: x.votes, reverse=True)
+    
+    if len(related) < x:
+        all_questions = Pergunta.objects.order_by('-votes')[0:x+2]
+        for qst in all_questions:
+            if qst not in related and qst != question:
+                related.append(qst)
+    
+    return related[0:x]
+
+
+# Sugest topics based in user profile
+def sugest_topics(profile):
+    sugestions = []
+    if profile.knows_about.all():
+        for tpc in profile.knows_about.all():
+            perguntas = tpc.pergunta_set.all()
+            for perg in perguntas:
+                for tag in perg.tags.all():
+                    if (tag not in sugestions) and (tag not in profile.knows_about.all()):
+                        sugestions.append(tag)
+    
+    if len(sugestions) < 30:
+        tags = Tag.objects.all()
+        tags = sorted(tags, key= lambda t: t.num_perguntas())
+        for tag in tags:
+            if (tag not in sugestions) and (tag not in profile.knows_about.all()):
+                sugestions.append(tag)
+    
+    return sugestions[0:30]
+
+
+
+# Show questions that user can answer
+@login_required
+def responder_perguntas(request):
+    # get profile, topics of knowledge and aswered questions
+    profile = request.user.userprofile
+    topics = profile.knows_about.all()
+    
+    # Get questions that user already answered or asked
+    answered = []
+    for resp in profile.respostas():
+        if resp.pergunta not in answered:
+            answered.append(resp.pergunta)
+    for perg in profile.perguntas():
+        if perg not in answered:
+            answered.append(perg)
+    
+    # Create a suggested questions list
+    sugested_questions = []
+    for tpc in topics:
+        questions = tpc.pergunta_set.all()
+        print questions
+        for qst in questions:
+            if (qst not in sugested_questions) and (qst not in answered):
+                sugested_questions.append(qst)
+                
+    sugested_questions.sort(key=lambda x: x.votes, reverse=True)
+    
+    # If suggested list is small, add unaswered questions to the list:
+    if len(sugested_questions) < 50:
+        perguntas = Pergunta.objects.all()
+        perguntas = sorted(perguntas, key= lambda t: t.num_respostas())
+        
+        for qst in perguntas:
+            if (qst not in sugested_questions) and (qst not in answered):
+                sugested_questions.append(qst)
+        
+        
+    # Get sugested topics
+    topics_sugestion = sugest_topics(profile)
+    
+    # Paginator
+    paginator = Paginator(sugested_questions, 15) # Show 25 sugested_questions per page
+    
+    page = request.GET.get('page')
+    try:
+        sugested_questions = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        sugested_questions = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        sugested_questions = paginator.page(paginator.num_pages)
+        
+    form = RespostaForm()
+    
+    
+    context = {
+        'sugestions': sugested_questions,
+        'form': form,
+        'topics': topics,
+        'topics_sugestion': topics_sugestion,
+    }
+    
+    return render(request, 'perguntas/menu_responder.html', context)
+
+
+
+# Show all questions of a category
 def categoria(request, slug):
     
     tag = Tag.objects.get(slug=slug)
@@ -423,6 +543,7 @@ def add_comment(request, pk=0):
             form_data.answer = resp
             form_data.save()
             new_Comment(resp.autor, request.user, resp, form_data)
+            messages.success(request, 'Comentário enviado com sucesso!!')
             return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
     else:
         form = CommentForm()
@@ -442,7 +563,7 @@ def edit_comment(request, pk=0):
     
     comment = Comment.objects.get(pk=pk)
     answer = comment.answer
-    if comment and comment.autor == request.user:
+    if comment and (comment.autor == request.user or request.user.userprofile.user_role == 'admin'):
         if request.method == 'POST':
             form = CommentForm(request.POST, instance=comment)
             if form.is_valid():
@@ -527,8 +648,6 @@ def get_question_list(max_results=0, inputed_question=''):
                     string1 = string0[:index1]+'<b>'+string0[index1:index2]+'</b>'+string0[index2:]
                     qst.titulo = string1
 
-        
-            
     return qst_list
     
     

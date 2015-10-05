@@ -183,7 +183,7 @@
                   <ul class="dropdown-menu">
                     <li><a href="{% url 'report_answer' resp.pk 1 %}">Reportar Resposta</a></li>
                     <li><a href="{% url 'report_profile' resp.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
-                    {% if resp.autor == request.user %}
+                    {% if resp.autor == request.user or request.user.userprofile.user_role == 'admin' %}
                     <li role="separator" class="divider"></li>
                     <li><a href='{% url 'editar_resposta' resp.id %}'>Editar Resposta</a></li>
                     {% endif %}
@@ -218,7 +218,7 @@
                         <ul class="dropdown-menu">
                           <li><a href="{% url 'report_comment' com.pk 1 %}">Reportar Comentário</a></li>
                           <li><a href="{% url 'report_profile' com.autor.userprofile.pk 2 %}">Reportar Perfil</a></li>
-                          {% if com.autor == request.user %}
+                          {% if com.autor == request.user or request.user.userprofile.user_role = 'admin' %}
                           <li role="separator" class="divider"></li>
                           <li><a href='{% url 'edit_comment' com.pk %}'>Editar Comentário</a></li>
                           {% endif %}
@@ -250,4 +250,15 @@
 <br>
 <br>
 
+{% endblock %}
+
+
+
+{% block sidebar %}
+    <div class="sidebar-module sidebar-module-inset">
+        <h4>Perguntas relacionadas:</h4>
+        {% for perg in related %}
+        <p><a href={% url 'pergunta' perg.slug  %}>{{ perg.titulo }}</a></p>
+        {% endfor %}
+    </div>
 {% endblock %}

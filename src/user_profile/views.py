@@ -14,8 +14,7 @@ from notifications.views import new_Follow
 from .forms import EditProfileForm, EditUserForm
 from .models import UserProfile
 
-# Create your views here.
-
+# Allow user to edit its profile
 @login_required
 def user_profile(request):
     
@@ -43,6 +42,7 @@ def user_profile(request):
     }
     return render(request, 'user_profile/profile.html', context)
 
+
 # This view creates and populates user profile with social data
 @receiver(user_signed_up)
 def populate_profile(request, user, sociallogin=None, **kwargs):
@@ -57,7 +57,7 @@ def populate_profile(request, user, sociallogin=None, **kwargs):
         
         
         
-
+# Show the public profile information
 def public_profile(request, slug):
     
     profile = UserProfile.objects.get(slug=slug)
@@ -85,6 +85,7 @@ def public_profile(request, slug):
     return render(request, 'user_profile/public_profile.html', context)
 
 
+# Display all users
 def members(request):
     
     users = UserProfile.objects.all()
@@ -108,6 +109,7 @@ def members(request):
     return render(request, 'user_profile/members.html', context)
     
 
+# Start following a user
 @login_required
 def follow_user(request):
     user_id = None
@@ -133,7 +135,7 @@ def follow_user(request):
             
             
         
-
+# Unfollow a user
 @login_required
 def unfollow_user(request):
     user_id = None
@@ -157,6 +159,7 @@ def unfollow_user(request):
     return HttpResponse(followers)
 
 
+# Show all user folowers
 def user_followers(request, slug):
     profile = UserProfile.objects.get(slug=slug)
     followers = profile.user.follows.all()
@@ -176,7 +179,7 @@ def user_followers(request, slug):
     return render(request, 'user_profile/followers.html', context)
 
 
-
+# Show all user questions
 def user_questions(request, slug):
     profile = UserProfile.objects.get(slug=slug)
     questions = Pergunta.objects.filter(autor=profile.user)
@@ -196,6 +199,7 @@ def user_questions(request, slug):
     return render(request, 'user_profile/questions.html', context)
 
 
+# Show all user answers
 def user_answers(request, slug):
     profile = UserProfile.objects.get(slug=slug)
     answers = Resposta.objects.filter(autor=profile.user)
@@ -214,4 +218,53 @@ def user_answers(request, slug):
     
     return render(request, 'user_profile/answers.html', context)
         
-        
+
+# Add a topic to user known topics
+def add_topic_known(request):
+    # Get the data being passed by get
+    topic_id = None
+    if request.method == "GET":
+        topic_id = request.GET['topic_id']
+    # If was passed any value on get
+    if topic_id:
+        # Get the topic with the id received
+        topic = Tag.objects.get(pk=int(topic_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # adds the topic to knowledge
+        if topic and topic not in profile.knows_about.all():
+            profile.knows_about.add(topic)
+            profile.save()
+            
+    return HttpResponse()
+
+
+
+# Add a topic to user known topics
+def remove_topic_known(request):
+    # Get the data being passed by get
+    topic_id = None
+    if request.method == "GET":
+        topic_id = request.GET['topic_id']
+    # If was passed any value on get
+    if topic_id:
+        # Get the topic with the id received
+        topic = Tag.objects.get(pk=int(topic_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # adds the topic to knowledge
+        if topic and topic in profile.knows_about.all():
+            profile.knows_about.remove(topic)
+            profile.save()
+            
+    return HttpResponse()
+
+
+
+
+
+
+
+
+
+

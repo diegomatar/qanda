@@ -212,7 +212,6 @@ $('#responder').click(function(){
 
 
 // Sugests questions
-
 $(function(){
     $("#collapseQsts").hide();
     $("#newquestion").hide();
@@ -242,11 +241,6 @@ $('#id_titulo').keyup(function(){
 
 
 
-// Modal
-$('#myModal').on('shown.bs.modal', function () {
-  $('#myInput').focus()
-})
-
 
 // Ask to answer
 $('.ask-answer').click(function(){
@@ -259,6 +253,25 @@ $('.ask-answer').click(function(){
         });
 });
 
+
+// add or remove topics of knowledge in modal
+$('.add_topic_know').click(function(){
+    topicid = $(this).attr("data-topicid");
+    var $th = $(this);
+    
+    // if is to add, remove warning class and add success
+    if($th.hasClass('btn-default')) {
+        $.get('/perfil/add-topic-known/', {topic_id: topicid}, function(data){
+            $th.removeClass( 'btn-default' ).addClass('btn-warning');
+        });
+    }
+    // if is to remove, add warning class and remove success
+    else {
+        $.get('/perfil/remove-topic-known/', {topic_id: topicid}, function(data){
+            $th.removeClass( 'btn-warning' ).addClass('btn-default');
+        });
+    };
+});
 
 
 

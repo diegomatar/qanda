@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^pergunta/(?P<slug>.*)$', views.pergunta, name='pergunta'),
     url(r'^perguntar/$', views.perguntar, name='perguntar'),
+    url(r'^responder-perguntas/$', views.responder_perguntas, name='responder-perguntas'),
     url(r'^sugerir-pergunta/$', views.suggest_question, name='suggest_question'),
     url(r'^unfollow-question/$', views.unfollow_question, name='unfollow_question'),
     url(r'^follow-question/$', views.follow_question, name='follow_question'),

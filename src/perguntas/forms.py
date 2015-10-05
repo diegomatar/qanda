@@ -21,8 +21,6 @@ class TagField(AutoModelSelect2TagField):
     queryset = Tag.objects
     search_fields = ['nome__icontains', ]
 
-    
-
     def get_model_field_values(self, value):
         
         return {'nome': value, 'slug':slugify(value)}
@@ -121,6 +119,9 @@ class RespostaForm(forms.ModelForm):
         
         self.helper.layout = Layout(
             'resposta',
+            HTML("""
+                <div class="row">
+            """),
             Div(
                 HTML("""
                 <p class="info-text">Seja respeitoso e claro em suas respostas.</p>
@@ -131,6 +132,9 @@ class RespostaForm(forms.ModelForm):
                 Submit('submit', 'Enviar Resposta', css_class='btn-warning'),
                 css_class='col-lg-2',
             ),
+            HTML("""
+                </div>
+            """),
         )
         
         

@@ -73,7 +73,7 @@
           <ul class="nav navbar-nav navbar-right">
             <p class="navbar-text"> | </p>
             <li><a href="{% url 'perguntar' %}" class="{% block perguntar_active %}{% endblock %}"><i class="fa fa-pencil"></i> Perguntar</a></li>
-            <li><a href="#" class="{% block responder_active %}{% endblock %}"><i class="fa fa-comment"></i> Responder</a></li>
+            <li><a href="{% url 'responder-perguntas' %}" class="{% block responder_active %}{% endblock %}"><i class="fa fa-comment"></i> Responder</a></li>
             <li><a href="{% url 'members' %}" class="{% block membros_active %}{% endblock %}"><i class="fa fa-users"></i> Membros</a></li>
             {% if request.user.is_authenticated %}
             <li><a href='{% url "view_notification" %}' class="{% block avisos_active %}{% endblock %}"><i class="fa fa-bell"></i> Avisos <span class="badge">{{ num_unread }}</span></a></li>

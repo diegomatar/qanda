@@ -5,6 +5,8 @@ from user_profile import views
 urlpatterns = [
     url(r'^follow-user/$', views.follow_user, name='follow_user'),
     url(r'^unfollow-user/$', views.unfollow_user, name='unfollow_user'),
+    url(r'^add-topic-known/$', views.add_topic_known, name='add-topic-known'),
+    url(r'^remove-topic-known/$', views.remove_topic_known, name='remove-topic-known'),
     url(r'^editar/$', views.user_profile, name='edit_profile'),
     url(r'^(?P<slug>.*)/seguidores/$', views.user_followers, name='followers'),
     url(r'^(?P<slug>.*)/perguntas/$', views.user_questions, name='questions'),
