@@ -11,7 +11,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="{% block description %}Um site com todas as respostas que você procura.{% endblock %}">
     <meta name="author" content="">
-    <link rel="icon" href="{% static 'img/favicon.ico' %}">
+    <link rel="icon" href="{% static 'img/icon_s.png' %}">
     <title>{% block title %}As melhores respostas.{% endblock %}</title>
     
     <!-- Load Jquery -->
@@ -66,17 +66,17 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="{% url 'home' %}"><span class="logo {% block home_active %}{% endblock %}">Qanda</span></a>
+          <a class="navbar-brand" href="{% url 'home' %}"><span class="logo {% block home_active %}{% endblock %}"><img src="{% static 'img/logo_s.png' %}"></span></a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           
           <ul class="nav navbar-nav navbar-right">
             <p class="navbar-text"> | </p>
-            <li><a href="{% url 'perguntar' %}" class="{% block perguntar_active %}{% endblock %}"><i class="fa fa-pencil"></i> Perguntar</a></li>
-            <li><a href="{% url 'responder-perguntas' %}" class="{% block responder_active %}{% endblock %}"><i class="fa fa-comment"></i> Responder</a></li>
-            <li><a href="{% url 'members' %}" class="{% block membros_active %}{% endblock %}"><i class="fa fa-users"></i> Membros</a></li>
+            <li><a href="{% url 'perguntar' %}" class="{% block perguntar_active %}{% endblock %}"><i class="fa fa-comment fa-lg"></i> Perguntar</a></li>
+            <li><a href="{% url 'responder-perguntas' %}" class="{% block responder_active %}{% endblock %}"><i class="fa fa-pencil fa-lg"></i> Responder</a></li>            
+            <li><a href="{% url 'members' %}" class="{% block membros_active %}{% endblock %}"><i class="fa fa-users fa-lg"></i> Membros</a></li>
             {% if request.user.is_authenticated %}
-            <li><a href='{% url "view_notification" %}' class="{% block avisos_active %}{% endblock %}"><i class="fa fa-bell"></i> Avisos <span class="badge">{{ num_unread }}</span></a></li>
+            <li><a href='{% url "view_notification" %}' class="{% block avisos_active %}{% endblock %}"><i class="fa fa-bell fa-lg"></i> Avisos <span class="badge">{{ num_unread }}</span></a></li>
             <p class="navbar-text"> | </p>
             
             <li class="dropdown">
@@ -142,8 +142,8 @@
         </div>
       </div>
       <div class="row footer-bar">
-        <div class="col-xs-2">
-          <p>Qanda - a melhor resposta.</p>
+        <div class="col-xs-3">
+          <p><img src="{% static 'img/logo_xs.png' %}"> a melhor resposta.</p>
         </div>
         <div class="col-xs-4">
           2015 - todos os direitos reservados

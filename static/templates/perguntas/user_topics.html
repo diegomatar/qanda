@@ -1,8 +1,14 @@
-
-<div class="row">
+{% if current_topics %}
+    <p class="info-text">Clique para remover:</p>
     <p>
         {% for tpcs in current_topics %}
-            <button class="add_topic_know btn btn-warning" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
-        {% endfor %}
+            <button class="add_topic_know btn" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+        {% endfor %}        
     </p>
-</div>    
+    <hr>
+    <p class="text-center"><a href="{% url 'responder-perguntas' %}" class="btn btn-warning">Responder Perguntas</a></p>
+{% else %}
+    <p class="info-text">Nenhum tema adicionado..</p>
+{% endif %}
+
+

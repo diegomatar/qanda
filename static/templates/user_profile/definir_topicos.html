@@ -21,12 +21,12 @@
     
 </div>
 
-
+<hr>
 
 <h3 class="lead blog-description">Temas sugeridos:</h3>
 
 <div id="topicsSuggestions">
-    
+<p class="info-text">Clique para adicionar:</p>
 <div class="row">
     {% for sgt in sugestions%}
     <div class="col-sm-4 ">
@@ -43,12 +43,26 @@
 
 
 {% block sidebar %}
-    <div class="sidebar-module sidebar-module-inset">
-        <h4>Seus temas de conhecimento:</h4>
-       <div id="currentTopics">
-        
-       </div>
-        
+<div class="sidebar-module sidebar-module-inset">
+    <div class="row">
+        <div class="well">
+            <h4 class="sm-title">VOCÊ CONHECE SOBRE:</h4>
+            <div id="currentTopics">
+                {% if current_topics %}
+                    <p class="info-text">Clique para remover:</p>
+                    <p>
+                        {% for tpcs in current_topics %}
+                            <button class="add_topic_know btn" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+                        {% endfor %}        
+                    </p>
+                    <hr>
+                    <p class="text-center"><a href="{% url 'responder-perguntas' %}" class="btn btn-warning">Responder Perguntas</a></p>
+                {% else %}
+                    <p class="info-text">Nenhum tema adicionado..</p>
+                {% endif %}
+            </div>
+        </div>            
     </div>
+</div>
     
 {% endblock %}

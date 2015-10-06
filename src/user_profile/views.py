@@ -11,8 +11,11 @@ from django.template.defaultfilters import slugify
 
 from perguntas.models import Pergunta, Resposta, Tag
 from notifications.views import new_Follow
+from perguntas.views import suggest_topics
 from .forms import EditProfileForm, EditUserForm
 from .models import UserProfile
+
+
 
 # Allow user to edit its profile
 @login_required
@@ -240,7 +243,7 @@ def add_topic_known(request):
 
 
 
-# Add a topic to user known topics
+# Remove a topic from user known topics
 def remove_topic_known(request):
     # Get the data being passed by get
     topic_id = None
@@ -260,6 +263,20 @@ def remove_topic_known(request):
     return HttpResponse()
 
 
+# Allow user to edit its known topics
+def edit_user_known_topics(request):
+    # get profile, topics of knowledge and aswered questions
+    profile = request.user.userprofile
+    current_topics = profile.knows_about.all()
+    
+    sugestions = suggest_topics(profile)
+    
+    context = {
+        'sugestions': sugestions,
+        'current_topics': current_topics,
+    }
+    
+    return render(request, 'user_profile/definir_topicos.html', context)
 
 
 

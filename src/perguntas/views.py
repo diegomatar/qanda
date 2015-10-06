@@ -185,14 +185,7 @@ def responder_perguntas(request):
     profile = request.user.userprofile
     topics = profile.knows_about.all()
     if not topics:
-        sugestions = suggest_topics(profile)
-        
-        
-        context = {
-            'sugestions': sugestions,
-        }
-        
-        return render(request, 'perguntas/definir_topicos.html', context)
+        return HttpResponseRedirect(reverse('edit_user_known_topics', args=[] ))
         
     
     # Get questions that user already answered or asked
@@ -222,10 +215,6 @@ def responder_perguntas(request):
         for qst in perguntas:
             if (qst not in sugested_questions) and (qst not in answered):
                 sugested_questions.append(qst)
-        
-        
-    # Get sugested topics
-    topics_sugestion = suggest_topics(profile)
     
     # Paginator
     paginator = Paginator(sugested_questions, 15) # Show 25 sugested_questions per page
@@ -246,8 +235,7 @@ def responder_perguntas(request):
     context = {
         'sugestions': sugested_questions,
         'form': form,
-        'topics': topics,
-        'topics_sugestion': topics_sugestion,
+        'current_topics': topics,
     }
     
     return render(request, 'perguntas/menu_responder.html', context)
@@ -868,10 +856,7 @@ def current_known_topics(request):
         context = {
             'current_topics': current_topics,
         }
-        test = '<p>Funcionou!!!</p>'
         
-        #return render(request, 'perguntas/user_topics.html', context)
-        #return HttpResponse(test)
         return render(request, 'perguntas/user_topics.html', context)
     
     

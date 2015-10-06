@@ -1,55 +1,14 @@
 {% extends 'base.html' %}
 {% load app_filters %}
 
-{% block responder_active %}active{% endblock %}
+{% block responder_active %}active-nav{% endblock %}
 
-
-{% block jumbotrone %}
-
-<!-- Modal -->
-<div class="modal " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">Alterar tópicos de conhecimento:</h4>
-      </div>
-      <div class="modal-body">
-        <div class="container-fluid">
-            <p><b>Já Adicionados:</b></p>
-            <div class="row">
-                {% for tpc in topics %}
-                <div class="col-sm-4">
-                <button class="add_topic_know btn btn-sm btn-warning" data-topicid='{{ tpc.pk }}'>{{ tpc.nome|title }} <i class="fa fa-times"></i></button>
-                </div>
-                {% endfor %}
-            </div>
-            <hr>
-            <p><b>Adicionar Novos:</b></p>
-            <div class="row">
-                {% for tpc in topics_sugestion %}
-                <div class="col-sm-4">
-                <button class="add_topic_know btn btn-sm btn-default" data-topicid='{{ tpc.pk }}'>{{ tpc.nome|title }} <i class="fa fa-plus"></i></button>
-                </div>
-                {% endfor %}
-            </div>  
-        </div><!-- container-fluid -->
-      </div>
-      <div class="modal-footer">
-        <a href="{% url 'responder-perguntas' %}" class="btn btn-default">Atualizar</a>
-        
-      </div>
-    </div>
-  </div>
-</div>
-
-{% endblock %}
 
 
 {% block content %}
 
 <p class="lead blog-description">Perguntas que talvez você possa responder:</p>
-
+<hr>
 {% for pergunta in sugestions %}
     
     <div class="blog-post">
@@ -90,47 +49,26 @@
 
 
 {% block sidebar %}
-    <div class="sidebar-module sidebar-module-inset">
-        <div class="well">
-        <h4>Temas que você conhece bem:</h4>
-        <p>
-        {% for tag in topics %}
-        <a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag|title }}</span></a>
-        {% endfor %}
-        </p>
-    <button class="btn btn-default"  data-toggle="modal" data-target="#myModal" title="Alterar tópicos de conhecimento.">Alterar Temas</button>
+    
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <div id="currentTopics">
+        <div class="row">
+            <h4 class="sm-title">VOCÊ CONHECE SOBRE:</h4>
+            {% if current_topics %}
+                <ul>
+                    {% for tpcs in current_topics %}
+                        <li><span class="label label-tag">{{ tpcs|title }}</span></li>
+                    {% endfor %}        
+                </ul>
+                <a href="{% url 'edit_user_known_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
+            {% else %}
+                <p class="info-text">Nenhum tema adicionado..</p>
+            {% endif %}
+        </div>            
     </div>
     <hr>
-    <br>        
-        
-        
-        <h4>Atividades Recentes</h4>
-        {% for ativ in atividades_recentes %}
-            {% if ativ.classe = 'pergunta' %}
-                <p><a href='{% url 'profile' ativ.autor.userprofile.slug %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
-                <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
-                <p><i> - {{ ativ.timestamp }}</i></p>
-                <hr>
-            {% elif ativ.classe = 'resposta' %}
-                <p><a href="{% url 'profile' ativ.autor.userprofile.slug %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
-                <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
-                <p><i> - {{ ativ.timestamp }}</i></p>
-                <hr>
-            {% endif %}
-        {% endfor %}
-    </div>
-    <div class="sidebar-module">
-        <h4>Tópicos am Alta</h4>
-        {% for tg in tags_todas %}
-            <p class="sidebar-tags"><a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome }}</span></a></p>
-        {% endfor %}
-    </div>
-    <div class="sidebar-module">
-      <h4>Membros Mais Ativos</h4>
-      <ol class="list-unstyled">
-        <li><a href="#">GitHub</a></li>
-        <li><a href="#">Twitter</a></li>
-        <li><a href="#">Facebook</a></li>
-      </ol>
-    </div>
+</div>
+    
+
 {% endblock %}
