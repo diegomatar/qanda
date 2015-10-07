@@ -111,9 +111,12 @@ a {
 /* Buttons */
 
 .btn {
-  margin-top: 2px !important;
-  margin-bottom: 2px !important;
   background-color: #DADADA;
+}
+
+.btn-margin {
+    margin-top: 2px !important;
+  margin-bottom: 2px !important;
 }
 
 .btn-warning {
@@ -159,7 +162,7 @@ hr {
   background-size: cover;
   background-color: #ecf0f1;
   margin-top: 0px;
-  margin-bottom: 0px;
+  margin-bottom: 20px;
 }
 
 .jumbotron h1{
@@ -428,7 +431,7 @@ a>p.text:hover {
 }
 
 .footer-bar {
-  background-color: #8b8b8b;
+  background-color: #E4E4E4;
   color: #e67e22;
   padding-top: 10px;
   padding-bottom: 10px;

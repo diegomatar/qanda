@@ -4,7 +4,8 @@
 {% block home_active %}active{% endblock %}
 
 
-{% block jumbotrone %}    
+{% block jumbotrone %}
+{% if not user.is_authenticated %}
     <div class="jumbotron">
         <div class="container">
             <h1><i>encontre a melhor resposta para qualquer pergunta:</i></h1>
@@ -26,43 +27,60 @@
     
         </div>
     </div>
-
+{% endif %}
 {% endblock %}
 
-
-
-{% block header %}
-    
-    <div class="blog-header">
-        <h2 class="blog-title">Perguntas em destaque:</h2>
-        <a href="#"><p class="lead blog-description">veja perguntas de outros tópicos >></p></a>
-    </div>
-{% endblock %}
 
 
 {% block content %}
 
+<p class="lead blog-description">Perguntas que você pode se interessar:</p>
+<hr>
+
 {% for pergunta in perguntas %}
     
     <div class="blog-post">
-        <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.data|post_date }}</p>
-        <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> <small>{{ pergunta.score }}</small></h2>        
-        {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
-        <p class="info-text"> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/></a> <a href="{% url 'profile' pergunta.autor.userprofile.slug %}"><span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span></a></p>
-        <p class="info-text">
-            <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Escrever Resposta</a>
-            <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
-                {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}
-            </a>
         
+        <div class="row">
             
-            {% if pergunta.num_respostas > 1 %}
-                <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
-            {% elif pergunta.num_respostas = 1 %}
-                <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} resposta</a>
-            {% endif %}
-             {{ pergunta.views }} visualizações
-        </p>
+            <div class="col-xs-2"><!-- Vote Buttons -->
+              <a class="perg_upvote {% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
+                id="perg_{{ pergunta.pk }}" title="Gostei: esta pergunta é relevante, clara e bem escrita."
+                data-pergid="{{ pergunta.id}}"  >gostei
+              </a>
+              <p class="votes_count" id="perg_{{ pergunta.pk }}">{{ pergunta.votes }}</p>
+              <a class="perg_downvote {% if pergunta|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
+                id="perg_{{ pergunta.pk }}" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
+                data-pergid="{{ pergunta.id}}" >não gostei
+              </a>
+            </div><!-- col-xs-2 -->
+        
+        
+            <div class="col-xs-10"> 
+                <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.data|post_date }}</p>
+                <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a> <small>{{ pergunta.score }}</small></h2>        
+                {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
+                <p class="info-text">
+                    
+                    {% if pergunta.num_respostas > 1 %}
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
+                    {% elif pergunta.num_respostas = 1 %}
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} resposta</a>
+                    {% elif pergunta.num_respostas = 0 %}
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">Sem respostas</a>
+                    {% endif %}
+                    <span class="bullet"> • </span>
+                    <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
+                        {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %} | {{ pergunta.follow_questions.all|length }}
+                    </a>
+                    <span class="bullet"> • </span>
+                    <a href="{% url 'perguntar_novamente' pergunta.id %}" class="btn btn-link">Perguntar Novamente</a>
+                </p>
+                <p class="info-text">
+                        <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Responder</a>
+                </p>
+            </div><!-- col-10 -->
+        </div><!-- row -->
             
     </div><!-- /.blog-post -->
     <hr>

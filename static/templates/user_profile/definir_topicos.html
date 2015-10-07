@@ -30,7 +30,7 @@
 <div class="row">
     {% for sgt in sugestions%}
     <div class="col-sm-4 ">
-        <button class="add_topic_know btn btn-default" data-topicid='{{ sgt.pk }}'>{{ sgt.nome|title }}  <i class="fa fa-plus"></i></button>
+        <button class="add_topic_know btn btn-default btn-margin" data-topicid='{{ sgt.pk }}'>{{ sgt.nome|title }}  <i class="fa fa-plus"></i></button>
     </div>
     {% endfor %}
     
@@ -52,11 +52,11 @@
                     <p class="info-text">Clique para remover:</p>
                     <p>
                         {% for tpcs in current_topics %}
-                            <button class="add_topic_know btn" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+                            <button class="add_topic_know btn btn-margin" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
                         {% endfor %}        
                     </p>
                     <hr>
-                    <p class="text-center"><a href="{% url 'responder-perguntas' %}" class="btn btn-warning">Responder Perguntas</a></p>
+                    <p class="text-center"><a href="{% url 'responder-perguntas' %}" class="btn btn-warning btn-margin">Responder Perguntas</a></p>
                 {% else %}
                     <p class="info-text">Nenhum tema adicionado..</p>
                 {% endif %}

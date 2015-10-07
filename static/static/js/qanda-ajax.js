@@ -6,7 +6,7 @@ $(function () {
   $('[data-toggle="popover"]').popover({html:true})
 });
 
-
+/*
 // questions votes-up control
 $('#perg_upvote').click(function(){
     pergid = $(this).attr("data-pergid");
@@ -78,6 +78,98 @@ $('#perg_downvote').click(function(){
         });
     };
 });
+*/
+
+
+// New question votes control
+
+// question votes-up control
+$('a.perg_upvote').click(function(){
+    pergid = $(this).attr("data-pergid");
+    var $th = $(this);
+    var myId = $(this).attr('id');
+    console.log(myId)
+    
+    // if it is active, turn off and remove 1 vote
+    if($th.hasClass('active')) {    
+        $.get('/downvote/', {pergunta_id: pergid}, function(data){
+            $('p#'+myId).html(data);
+            $('.perg_upvote#'+myId).removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
+        });
+    }
+    
+    // if vote down is active, turn down off, turn up on and add 2 votes
+    else if ($('.perg_downvote#'+myId).hasClass('active')) {
+     $.get('/upvote/', {pergunta_id: pergid});
+     $.get('/upvote/', {pergunta_id: pergid}, function(data){
+            $('p#'+myId).html(data);
+            $('.perg_downvote#'+myId).removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
+            $('.perg_upvote#'+myId).addClass('active').addClass( 'upvote-on' );
+            
+        });
+     
+    }    
+    
+    // if none of votes are active, turn on and add a vote
+    else {
+        $th.addClass('active');
+        $.get('/upvote/', {pergunta_id: pergid}, function(data){
+                   $('p#'+myId).html(data);
+                   $('.perg_upvote#'+myId).removeClass( 'upvote-off' ).addClass( 'upvote-on' );
+                   $('.perg_downvote#'+myId).removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
+        });
+    };
+});
+
+
+
+// question down votes control
+$('a.perg_downvote').click(function(){
+    pergid = $(this).attr("data-pergid");
+    var $th = $(this);
+    var myId = $(this).attr('id');
+    console.log(myId)
+    
+    // if is active, tur it off and remove one vote
+    if($th.hasClass('active')) {
+        $.get('/upvote/', {pergunta_id: pergid}, function(data){
+            $('p#'+myId).html(data);
+            $('.perg_downvote#'+myId).removeClass( 'downvote-on' ).removeClass( 'active' ).addClass( 'downvote-off' );
+        });
+    }
+    
+    // if vote up is active, turn up off, turn down on and remove 2 votes
+    else if ($('.perg_upvote#'+myId).hasClass('active')) {
+     $.get('/downvote/', {pergunta_id: pergid});
+     $.get('/downvote/', {pergunta_id: pergid}, function(data){
+            $('p#'+myId).html(data);
+            $('.perg_upvote#'+myId).removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
+            $('.perg_downvote#'+myId).addClass('active').addClass( 'downvote-on' );
+            
+        });   
+    }
+    
+    // if none is active, just turn down on and remove 1 vote.
+    else {
+    $th.addClass('active');
+    $.get('/downvote/', {pergunta_id: pergid}, function(data){
+               $('p#'+myId).html(data);
+               $('.perg_downvote#'+myId).removeClass( 'downvote-off' ).addClass( 'downvote-on' );
+               $('.perg_upvote#'+myId).removeClass( 'upvote-on' ).removeClass( 'active' ).addClass( 'upvote-off' );
+        });
+    };
+});
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -18,22 +18,21 @@ Factors considered:
 
 # weits the algoritm factors
 factors = {
-    'time': 1,
+    'time': 3,
     'votes': 1,
-    'answers': 1,
+    'answers': 0.5,
 }
 
 
 #  A Variable that deffines how many questions will be considered
 # in deffining the ranking intervals
-questions_to_consider = 100
+questions_to_consider = 50
 
 
 # Returns only the considered questions
 def considered():
     from .models import Pergunta
-    questions = Pergunta.objects.all()
-    questions = sorted(questions, key=lambda pergunta: pergunta.timestamp, reverse=True)
+    questions = Pergunta.objects.order_by('-timestamp')
     last_questions = questions[:questions_to_consider]
     return last_questions
     
@@ -116,7 +115,7 @@ def get_answers_intervals():
 
 
 
-# Scores a question:
+# Scores a list of questions question:
 def score_question(question):
     
     # Time factor

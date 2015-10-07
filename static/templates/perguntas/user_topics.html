@@ -2,7 +2,7 @@
     <p class="info-text">Clique para remover:</p>
     <p>
         {% for tpcs in current_topics %}
-            <button class="add_topic_know btn" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+            <button class="add_topic_know btn btn-margin" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
         {% endfor %}        
     </p>
     <hr>

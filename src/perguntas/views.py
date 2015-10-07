@@ -22,8 +22,23 @@ from .models import Pergunta, Resposta, Tag, Comment
 # Home view
 def home(request):
     
-    perguntas = Pergunta.objects.all()
-    perguntas = sorted(perguntas, key=lambda pergunta: pergunta.score(), reverse=True)
+    perguntas1 = []
+    if request.user.is_authenticated() and request.user.userprofile.interests.all():
+        for interest in request.user.userprofile.interests.all():
+            filtered = Pergunta.objects.filter(tags__nome=interest.nome)
+            for fltr in filtered:
+                if fltr not in perguntas1:
+                    perguntas1.append(fltr)
+        perguntas1 = sorted(perguntas1, key=lambda pergunta: pergunta.score(), reverse=True)
+    
+    perguntas2 = []
+    if len(perguntas1) < 100:
+        perguntas2 = Pergunta.objects.all()
+        perguntas2 = sorted(perguntas2, key=lambda pergunta: pergunta.score(), reverse=True)
+    
+    perguntas = perguntas1 + perguntas2
+    
+    
     paginator = Paginator(perguntas, 30) # Show 30 questions per page
     tags = Tag.objects.all()
     
@@ -717,8 +732,8 @@ def unfollow_question(request):
 
 # Allow user to ask the question again
 @login_required
-def perguntar_novamente(request, slug):
-    pergunta = Pergunta.objects.get(slug=slug)
+def perguntar_novamente(request, pk):
+    pergunta = Pergunta.objects.get(pk=pk)
     pergunta.data = datetime.today()
     pergunta.asked_count += 1
     pergunta.save()
