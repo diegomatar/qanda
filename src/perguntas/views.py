@@ -53,9 +53,13 @@ def home(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         perguntas = paginator.page(paginator.num_pages)
     
+    cover_list = ['a', 'b', 'c', 'd', 'e', 'f']
+    cover = 'jumbotron-' + cover_list[randint(0,len(cover_list)-1)]
+    
     context = {
         'perguntas': perguntas,
         'tags': tags,
+        'cover': cover,
     }
     return render(request, 'home.html', context)
 
@@ -619,7 +623,6 @@ def get_question_list(max_results=0, inputed_question=''):
     qst_list5 = []
     
     if inputed_question:
-        #qst_list = Pergunta.objects.filter(titulo__istartswith=inputed_question)
         inputed = inputed_question.split()
         word = []
         for i in inputed:

@@ -88,7 +88,6 @@ $('a.perg_upvote').click(function(){
     pergid = $(this).attr("data-pergid");
     var $th = $(this);
     var myId = $(this).attr('id');
-    console.log(myId)
     
     // if it is active, turn off and remove 1 vote
     if($th.hasClass('active')) {    
@@ -159,13 +158,6 @@ $('a.perg_downvote').click(function(){
         });
     };
 });
-
-
-
-
-
-
-
 
 
 
@@ -250,24 +242,24 @@ $('a#resp_downvote').click(function(){
 
 
 // follow and unfollow users control
-$('a#follow_user').click(function(){
+$('a.follow_user').click(function(){
     var $th = $(this);
     userid = $th.attr("data-userid");
-    var myClass = $th.attr('class').split(' ')[0];
+    var myId = $(this).attr('id');
     
     // follow user
     if($th.hasClass('follow')) {
         $.get('/perfil/follow-user/', {userprofile_id: userid}, function(data){
-            $('#followers_count').html(data);
-            $('.'+myClass+'#follow_user').removeClass( 'follow' ).addClass( 'unfollow' ).addClass( 'active' ).html('Seguindo');
+            $('.followers_count#'+myId).html(data);
+            $('.follow_user#'+myId).removeClass( 'follow' ).addClass( 'unfollow' ).addClass( 'active' ).html('Seguindo');
         });
     }
     
     // unfollow user
     else if ($th.hasClass('unfollow')) {
      $.get('/perfil/unfollow-user/', {userprofile_id: userid}, function(data){
-            $('#followers_count').html(data);
-            $('.'+myClass+'#follow_user').removeClass( 'unfollow' ).removeClass( 'active' ).addClass( 'follow' ).html('Seguir');
+            $('.followers_count#'+myId).html(data);
+            $('.follow_user#'+myId).removeClass( 'unfollow' ).removeClass( 'active' ).addClass( 'follow' ).html('Seguir');
         });
     }
     

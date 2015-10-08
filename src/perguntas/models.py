@@ -101,6 +101,7 @@ class Pergunta(models.Model):
         score = score_question(self)
         return score
     
+    
     def followed(self, user):
         try:
             profile = user.userprofile

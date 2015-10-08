@@ -82,6 +82,17 @@ class UserProfile(models.Model):
         for rsp in resp:
             reputation += rsp.votes
         return reputation
+    
+    def followed(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self.user in profile.follow_users.all():
+            return 1
+        else:
+            return 0
+            
         
         
     def __unicode__(self):

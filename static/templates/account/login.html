@@ -6,25 +6,26 @@
 {% block head_title %}{% trans "Sign In" %}{% endblock %}
 
 {% block header %}
-  
-
-        <h1 class="blog-title">Entrar</h1>
-
         <div class="row">
-            
+            <div class="col-md-5 col-md-offset-3">
+                <h1 class="blog-title"><i class="fa fa-user fa-4"></i> Entrar</h1>
+                <div class="well">
+                    
 
+        
+        
         
         {% get_providers as socialaccount_providers %}
         {% if socialaccount_providers %}
-          <p class="lead blog-description">Acesse sua conta pelas redes sociais abaixo. Ou, caso ainda não tenha uma conta <a href="{{ signup_url }}">crie sua conta aqui</a></p>
           
           <div class="socialaccount_ballot">
           
             <ul class="socialaccount_providers">
               {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                
+                <li><a title="Email" class="socialaccount_provider email btn-block"role="button" data-toggle="collapse" href="#collapseEmail" aria-expanded="false" aria-controls="collapseEmail"><i class="fa fa-envelope fa-3"></i><span class="bullet"></span> Email</a></li>
             </ul>
           
-            <p class="lead blog-description">ou</p>
           
           </div>
           
@@ -37,30 +38,40 @@
 
 
 
-          
-
-        <p class="lead blog-description">Entrar com email:</p>
-        <form class="login" method="POST" action="{% url 'account_login' %}">
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            <input id="id_login" class="login-input" maxlength="30" name="login" placeholder="Email" type="text" />{{ form.login.errors }}<br>
-            <input id="id_password"  class="login-input" name="password" placeholder="Senha" type="password" />{{ form.password.errors }}<br>
-            <div class="remember-forgot-section">
-            <input id="id_remember" name="remember" type="checkbox" />
-            <label for="id_remember">Lembrar de mim</label>
-            <br>
-            <a class="forgot" href="{% url 'account_reset_password' %}">{% trans "Forgot Password?" %}</a>
-            </div>
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-            {% endif %}
-            <button class="btn btn-warning btn-lg" type="submit">{% trans "Sign In" %}</button>
-        </form>
-
-                
-
-          
-          </div><!-- row -->
+        <div class="collapse" id="collapseEmail">
+            <div class="row">
+                <div class="col-sm-10 col-sm-offset-1">
+                    <div class="well">
+                        <form class="login" method="POST" action="{% url 'account_login' %}">
+                            
+                            {% csrf_token %}
+                            {{ form.non_field_errors }}
+                            <div class="form-group">
+                                <input id="id_login" class="login-input form-control" maxlength="30" name="login" placeholder="Email" type="text" />{{ form.login.errors }}<br>
+                                <input id="id_password"  class="login-input form-control" name="password" placeholder="Senha" type="password" />{{ form.password.errors }}
+                                <a class="forgot help-block clear-form" href="{% url 'account_reset_password' %}">Esqueci minha senha.</a>                    
+                                {% if redirect_field_value %}
+                                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                                {% endif %}
+                                <button class="btn btn-warning btn-lg" type="submit">{% trans "Sign In" %}</button>
+                                <input id="id_remember" name="remember" type="checkbox" checked />
+                                <label for="id_remember">Lembrar de mim</label>
+                            </div><!-- .form-group -->
+                        </form>
+                    </div><!-- well -->
+                </div><!-- col-8 -->
+            </div><!-- row -->
+        </div><!-- colapse -->
+        <div class="row">
+        <div class="col-sm-10 col-sm-offset-1">
+            <hr>
+            <p class="lead blog-description"><a href="{{ signup_url }}">Ainda não sou cadastrado.</a></p>
+        </div>
+        </div>
+            
+        </div><!-- well -->          
+    </div><!-- col-4 -->          
+</div><!-- row -->
 
 
 

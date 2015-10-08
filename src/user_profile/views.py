@@ -120,7 +120,7 @@ def follow_user(request):
     if request.method == "GET":
         # Get the user to be followed and its profile
         user_id = request.GET['userprofile_id']
-        follow_user = User.objects.get(id=int(user_id))
+        follow_user = User.objects.get(pk=int(user_id))
         follow_user_profile = follow_user.userprofile
         
         # Get the logedin user
@@ -128,11 +128,17 @@ def follow_user(request):
         user_follows = profile.follow_users.all()
         
         # Add user to be followed to the current user list
+        if follow_user:
+            print 1
+        if follow_user not in user_follows:
+            print 2
+        
+        
         if follow_user and follow_user not in user_follows:
             profile.follow_users.add(follow_user)
             profile.save()
-            followers = follow_user_profile.followers_num()
             notif = new_Follow(follow_user, request.user)
+        followers = follow_user_profile.followers_num()
             
     return HttpResponse(followers)
             
@@ -157,7 +163,7 @@ def unfollow_user(request):
         if unfollow_user and unfollow_user in user_follows:
             profile.follow_users.remove(unfollow_user)
             profile.save()
-            followers = unfollow_user_profile.followers_num()
+        followers = unfollow_user_profile.followers_num()
             
     return HttpResponse(followers)
 
