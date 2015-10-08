@@ -2,9 +2,9 @@
 
 {% get_providers as socialaccount_providers %}
 
-{% for provider in socialaccount_providers %}
+{% for provider in socialaccount_providers reversed %}
 {% if provider.id == "openid" %}
-{% for brand in provider.get_brands %}
+{% for brand in provider.get_brands  %}
 <li>
   <a title="{{brand.name}}" 
      class="socialaccount_provider {{provider.id}} {{brand.id}} btn-block" 

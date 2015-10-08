@@ -563,6 +563,25 @@ a.facebook {
   background-position-y: center;
 }
 
+a.google {
+  background-color: #DC4E41;
+  background-image: url("img/google-longin.png");
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  background-position-x: 25px;
+  background-position-y: center;
+}
+
+a.twitter {
+  background-color: #00aced;
+  background-image: url("img/twitter-longin.png");
+  background-repeat: no-repeat;
+  background-size: 24px 24px;
+  background-position-x: 25px;
+  background-position-y: center;
+}
+
+
 a.email {
   padding: 12px 29px;
   background-color: #95A5A6;

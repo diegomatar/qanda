@@ -57,6 +57,12 @@
 
   <body>
     
+    {% if not request.user.is_authenticated %}
+    
+    {% include "login_modal.html" %}
+    
+    {% endif %}
+    
     <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
@@ -90,7 +96,7 @@
             </li>
             {% else %}
             <p class="navbar-text"> | </p>
-            <li><button type="button" class="btn btn-warning navbar-btn"><a href="{% url 'account_login' %}"><i class="fa fa-sign-in"></i> Entrar</a></button></li>
+            <li><button type="button" class="btn btn-warning navbar-btn" data-toggle="modal" data-target=".login-modal"><i class="fa fa-sign-in"></i> Entrar</button></li>
             <li><a href="{% url 'account_signup' %}">Criar Conta</a></li>
             {% endif %}  
           </ul>
