@@ -1,6 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+'''
+---- VIEWS ARE ORGANIZED BY: ---
+- MAIN VIEWS: used to render important pages of the site
+- QUESTIONS AND ANSWERS SUPPORT VIEWS: support other views based on user actions
+- TOPICS / TAGS VIEWS: controls and help actions related to topics (Tags)
+- VOTING VIEWS: control the vote up and down buttons
+- FOLLOW VIEWS: control the follow and unfollow actions
+'''
+
+
+
+
+
 from datetime import datetime
 from random import randint
 
@@ -17,6 +30,27 @@ from notifications.views import new_Answer, new_Vote, new_Comment, new_AskAnswer
 from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm, EditarPerguntaForm
 from .models import Pergunta, Resposta, Tag, Comment
 
+
+
+
+'''
+---- MAIN VIEWS: ----
+
+These views are used to render important pages of the site:
+
+- HOME: the home menu
+- PERGUNTA: the single question page, with its answers and comments
+- RESPONDER_PERGUNTAS: "Responder" menu, returns questions that user migth be able to answer
+- CATEGORIA: show the most relevante questions of a given tag
+- PERGUNTAR: the ask a new quetion page
+- RESPONDER: answer a question page
+- ADD_COMMENT: create a new comment to an answer page
+- EDIT_QUESTION: allow user to edit its question
+- EDIT_ANSWER: allow user to edit its answer
+- EDIT_COMMENT: allow user to edit ts comment
+
+
+'''
 
 
 # Home view
@@ -128,73 +162,6 @@ def pergunta(request, slug):
     return render(request, 'perguntas/pergunta.html', context)
 
 
-# returns a list with x suggested users to answer a question
-def user_to_answer(question, x):
-    topics = question.tags.all()
-    ask_users = []
-    for tpc in topics:
-        for usr in tpc.knows_about.all():
-            if usr not in ask_users:
-                ask_users.append(usr)
-    
-    ## If it is too few user, include those with good reputation
-    if len(ask_users) < x:
-        users = UserProfile.objects.all()
-        users = sorted(users, key= lambda t: t.reputation(), reverse=True)[0:x+10]
-        for usr in users:
-            if usr not in ask_users:
-                ask_users.append(usr)
-
-    ## Remove those who alredy answered
-    answered = question.resposta_set.all()
-    for ans in answered:
-        if ans.autor.userprofile in ask_users:
-            ask_users.remove(ans.autor.userprofile)
-    
-    return ask_users[0:x]
-
-
-
-# returns a list with x related questions:
-def related_questions(question, x):
-    topics = question.tags.all()
-    related = []
-    for tpc in topics:
-        questions = tpc.pergunta_set.all()
-        for qst in questions:
-            if qst not in related and qst != question:
-                related.append(qst)
-        
-    related.sort(key=lambda x: x.votes, reverse=True)
-    
-    if len(related) < x:
-        all_questions = Pergunta.objects.order_by('-votes')[0:x+2]
-        for qst in all_questions:
-            if qst not in related and qst != question:
-                related.append(qst)
-    
-    return related[0:x]
-
-
-# Sugest topics based in user profile
-def suggest_topics(profile):
-    sugestions = []
-    if profile.knows_about.all():
-        for tpc in profile.knows_about.all():
-            perguntas = tpc.pergunta_set.all()
-            for perg in perguntas:
-                for tag in perg.tags.all():
-                    if (tag not in sugestions) and (tag not in profile.knows_about.all()):
-                        sugestions.append(tag)
-    
-    if len(sugestions) < 30:
-        tags = Tag.objects.all()
-        tags = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)
-        for tag in tags:
-            if (tag not in sugestions) and (tag not in profile.knows_about.all()):
-                sugestions.append(tag)
-    
-    return sugestions[0:30]
 
 
 # Show questions that user can answer: menu responder
@@ -260,6 +227,446 @@ def responder_perguntas(request):
     return render(request, 'perguntas/menu_responder.html', context)
 
 
+# Show all questions of a category
+def categoria(request, slug):
+    
+    tag = Tag.objects.get(slug=slug)
+    perguntas = tag.pergunta_set.all()
+    
+    context = {
+        'tag': tag,
+        'perguntas': perguntas,
+    }
+    return render(request, 'perguntas/tag.html', context)
+
+
+
+# User asks a new question
+@login_required
+def perguntar(request):
+    if request.method == 'POST':
+
+        form = PerguntaForm(request.POST)
+        
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.autor = request.user
+            form_data.slug = slugify(form_data.titulo)
+            slug = form_data.slug
+            # If slug is already taken, add a random number at the end of it
+            try:
+                Pergunta.objects.get(slug=slug)
+                form_data.slug = slug + str(randint(0,100))
+            except:
+                pass
+            
+            form_data.save()
+            form.save_m2m()
+            
+            # Add quetion to followed ones
+            profile = request.user.userprofile
+            profile.follow_questions.add(form_data)
+            profile.save()
+            messages.success(request, 'Parabéns! Sua pergunta foi publicada com sucesso!!')
+            
+            return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
+    
+    else:
+        if request.GET.get('q', ''):
+            form = PerguntaForm(initial={'titulo': request.GET.get('q', '')})
+        else:
+            form = PerguntaForm()
+    
+    context = {
+        'form': form,
+    }
+    
+    return render(request, 'perguntas/perguntar.html', context)
+
+
+
+# User answer a question
+@login_required
+def responder(request, pk):
+    pergunta = Pergunta.objects.get(pk=pk)
+    
+    if request.method == 'POST':
+        form = RespostaForm(request.POST)
+        form.helper.form_action = reverse('responder', args=[pergunta.id])
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.pergunta = pergunta
+            form_data.autor = request.user
+            form_data.save()
+            notif = new_Answer(pergunta.autor, request.user, pergunta, form_data)
+            url = pergunta.get_absolute_url()
+            
+            # Add the first two topics of question to user knowledge
+            question_tags = pergunta.tags.all()[0:2]
+            profile = request.user.userprofile
+            profile.knows_about.add(*question_tags)
+            # Add the question to followed ones
+            profile.follow_questions.add(pergunta)
+            profile.save()
+            return HttpResponseRedirect(url)
+    else:
+        form = RespostaForm()
+    
+    context = {
+        'form': form,
+        'pergunta': pergunta,
+    }
+     
+    return render(request, 'perguntas/responder.html', context)
+
+
+   
+# Allow users to comment answers
+@login_required
+def add_comment(request, pk=0):
+    
+    resp = Resposta.objects.get(pk=pk)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            form_data = form.save(commit=False)
+            form_data.autor = request.user
+            form_data.answer = resp
+            form_data.save()
+            new_Comment(resp.autor, request.user, resp, form_data)
+            messages.success(request, 'Comentário enviado com sucesso!!')
+            return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
+    else:
+        form = CommentForm()
+    
+    context = {
+        'form': form,
+        'answer': resp,
+        'edit': 0,
+    }
+    
+    return render(request, 'perguntas/comment.html', context)    
+
+
+
+# Allow user to edit questions
+@login_required
+def edit_question(request, pk):
+    question = Pergunta.objects.get(pk=pk)
+    # Checks if user has permission to edit the question
+    if request.user == question.autor or request.user.userprofile.user_role == 'admin':
+        # If is post get the data and save the edited question
+        if request.method == 'POST':
+            form = EditarPerguntaForm(request.POST, request.FILES, instance=question)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Pergunta editada com sucesso!!')
+                return HttpResponseRedirect(reverse('pergunta', args=[question.slug]))
+        # Otherwise, display the form to edit question:
+        else:
+            form = EditarPerguntaForm(instance=question)
+    else:
+        raise Http404
+    
+    context = {
+        'form': form,
+        'question': question,
+    }
+    
+    return render(request, 'perguntas/editar_pergunta.html', context)
+
+
+
+# Allow user to edit its own answer
+@login_required
+def edit_answer(request, pk):
+    answer = Resposta.objects.get(pk=pk)
+    # Checks user permission to edit the answer
+    if request.user == answer.autor or request.user.userprofile.user_role == 'admin':
+        # If is post, gets the data and save the edited answer
+        if request.method == 'POST':
+            form = RespostaForm(request.POST, request.FILES, instance=answer)
+            if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Resposta editada com sucesso!!')
+                    return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug]))
+        # Otherwise, just display the form to edit:
+        else:
+            form = RespostaForm(instance=answer)
+    else:
+            raise Http404
+        
+    context = {
+        'form': form,
+        'resposta': answer,
+    }
+    
+    return render(request, 'perguntas/editar-resposta.html', context)
+    
+
+
+# Allow the author of the comment to edit it
+@login_required
+def edit_comment(request, pk=0):
+    
+    comment = Comment.objects.get(pk=pk)
+    answer = comment.answer
+    if comment and (comment.autor == request.user or request.user.userprofile.user_role == 'admin'):
+        if request.method == 'POST':
+            form = CommentForm(request.POST, instance=comment)
+            if form.is_valid():
+                    form.save()
+                    messages.success(request, 'Comentário editado com sucesso!')
+                    return HttpResponseRedirect(reverse('pergunta', args=[comment.answer.pergunta.slug]))
+        else:
+            form = CommentForm(instance=comment)
+    
+        
+    
+    
+    context = {
+        'form': form,
+        'answer': answer,
+        'edit': 1,
+    }
+    
+    return render(request, 'perguntas/comment.html', context)
+
+
+
+
+
+
+'''
+---- QUESTIONS AND ANSWERS SUPPORT VIEWS: ----
+
+These views support other views based on user actions:
+(Those marked with ### are only helper function that can be reused in diferent views)
+
+- ###USER_TO_ANSWER: return a list of x users than can answer the inputed question
+- ASK_TO_ANSER: sends a notification to a user to answer a question
+- ###RELATED_QUESTIONS: returns a list of x related questions to the inputed one
+- ###GET_QUESTION_LIST: based on the inputed data, searches for similar questions
+- SUGGEST_QUESTION: gets the inputed data in new question form, and return sugestions (using get_question_list)
+- PERGUNTAR_NOVAMENTE: allow user to ask again an existing question
+
+
+
+'''
+
+# returns a list with x suggested users to answer a question
+def user_to_answer(question, x):
+    topics = question.tags.all()
+    ask_users = []
+    for tpc in topics:
+        for usr in tpc.knows_about.all():
+            if usr not in ask_users:
+                ask_users.append(usr)
+    
+    ## If it is too few user, include those with good reputation
+    if len(ask_users) < x:
+        users = UserProfile.objects.all()
+        users = sorted(users, key= lambda t: t.reputation(), reverse=True)[0:x+10]
+        for usr in users:
+            if usr not in ask_users:
+                ask_users.append(usr)
+
+    ## Remove those who alredy answered
+    answered = question.resposta_set.all()
+    for ans in answered:
+        if ans.autor.userprofile in ask_users:
+            ask_users.remove(ans.autor.userprofile)
+    
+    return ask_users[0:x]
+
+
+    
+# Send the notification to selected user to ask a question
+@login_required
+def ask_to_answer(request):
+    # Get the data being passed by get
+    quest_id = None
+    if request.method == "GET":
+        quest_id = request.GET['pergunta_id']
+        user_id = request.GET['user_id']
+    # If was passed any value on get
+    if quest_id and user_id:
+        to_user = UserProfile.objects.get(pk=user_id)
+        question = Pergunta.objects.get(pk=quest_id)
+        from_user = request.user
+        notif = new_AskAnswer(to_user.user, from_user, question)
+        notif.save()
+        profile = request.user.userprofile
+        
+        if question not in profile.follow_questions.all():
+            profile.follow_questions.add(question)
+            profile.save()
+        
+
+    return HttpResponse()
+
+
+# returns a list with x related questions:
+def related_questions(question, x):
+    topics = question.tags.all()
+    related = []
+    for tpc in topics:
+        questions = tpc.pergunta_set.all()
+        for qst in questions:
+            if qst not in related and qst != question:
+                related.append(qst)
+        
+    related.sort(key=lambda x: x.votes, reverse=True)
+    
+    if len(related) < x:
+        all_questions = Pergunta.objects.order_by('-votes')[0:x+2]
+        for qst in all_questions:
+            if qst not in related and qst != question:
+                related.append(qst)
+    
+    return related[0:x]
+
+
+
+
+# Search questions to suggest on new question page
+def get_question_list(max_results=0, inputed_question=''):
+    qst_list = []
+    qst_list1 = []
+    qst_list2 = []
+    qst_list3 = []
+    qst_list4 = []
+    qst_list5 = []
+    
+    if inputed_question:
+        inputed = inputed_question.split()
+        word = []
+        for i in inputed:
+            x = i.lower()
+            word.append(x)  
+        perguntas = Pergunta.objects.all()
+        
+        # Starts only afther X words are typed
+        if len(word) < 0:
+            return None
+        
+        for perg in perguntas:
+            titulo = perg.titulo.lower()
+            for search in word:
+                result = titulo.find(search)
+                if result == -1:
+                    pass
+                elif perg not in qst_list1:
+                    qst_list1.append(perg)
+                elif perg not in qst_list2:
+                    qst_list2.append(perg)
+                elif perg not in qst_list3:
+                    qst_list3.append(perg)
+                elif perg not in qst_list4:
+                    qst_list4.append(perg)
+                elif perg not in qst_list5:
+                    qst_list5.append(perg)
+            
+        dup_qst_list = qst_list5 + qst_list4 + qst_list3 + qst_list2 + qst_list1
+        
+        for i in dup_qst_list:
+            if i not in qst_list:
+                qst_list.append(i)
+        
+    # Cuts the list to maximum results
+    if max_results > 0:
+        if len(qst_list) > max_results:
+            qst_list = qst_list[:max_results]
+        
+        # Not working yet...
+        # Make the searched word bold    
+        for qst in qst_list:
+            for search in word:
+                titulo = qst.titulo.lower()
+                index1 = titulo.find(search)
+                if index1 != -1:
+                    index2 = index1 + len(search)
+                    string0 = qst.titulo
+                    string1 = string0[:index1]+'<b>'+string0[index1:index2]+'</b>'+string0[index2:]
+                    qst.titulo = string1
+
+    return qst_list
+    
+    
+
+# Suggests the questions searched in previwes view
+def suggest_question(request):    
+    qst_list = []
+    inputed_question = ''
+    if request.method == 'GET':
+        inputed_question = request.GET['suggestion']
+    qst_list = get_question_list(5, inputed_question)
+
+    return render(request, 'perguntas/sugest_question.html', {'qst_list': qst_list,})
+    
+
+
+# Allow user to ask the question again
+@login_required
+def perguntar_novamente(request, pk):
+    pergunta = Pergunta.objects.get(pk=pk)
+    pergunta.data = datetime.today()
+    pergunta.asked_count += 1
+    pergunta.save()
+    profile = request.user.userprofile
+    if pergunta not in profile.follow_questions.all():
+        profile.follow_questions.add(pergunta)
+        profile.save()
+
+    messages.success(request, 'Pronto! Você perguntou esta pergunta novamente!!')
+    
+    return HttpResponseRedirect(reverse('pergunta', args=[pergunta.slug]))
+    
+    
+
+
+
+
+'''
+---- TOPICS / TAGS VIEWS: ----
+
+These views controls and help actions related to topics (Tags):
+(Those marked with ### are only helper function that can be reused in diferent views)
+
+
+- ###SUGGEST_TOPICS: suggest topics that user migth know about, based on its profile
+- UPDATE_TOPICS_SUGESTION: on page update suggested topics that user migth know about
+- ###GET_TOPIC_LIST: return related topics based on the inputed one (SEARCH_TOPIC helper)
+- SEARCH_TOPICS: searches for topics based on inputed search query
+- CREATE_TOPIC_KNOWN: creates a new Tag and add it to user_knows_about topics
+- CURRENT_KNOWN_TOPICS: on page update of current user known topics
+
+
+
+'''
+
+
+# Sugest knows_about topics based in what user knows about
+def suggest_topics(profile):
+    sugestions = []
+    if profile.knows_about.all():
+        for tpc in profile.knows_about.all():
+            perguntas = tpc.pergunta_set.all()
+            for perg in perguntas:
+                for tag in perg.tags.all():
+                    if (tag not in sugestions) and (tag not in profile.knows_about.all()):
+                        sugestions.append(tag)
+    
+    if len(sugestions) < 30:
+        tags = Tag.objects.all()
+        tags = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)
+        for tag in tags:
+            if (tag not in sugestions) and (tag not in profile.knows_about.all()):
+                sugestions.append(tag)
+    
+    return sugestions[0:30]
+
+
 
 # Updates the suggested topic list
 def update_topics_sugestion(request):
@@ -273,17 +680,128 @@ def update_topics_sugestion(request):
 
 
 
-# Show all questions of a category
-def categoria(request, slug):
+
+# Searches for related topics, based on the inputed one
+def get_topic_list(max_results=0, inputed_topic=''):
+    topic_list = []
+    topic_list1 = []
+    topic_list2 = []
+    topic_list3 = []
+    topic_list4 = []
+    topic_list5 = []
+    topic_list6 = []
     
-    tag = Tag.objects.get(slug=slug)
-    perguntas = tag.pergunta_set.all()
+    if inputed_topic:
+        inputed = inputed_topic.split()
+        word = []
+        for i in inputed:
+            x = i.lower()
+            word.append(x)  
+        topicos = Tag.objects.all()
+        
+        # Starts only afther X words are typed
+        if len(word) < 0:
+            return None
+        
+        for tpc in topicos:
+            nome = tpc.nome.lower()
+            for search in word:
+                result = nome.find(search)
+                if result == -1:
+                    pass
+                elif tpc not in topic_list1:
+                    topic_list1.append(tpc)
+                elif tpc not in topic_list2:
+                    topic_list2.append(tpc)
+                elif tpc not in topic_list3:
+                    topic_list3.append(tpc)
+                elif tpc not in topic_list4:
+                    topic_list4.append(tpc)
+                elif tpc not in topic_list5:
+                    topic_list5.append(tpc)
+            
+        dup_topic_list = topic_list5 + topic_list4 + topic_list3 + topic_list2 + topic_list1
+        
+        for i in dup_topic_list:
+            if i not in topic_list:
+                topic_list.append(i)
+        
+    # Cuts the list to maximum results
+    if max_results > 0:
+        if len(topic_list) > max_results:
+            topic_list = topic_list[:max_results]
+        
+    return topic_list
+
+
+
+# Search topics based on inputed search query
+def search_topics(request):
+    topic_list = []
+    inputed_topic = ''
+    if request.method == 'GET':
+        inputed_topic = request.GET['suggestion']
+    topic_list = get_topic_list(15, inputed_topic)
     
     context = {
-        'tag': tag,
-        'perguntas': perguntas,
+        'inputed_topic': inputed_topic,
+        'topic_list': topic_list,
     }
-    return render(request, 'perguntas/tag.html', context)
+    return render(request, 'perguntas/search_topic.html', context)
+    
+
+
+# Create a new topic and add to user knowledge
+def create_topic_known(request):
+    topic_name = ''
+    if request.method == 'GET':
+        topic_name = request.GET['topic_name']
+    
+    # create new topic
+    topic = Tag(nome=topic_name, slug=slugify(topic_name))
+    topic.save()
+    
+    profile = request.user.userprofile
+    profile.knows_about.add(topic)
+    profile.save()
+    
+    context = {
+    'topic': topic,
+    }
+    return HttpResponse()
+    
+    
+# Get the users curent known topics and return as a list
+def current_known_topics(request):
+    if request.method == 'GET':
+        current_topics = request.user.userprofile.knows_about.all()
+        
+        context = {
+            'current_topics': current_topics,
+        }
+        
+        return render(request, 'perguntas/user_topics.html', context)
+    
+    
+
+    
+
+
+
+
+
+'''
+---- VOTING VIEWS: ----
+These views control the vote up and down buttons:
+- UPVOTE: upvotes a question
+- DOWNVOTE: downvotes a question
+- RESP_UPVOTE: upvotes an answer
+- RESP_DOWNVOTE: downvotes an answer
+
+
+'''
+
+
 
 # Upvotes a question
 @login_required
@@ -424,269 +942,21 @@ def resp_downvote(request):
 
     return HttpResponse(votes)
 
-# User asks a new question
-@login_required
-def perguntar(request):
-    if request.method == 'POST':
-
-        form = PerguntaForm(request.POST)
-        
-        if form.is_valid():
-            form_data = form.save(commit=False)
-            form_data.autor = request.user
-            form_data.slug = slugify(form_data.titulo)
-            slug = form_data.slug
-            # If slug is already taken, add a random number at the end of it
-            try:
-                Pergunta.objects.get(slug=slug)
-                form_data.slug = slug + str(randint(0,100))
-            except:
-                pass
-            
-            form_data.save()
-            form.save_m2m()
-            
-            # Add quetion to followed ones
-            profile = request.user.userprofile
-            profile.follow_questions.add(form_data)
-            profile.save()
-            messages.success(request, 'Parabéns! Sua pergunta foi publicada com sucesso!!')
-            
-            return HttpResponseRedirect(reverse('pergunta', args=[form_data.slug] ))
-    
-    else:
-        if request.GET.get('q', ''):
-            form = PerguntaForm(initial={'titulo': request.GET.get('q', '')})
-        else:
-            form = PerguntaForm()
-    
-    context = {
-        'form': form,
-    }
-    
-    return render(request, 'perguntas/perguntar.html', context)
-
-# User answer a question
-@login_required
-def responder(request, pk):
-    pergunta = Pergunta.objects.get(pk=pk)
-    
-    if request.method == 'POST':
-        form = RespostaForm(request.POST)
-        form.helper.form_action = reverse('responder', args=[pergunta.id])
-        if form.is_valid():
-            form_data = form.save(commit=False)
-            form_data.pergunta = pergunta
-            form_data.autor = request.user
-            form_data.save()
-            notif = new_Answer(pergunta.autor, request.user, pergunta, form_data)
-            url = pergunta.get_absolute_url()
-            
-            # Add the first two topics of question to user knowledge
-            question_tags = pergunta.tags.all()[0:2]
-            profile = request.user.userprofile
-            profile.knows_about.add(*question_tags)
-            # Add the question to followed ones
-            profile.follow_questions.add(pergunta)
-            profile.save()
-            return HttpResponseRedirect(url)
-    else:
-        form = RespostaForm()
-    
-    context = {
-        'form': form,
-        'pergunta': pergunta,
-    }
-     
-    return render(request, 'perguntas/responder.html', context)
 
 
 
-# Allow user to edit questions
-@login_required
-def edit_question(request, pk):
-    question = Pergunta.objects.get(pk=pk)
-    # Checks if user has permission to edit the question
-    if request.user == question.autor or request.user.userprofile.user_role == 'admin':
-        # If is post get the data and save the edited question
-        if request.method == 'POST':
-            form = EditarPerguntaForm(request.POST, request.FILES, instance=question)
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Pergunta editada com sucesso!!')
-                return HttpResponseRedirect(reverse('pergunta', args=[question.slug]))
-        # Otherwise, display the form to edit question:
-        else:
-            form = EditarPerguntaForm(instance=question)
-    else:
-        raise Http404
-    
-    context = {
-        'form': form,
-        'question': question,
-    }
-    
-    return render(request, 'perguntas/editar_pergunta.html', context)
+'''
+---- FOLLOW VIEWS: ----
+These views control the follow and unfollow actions:
+- FOLLOW_QUESTION: add a question to users follow_question list
+- UNFOLLOW QUESTION: removes a question from users follow_question list
+- 
 
 
-
-# Allow user to edit its own answer
-@login_required
-def edit_answer(request, pk):
-    answer = Resposta.objects.get(pk=pk)
-    # Checks user permission to edit the answer
-    if request.user == answer.autor or request.user.userprofile.user_role == 'admin':
-        # If is post, gets the data and save the edited answer
-        if request.method == 'POST':
-            form = RespostaForm(request.POST, request.FILES, instance=answer)
-            if form.is_valid():
-                    form.save()
-                    messages.success(request, 'Resposta editada com sucesso!!')
-                    return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug]))
-        # Otherwise, just display the form to edit:
-        else:
-            form = RespostaForm(instance=answer)
-    else:
-            raise Http404
-        
-    context = {
-        'form': form,
-        'resposta': answer,
-    }
-    
-    return render(request, 'perguntas/editar-resposta.html', context)
-    
-    
-# Allow users to comment answers
-@login_required
-def add_comment(request, pk=0):
-    
-    resp = Resposta.objects.get(pk=pk)
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            form_data = form.save(commit=False)
-            form_data.autor = request.user
-            form_data.answer = resp
-            form_data.save()
-            new_Comment(resp.autor, request.user, resp, form_data)
-            messages.success(request, 'Comentário enviado com sucesso!!')
-            return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
-    else:
-        form = CommentForm()
-    
-    context = {
-        'form': form,
-        'answer': resp,
-        'edit': 0,
-    }
-    
-    return render(request, 'perguntas/comment.html', context)    
+'''
 
 
-# Allow the author of the comment to edit it
-@login_required
-def edit_comment(request, pk=0):
     
-    comment = Comment.objects.get(pk=pk)
-    answer = comment.answer
-    if comment and (comment.autor == request.user or request.user.userprofile.user_role == 'admin'):
-        if request.method == 'POST':
-            form = CommentForm(request.POST, instance=comment)
-            if form.is_valid():
-                    form.save()
-                    messages.success(request, 'Comentário editado com sucesso!')
-                    return HttpResponseRedirect(reverse('pergunta', args=[comment.answer.pergunta.slug]))
-        else:
-            form = CommentForm(instance=comment)
-    
-        
-    
-    
-    context = {
-        'form': form,
-        'answer': answer,
-        'edit': 1,
-    }
-    
-    return render(request, 'perguntas/comment.html', context)
-
-    
-    
-# Search questions to suggest on new question page
-def get_question_list(max_results=0, inputed_question=''):
-    qst_list = []
-    qst_list1 = []
-    qst_list2 = []
-    qst_list3 = []
-    qst_list4 = []
-    qst_list5 = []
-    
-    if inputed_question:
-        inputed = inputed_question.split()
-        word = []
-        for i in inputed:
-            x = i.lower()
-            word.append(x)  
-        perguntas = Pergunta.objects.all()
-        
-        # Starts only afther X words are typed
-        if len(word) < 0:
-            return None
-        
-        for perg in perguntas:
-            titulo = perg.titulo.lower()
-            for search in word:
-                result = titulo.find(search)
-                if result == -1:
-                    pass
-                elif perg not in qst_list1:
-                    qst_list1.append(perg)
-                elif perg not in qst_list2:
-                    qst_list2.append(perg)
-                elif perg not in qst_list3:
-                    qst_list3.append(perg)
-                elif perg not in qst_list4:
-                    qst_list4.append(perg)
-                elif perg not in qst_list5:
-                    qst_list5.append(perg)
-            
-        dup_qst_list = qst_list5 + qst_list4 + qst_list3 + qst_list2 + qst_list1
-        
-        for i in dup_qst_list:
-            if i not in qst_list:
-                qst_list.append(i)
-        
-    # Cuts the list to maximum results
-    if max_results > 0:
-        if len(qst_list) > max_results:
-            qst_list = qst_list[:max_results]
-        
-        # Not working yet...
-        # Make the searched word bold    
-        for qst in qst_list:
-            for search in word:
-                titulo = qst.titulo.lower()
-                index1 = titulo.find(search)
-                if index1 != -1:
-                    index2 = index1 + len(search)
-                    string0 = qst.titulo
-                    string1 = string0[:index1]+'<b>'+string0[index1:index2]+'</b>'+string0[index2:]
-                    qst.titulo = string1
-
-    return qst_list
-    
-    
-
-# Suggests the questions searched in previwes view
-def suggest_question(request):    
-    qst_list = []
-    inputed_question = ''
-    if request.method == 'GET':
-        inputed_question = request.GET['suggestion']
-    qst_list = get_question_list(5, inputed_question)
-
-    return render(request, 'perguntas/sugest_question.html', {'qst_list': qst_list,})
     
 
 # Add the question to following list
@@ -733,152 +1003,6 @@ def unfollow_question(request):
     return HttpResponse()
 
 
-# Allow user to ask the question again
-@login_required
-def perguntar_novamente(request, pk):
-    pergunta = Pergunta.objects.get(pk=pk)
-    pergunta.data = datetime.today()
-    pergunta.asked_count += 1
-    pergunta.save()
-    profile = request.user.userprofile
-    if pergunta not in profile.follow_questions.all():
-        profile.follow_questions.add(pergunta)
-        profile.save()
 
-    messages.success(request, 'Pronto! Você perguntou esta pergunta novamente!!')
-    
-    return HttpResponseRedirect(reverse('pergunta', args=[pergunta.slug]))
-    
-    
-    
-# Send the request to ask question to the selcted user
-@login_required
-def ask_to_answer(request):
-    # Get the data being passed by get
-    quest_id = None
-    if request.method == "GET":
-        quest_id = request.GET['pergunta_id']
-        user_id = request.GET['user_id']
-    # If was passed any value on get
-    if quest_id and user_id:
-        to_user = UserProfile.objects.get(pk=user_id)
-        question = Pergunta.objects.get(pk=quest_id)
-        from_user = request.user
-        notif = new_AskAnswer(to_user.user, from_user, question)
-        notif.save()
-        profile = request.user.userprofile
-        
-        if question not in profile.follow_questions.all():
-            profile.follow_questions.add(question)
-            profile.save()
-        
-
-    return HttpResponse()
-
-
-
-def get_topic_list(max_results=0, inputed_topic=''):
-    topic_list = []
-    topic_list1 = []
-    topic_list2 = []
-    topic_list3 = []
-    topic_list4 = []
-    topic_list5 = []
-    topic_list6 = []
-    
-    if inputed_topic:
-        inputed = inputed_topic.split()
-        word = []
-        for i in inputed:
-            x = i.lower()
-            word.append(x)  
-        topicos = Tag.objects.all()
-        
-        # Starts only afther X words are typed
-        if len(word) < 0:
-            return None
-        
-        for tpc in topicos:
-            nome = tpc.nome.lower()
-            for search in word:
-                result = nome.find(search)
-                if result == -1:
-                    pass
-                elif tpc not in topic_list1:
-                    topic_list1.append(tpc)
-                elif tpc not in topic_list2:
-                    topic_list2.append(tpc)
-                elif tpc not in topic_list3:
-                    topic_list3.append(tpc)
-                elif tpc not in topic_list4:
-                    topic_list4.append(tpc)
-                elif tpc not in topic_list5:
-                    topic_list5.append(tpc)
-            
-        dup_topic_list = topic_list5 + topic_list4 + topic_list3 + topic_list2 + topic_list1
-        
-        for i in dup_topic_list:
-            if i not in topic_list:
-                topic_list.append(i)
-        
-    # Cuts the list to maximum results
-    if max_results > 0:
-        if len(topic_list) > max_results:
-            topic_list = topic_list[:max_results]
-        
-    return topic_list
-
-
-
-# Search topics to user add in its knows_abaout
-def search_topics(request):
-    topic_list = []
-    inputed_topic = ''
-    if request.method == 'GET':
-        inputed_topic = request.GET['suggestion']
-    topic_list = get_topic_list(15, inputed_topic)
-    
-    context = {
-        'inputed_topic': inputed_topic,
-        'topic_list': topic_list,
-    }
-    return render(request, 'perguntas/search_topic.html', context)
-    
-
-
-# Create a new topic and add to user knowledge
-def create_topic_known(request):
-    topic_name = ''
-    if request.method == 'GET':
-        topic_name = request.GET['topic_name']
-    
-    # create new topic
-    topic = Tag(nome=topic_name, slug=slugify(topic_name))
-    topic.save()
-    
-    profile = request.user.userprofile
-    profile.knows_about.add(topic)
-    profile.save()
-    
-    context = {
-    'topic': topic,
-    }
-    return HttpResponse()
-    
-    
-# Get the users curent known topics and return as a list
-def current_known_topics(request):
-    if request.method == 'GET':
-        current_topics = request.user.userprofile.knows_about.all()
-        
-        context = {
-            'current_topics': current_topics,
-        }
-        
-        return render(request, 'perguntas/user_topics.html', context)
-    
-    
-    
-    
     
     
