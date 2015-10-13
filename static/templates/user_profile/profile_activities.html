@@ -1,0 +1,30 @@
+{% load app_filters %}
+
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        <br>
+        {% for ativ in atividades|slice:":20" %}
+            <p class="info-text"><i>{{ ativ.timestamp|time_ago }}</i><span class="bullet"> • </span>
+            {% if ativ.classe = 'pergunta' %}
+                <b>perguntou:</b></p>
+                <p class="blog-post-title"><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
+                {% if ativ.descricao %}
+                    <div class="text">
+                        {{ ativ.descricao|striptags|truncatechars:100 }}<a href="{% url 'pergunta' ativ.slug %}"> mais ></a>
+                    </div>
+                {% endif %}
+            {% elif ativ.classe = 'resposta' %}
+                <b>respondeu:</b> {{ativ.pergunta.titulo|striptags|truncatechars:100}}</p>
+                <div class="text">
+                    <p><a class="text" href="{% url 'pergunta' ativ.pergunta.slug %}"><b>{{ ativ.resposta|striptags|truncatechars:200 }}</b></a><a href="{% url 'pergunta' ativ.pergunta.slug %}"> mais ></a></p>
+                </div>
+            {% elif ativ.classe = 'comment' %}
+                <b>comentou a resposta:</b> {{ ativ.answer.resposta|striptags|truncatechars:100}}</p>
+                <div class="text">
+                    <p><a class="text" href="{% url 'pergunta' ativ.answer.pergunta.slug %}"><b>{{ ativ.comment|striptags|truncatechars:200 }}</b></a><a href="{% url 'pergunta' ativ.answer.pergunta.slug %}"> mais ></a></p>
+                </div>
+            {% endif %}
+            <hr>
+        {% endfor %}
+    </div>
+</div>

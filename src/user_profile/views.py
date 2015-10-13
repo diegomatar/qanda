@@ -11,52 +11,98 @@ from django.template.defaultfilters import slugify
 
 from perguntas.models import Pergunta, Resposta, Tag
 from notifications.views import new_Follow
-from perguntas.views import suggest_topics
-from .forms import EditProfileForm, EditUserForm
+from perguntas.views import suggest_topics, atividades_recentes
+from .forms import EditProfileForm, EditUserForm, EditProfilePictureForm
 from .models import UserProfile
 
 
 
 # Allow user to edit its profile
 @login_required
-def user_profile(request):
+def edit_user_profile(request):
     
-    user_data = UserProfile.objects.get(user=request.user)
+    profile = request.user.userprofile
 
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=request.user)
-        profile_form = EditProfileForm(request.POST, request.FILES, instance=user_data)
-        if profile_form.is_valid and user_form.is_valid:
+        profile_form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        picture_form = EditProfilePictureForm(instance=profile)
+        
+        if profile_form.is_valid and user_form.is_valid and picture_form.is_valid:
             user_form.save()
             profile_form.save()
-            slug = str(user_data.user.first_name) +' '+ str(user_data.user.last_name)
+            picture_form.save()
+            slug = str(profile.user.first_name) +' '+ str(profile.user.last_name)
             slug = slugify(slug)
-            user_data.slug = slug
-            user_data.save()
+            profile.slug = slug
+            profile.save()
     else:
         user_form = EditUserForm(instance=request.user)
-        profile_form = EditProfileForm(instance=user_data)
+        profile_form = EditProfileForm(instance=profile)
+        picture_form = EditProfilePictureForm(instance=profile)
         
     
     context ={
-        'user': user_data,
+        'profile': profile,
         'user_form': user_form,
         'profile_form': profile_form,
+        'picture_form': picture_form,
     }
-    return render(request, 'user_profile/profile.html', context)
+    return render(request, 'user_profile/edit_profile.html', context)
 
 
 # This view creates and populates user profile with social data
 @receiver(user_signed_up)
 def populate_profile(request, user, sociallogin=None, **kwargs):
     if sociallogin:
+        print 'social login!!!'
         if sociallogin.account.provider == 'facebook':
-            user.first_name = sociallogin.account.extra_data['first_name']
-            user.last_name = sociallogin.account.extra_data['last_name']
-        user.save()
-        perfil = UserProfile(user=user)
-        perfil.facebook = sociallogin.account.extra_data['link']
-        perfil.save()
+            if not user.first_name and sociallogin.account.extra_data['first_name']:
+                user.first_name = sociallogin.account.extra_data['first_name']
+            if not user.last_name and sociallogin.account.extra_data['last_name']:
+                user.last_name = sociallogin.account.extra_data['last_name']
+            if not user.email and sociallogin.account.extra_data['email']:
+                user.last_name = sociallogin.account.extra_data['email']
+            user.save()
+            if user.userprofile:
+                perfil = user.userprofile
+            else:
+                perfil = UserProfile(user=user)
+            perfil.facebook = sociallogin.account.extra_data['link']
+            perfil.save()
+        
+        if sociallogin.account.provider == 'twitter':
+            print 'twitter!!!'
+            if not user.first_name and sociallogin.account.extra_data['name']:
+                user.first_name = sociallogin.account.extra_data['name'].split( )[0]
+            if not user.last_name and sociallogin.account.extra_data['name']:
+                user.last_name = sociallogin.account.extra_data['name'].split( )[-1]
+            if not user.email and sociallogin.account.extra_data['email']:
+                user.last_name = sociallogin.account.extra_data['email']
+            user.save()
+            if user.userprofile:
+                perfil = user.userprofile
+                print "perfil: %s" % perfil
+            else:
+                perfil = UserProfile(user=user)
+            perfil.twitter = 'http://twitter.com/'+ sociallogin.account.extra_data['screen_name']
+            perfil.save()
+            print "perfil twitter: %s" % perfil.twitter
+            
+        if sociallogin.account.provider == 'google':
+            if not user.first_name and sociallogin.account.extra_data['first_name']:
+                user.first_name = sociallogin.account.extra_data['first_name']
+            if not user.last_name and sociallogin.account.extra_data['last_name']:
+                user.last_name = sociallogin.account.extra_data['last_name']
+            if not user.email and sociallogin.account.extra_data['email']:
+                user.last_name = sociallogin.account.extra_data['email']
+            user.save()
+            if user.userprofile:
+                perfil = user.userprofile
+            else:
+                perfil = UserProfile(user=user)
+            perfil.google = sociallogin.account.extra_data['link']
+            perfil.save()
         
         
         
@@ -69,8 +115,7 @@ def public_profile(request, slug):
     perguntas = Pergunta.objects.filter(autor=user)
     respostas = Resposta.objects.filter(autor=user)
     
-    atividades = list(chain(perguntas, respostas))
-    ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)[0:5]
+    atividades = atividades_recentes(tag=None, user=user)
     
     is_followed = 0
     if request.user.is_authenticated():
@@ -81,7 +126,7 @@ def public_profile(request, slug):
     context = {
         'user': user,
         'profile': profile,
-        'atividades': ativ_em_ordem,
+        'atividades': atividades,
         'is_followed': is_followed,
     }
     

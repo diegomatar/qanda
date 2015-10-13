@@ -1,4 +1,5 @@
-{% extends "account/base.html" %}
+{% extends "base.html" %}
+{% load app_filters %}
 
 {% load i18n %}
 
@@ -7,40 +8,132 @@
 {% block content %}
   
 
-<h1 class="blog-title"><img class='profile-pic' src='{{ profile.profile_image_url }}'> <a href='{% url "profile" profile.slug %}'>{{ profile.name }}</a></h1>
+<div class="blog-post">
+      <div class="row">
+            <div class="col-sm-4"><!-- Profile Pic -->
+                  <br>
+                  <img class='profile-pic' src='{{ profile.profile_image_url }}'>
+            </div><!-- col-pic -->
+            <div class="col-sm-8"><!-- Profile Name -->
+                  <div class="row">
+                        <div class="col-sm-10">
+                              <h1 class="blog-title">
+                                    {{ profile.name }}
+                              </h1>
+                        </div>
+                        {% if request.user.id = profile.user.id %}
+                        <div class="col-sm-2">
+                              <a class='btn btn-warning' href='{% url "edit_profile" %}'>Editar Perfil</a>
+                        </div>
+                        {% endif %}
+                  </div>
+                  <hr>
+                  <p>{{ profile.about }}</p>
+                  <br>
+                  <p>
+                        <a class='follow_user btn btn-default {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='user_{{ profile.user.pk }}' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a>
+                        | <span class='followers_count' id="user_{{profile.user.pk}}">{{ profile.followers_num }}</span> seguidores
+                  </p>
+                  
+            </div>
+      </div>      
 
-          <div class="row">
-                <div class="col-xs-1">
-                </div>
-                <div class="col-xs-11">
-               {% if request.user.id = profile.user.id %}
-               <p><a class='btn btn-warning' href='{% url "edit_profile" %}'>Editar Perfil</a></p>
-               {%else%}
-               {% if request.user.is_authenticated %}
-               <p><a class='user_{{ profile.user.id }} btn btn-danger {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='follow_user' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a> | <span id='followers_count'>{{ profile.followers_num }}</span> seguidores</p>
-               {% endif %}
-               {% endif %}
-               <p><a href="{% url 'followers' profile.slug %}"><b>Seguidores:</b></a>  {{ profile.followers_num }} | <a href="{% url 'answers' profile.slug %}"><b>Respostas:</b></a> {{ profile.num_respostas }} | <a href="{% url 'questions' profile.slug %}"><b>Perguntas:</b></a> {{ profile.num_pergs }}  </p>
-               <p><b>Sobre:</b> {{ profile.about }}</p>
-               <br>
-                  <h2>Atividades Recentes:</h2>
-            {% for ativ in atividades %}
-                  {% if ativ.classe = 'pergunta' %}
-                  <p>Perguntou:</p>
-                  <p><a href="{% url 'pergunta' ativ.slug %}">"{{ ativ.titulo }}"</a></p>
-                  <p><i> - {{ ativ.timestamp }}</i></p>
-                  <hr>
-                  {% elif ativ.classe = 'resposta' %}
-                  <p>Respondeu:</p>
-                  <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">"{{ ativ.resposta|truncatechars:200 }}"</a></p>
-                  <p><i> - {{ ativ.timestamp }}</i></p>
-                  <hr>
-                  {% endif %}
-            {% endfor %}
-               
-               
+
+
+
+      <br>
+      <div class="row">     
+            <div class="col-xs-12">
+                  <div><!-- Tabs -->
+
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                          <li role="presentation" class="active"><a href="#atividades" aria-controls="atividades" role="tab" data-toggle="tab">Atividades</a></li>
+                          <li role="presentation"><a href="#respostas" aria-controls="respostas" role="tab" data-toggle="tab">Respostas: {{ profile.num_respostas }}</a></li>
+                          <li role="presentation"><a href="#perguntas" aria-controls="perguntas" role="tab" data-toggle="tab">Perguntas: {{ profile.num_pergs }}</a></li>
+                          <li role="presentation"><a href="#seguindo" aria-controls="seguindo" role="tab" data-toggle="tab">Seguindo: {{ profile.follow_users.all|length }}</a></li>
+                        </ul>
                         
-                </div><!-- /.col-xs -->
+                        <!-- Tab panes -->
+                        <div class="tab-content">
+                              
+                              <!-- Tab Activities -->
+                              <div role="tabpanel" class="tab-pane active" id="atividades">
+                                  {% include "user_profile/profile_activities.html" %}    
+                              </div>
+                                
+                                  <!-- Tab Respostas -->
+                              <div role="tabpanel" class="tab-pane" id="respostas">
+                                 {% include "user_profile/profile_respostas.html" %} 
+                              </div>
+                                
+                              <!-- Tab Perguntas -->
+                              <div role="tabpanel" class="tab-pane" id="perguntas">
+                                 {% include "user_profile/profile_perguntas.html" %}
+                              </div>
+                                
+                              <!-- Tab Seguindo -->
+                              <div role="tabpanel" class="tab-pane" id="seguindo">
+                                 {% include "user_profile/profile_seguindo.html" %}
+                              </div>
+                        </div><!-- tab-content -->
+                  </div><!-- Tabs -->
+            </div><!-- /.col-xs -->
+      </div><!-- row -->
+</div><!-- blog-post -->
+
+{% endblock %}
+
+
+
+
+
+{% block sidebar %}
+    
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <h4 class="sm-title">CONHECE SOBRE:</h4>
+    {% if profile.knows_about %}
+        <ul>
+        {% for tg in profile.knows_about.all %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+                     | <span class="tag_followers_count" id="tag_{{ tg.pk }}">{{ tg.followers_num }}</span>
+            </li>
+        {% endfor %}  
+        </ul>
+      {% if request.user.id = profile.user.id %}
+            <a href="{% url 'edit_user_known_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
+      {% endif %}
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
+    <hr>
 </div>
+
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <h4 class="sm-title">SEGUINDO OS TEMAS:</h4>
+    {% if profile.follow_topics %}
+        <ul>
+        {% for tg in profile.follow_topics.all %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+                     | <span class="tag_followers_count" id="tag_{{ tg.pk }}">{{ tg.followers_num }}</span>
+            </li>
+        {% endfor %}  
+        </ul>
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
+    <hr>
+</div>
+    
 
 {% endblock %}

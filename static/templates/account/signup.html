@@ -7,45 +7,127 @@
 
 {% block header %}
   
-<h1 class="blog-title">Nova Conta</h1>
-<p class="lead blog-description">Já tem uma conta? Então <a href="{{ login_url }}">entre aqui</a>.</p>
-
-          <div class="row">
-                <div class="col-xs-1">
-                </div>
-                <div class="col-xs-11">
+<div class="row">
+    <div class="col-md-10 col-md-offset-1">
+      <h1 class="blog-title"><i class="fa fa-user-plus fa-4"></i> Nova Conta</h1>
+      <div class="well">
+        <div class="row">
+          <div class="col-md-5">
+                
+                          
+                {% get_providers as socialaccount_providers %}
+                {% if socialaccount_providers %}
+                  <p class="lead blog-description">Crie grátis sua conta usando:</p>          
+                  <div class="socialaccount_ballot">
+                    <ul class="socialaccount_providers">
+                      {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+                      <li><a title="Email" class="socialaccount_provider email btn-block"role="button" data-toggle="collapse" href="#collapseEmail" aria-expanded="false" aria-controls="collapseEmail"><i class="fa fa-envelope fa-3"></i><span class="bullet"></span> Email</a></li>
+                    </ul>
+                  </div>
                   
-                  {% get_providers as socialaccount_providers %}
-        {% if socialaccount_providers %}
-          <p class="lead blog-description">Crie sua conta usando as redes sociais abaixo:</p>          
-          <div class="socialaccount_ballot">
-            <ul class="socialaccount_providers">
-              {% include "socialaccount/snippets/provider_list.html" with process="login" %}
-            </ul>
-            <br>
-            <p class="lead blog-description"> Ou crie uma nova conta usando seu email:</p>
-          </div>
-          
-          {% include "socialaccount/snippets/login_extra.html" %}
-          
-        {% endif %}
+                  {% include "socialaccount/snippets/login_extra.html" %}
                   
-                  <div class="panel panel-default">
-                  <div class="panel-body">
-
-                  <form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    {% if redirect_field_value %}
-                    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
-                    {% endif %}
-                    <button class="primaryAction btn btn-info btn-lg" type="submit">Criar Conta &raquo;</button>
-                  </form>
-                  </div><!-- /.panel-body -->
-                  </div><!-- /.panel-default -->
-                </div><!-- /.col-xs -->
-          </div>
+                {% endif %}
+                
+                  <div class="row">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <hr>
+                        <p class="lead blog-description">Já tem uma conta?<br><a href="{{ login_url }}">Entre aqui.</a></p>
+                    </div>
+                  </div>
+                          
+                </div><!-- col-md-6 -->
+                <div class="col-md-7">
+          
+                      <div class="collapse" id="collapseEmail">
+                        <div class="row">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <div class="well">
+                                  
+                                  <form class="signup form-horizontal" id="signup_form" method="post" action="/conta/nova/">
+                                    
+                                      {% csrf_token %}
+                                        
+                                      <div class="form-group">  
+                                        <label for="id_first_name" class="col-sm-3 control-label">Nome</label>
+                                        <div class="col-sm-9">
+                                          <input class="form-control" id="id_first_name" maxlength="30" name="first_name" placeholder="Primeiro Nome" type="text">
+                                        </div>
+                                      </div>
+                                      
+                                      <div class="form-group">
+                                        <label for="id_last_name" class="col-sm-3 control-label">Sobrenome</label>
+                                          <div class="col-sm-9">
+                                            <input class="form-control" id="id_last_name" maxlength="30" name="last_name" placeholder="Sobrenome" type="text">
+                                          </div>
+                                      </div>
+                                      
+                                      <div class="form-group">  
+                                        <label for="id_email" class="col-sm-3 control-label">E-mail</label>
+                                        <div class="col-sm-9">
+                                          <input class="form-control" id="id_email" name="email" placeholder="Endereço de e-mail" type="email">
+                                        </div>
+                                      </div>
+                                      <hr>
+                                      <div class="form-group">  
+                                        <label for="id_password1" class="col-sm-3 control-label">Senha</label>
+                                        <div class="col-sm-9">
+                                          <input class="form-control" id="id_password1" name="password1" placeholder="Senha" type="password">
+                                        </div>
+                                      </div>
+                                         
+                                      <div class="form-group">   
+                                        <label for="id_password2" class="col-sm-3 control-label"></label>
+                                        <div class="col-sm-9">
+                                          <input class="form-control" id="id_password2" name="password2" placeholder="Senha (novamente)" type="password"><input id="id_confirmation_key" maxlength="40" name="confirmation_key" type="hidden">
+                                        </div>
+                                      </div>  
+                                      <hr>             
+                                      <div class="form-group">
+                                        <div class="col-sm-offset-3 col-sm-9">
+                                          <button class="primaryAction btn btn-warning btn-lg" type="submit">Criar Conta »</button>
+                                        </div>
+                                      </div>
+                                  
+                                  </form>
+                                  
+                                </div><!-- well -->
+                            </div><!-- col-10 -->
+                        </div><!-- row -->
+                      </div><!-- colapse -->
+        
+          </div><!-- col-md-6 -->
+        </div><!-- row -->
+      </div><!-- well -->
+    </div><!-- col-5 -->
+  </div><!-- row -->
 
 
 
 {% endblock %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+ {% comment %}
+<form class="signup" id="signup_form" method="post" action="{% url 'account_signup' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {% if redirect_field_value %}
+  <div class="form-group">
+    <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+    {% endif %}
+    <button class="primaryAction btn btn-info btn-lg" type="submit">Criar Conta &raquo;</button>
+  </div><!-- form-group -->
+</form>
+{% endcomment %}
+                          

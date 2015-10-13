@@ -7,8 +7,6 @@ from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 from django.db import models, IntegrityError
 
-from .rank import score_question
-
 
 # Create your models here.
 
@@ -34,6 +32,24 @@ class Tag(models.Model):
     def num_perguntas(self, ):
         perg = self.pergunta_set.all()
         return len(perg)
+    
+    
+    def followers_num(self):
+        followers = self.follow_topics.all()
+        return len(followers)
+    
+    
+    def followed(self, user):
+        try:
+            profile = user.userprofile
+        except:
+            return 0
+        if self in profile.follow_topics.all():
+            return 1
+        else:
+            return 0
+    
+    
     
     def save(self, *args, **kwargs):
         self.nome = self.nome.lower()
@@ -97,9 +113,6 @@ class Pergunta(models.Model):
         else:
             return 0
         
-    def score(self, ):
-        score = score_question(self)
-        return score
     
     
     def followed(self, user):
@@ -111,6 +124,10 @@ class Pergunta(models.Model):
             return 1
         else:
             return 0
+        
+    def followers_num(self):
+        followers = self.follow_questions.all()
+        return len(followers)
     
 
 

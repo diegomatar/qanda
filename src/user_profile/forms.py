@@ -52,50 +52,46 @@ class EditUserForm(forms.ModelForm):
         super(EditUserForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-3'
+        self.helper.field_class = 'col-lg-9'
         self.helper.layout = Layout(
             
         )
         
-        
-        
 
 class EditProfileForm(forms.ModelForm):
-    about = forms.CharField(widget=forms.Textarea, label="Sobre você", required=False)
-    twitter = forms.URLField(label="Twitter", required=False)
-    facebook = forms.URLField(label="Facebook", required=False)
-    linkedin = forms.URLField(label="Linkedin", required=False)
-    picture = forms.ImageField(label="Alterar Foto de Perfil", required=False)
-    interests = TagField(label="Tópicos você tem interesse:", required=False)
-    knows_about = TagField(label="Temas que você conhece bem:", required=False)
-    
+    about = forms.CharField(widget=forms.Textarea, label="Sobre você", required=False, max_length = 150)
+
     class Meta:
         model = UserProfile
-        fields = ('interests', 'knows_about', 'about', 'twitter', 'facebook', 'linkedin', 'picture')
+        fields = ('about',)
         
     def __init__(self, *args, **kwargs):
         super(EditProfileForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-3'
+        self.helper.field_class = 'col-lg-9'
         self.helper.layout = Layout(
-            'interests',
-            'knows_about',
-            'about',
-            'twitter',
-            'facebook',
-            'linkedin',
-            HTML("""
-                <div class='row'>
-                <div class='col-md-6'>
-            """),
-            'picture',
-            HTML("""
-                </div>
-                <div class='col-md-6'>
-                <p><b>Foto atual:</b> <img class='profile-pic' src='{{ user.profile_image_url }}'></p>
-                </div>
-                </div>
-            """),
+            Field('about', rows="3"),
         )
 
+
+class EditProfilePictureForm(forms.ModelForm):
+    picture = forms.ImageField(label="Alterar Foto", required=False)
+    
+    class Meta:
+        model = UserProfile
+        fields = ('picture',)
+        
+    def __init__(self, *args, **kwargs):
+        super(EditProfilePictureForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            'picture',
+        )
 
         

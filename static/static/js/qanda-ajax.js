@@ -265,7 +265,7 @@ $('a.follow_user').click(function(){
     
 });
 
-
+/*
 // follow and unfollow questions control
 $('.follow_quest').click(function(){
     questid = $(this).attr("data-questid");
@@ -283,6 +283,62 @@ $('.follow_quest').click(function(){
             $th.addClass( 'active' ).html('Seguindo');
         });
     };
+});
+*/
+
+
+
+// follow and unfollow questions control
+$('a.follow_quest').click(function(){
+    var $th = $(this);
+    questid = $th.attr("data-questid");
+    var myId = $(this).attr('id');
+    
+    // follow question
+    if($th.hasClass('follow')) {
+        $.get('/follow-question/', {pergunta_id: questid}, function(data){
+            $('.perg_follow_status#'+myId).html('Seguindo');
+            $('.perg_followers_count#'+myId).html(data);
+            $('.follow_quest#'+myId).removeClass( 'follow' ).addClass( 'unfollow' ).addClass( 'active' );
+        });
+    }
+    
+    // unfollow question
+    else if ($th.hasClass('unfollow')) {
+     $.get('/unfollow-question/', {pergunta_id: questid}, function(data){
+            $('.perg_follow_status#'+myId).html('Seguir');
+            $('.perg_followers_count#'+myId).html(data);
+            $('.follow_quest#'+myId).removeClass( 'unfollow' ).removeClass( 'active' ).addClass( 'follow' );
+        });
+    }
+    
+});
+
+
+
+
+// follow and unfollow tags control
+$('a.follow_tag').click(function(){
+    var $th = $(this);
+    tagid = $th.attr("data-tagid");
+    var myId = $(this).attr('id');
+    
+    // follow tag
+    if($th.hasClass('follow')) {
+        $.get('/follow-tag/', {tag_id: tagid}, function(data){
+            $('.tag_followers_count#'+myId).html(data);
+            $('.follow_tag#'+myId).removeClass( 'follow' ).addClass( 'unfollow' ).addClass( 'active' ).html('Seguindo');
+        });
+    }
+    
+    // unfollow tag
+    else if ($th.hasClass('unfollow')) {
+     $.get('/unfollow-tag/', {tag_id: tagid}, function(data){
+            $('.tag_followers_count#'+myId).html(data);
+            $('.follow_tag#'+myId).removeClass( 'unfollow' ).removeClass( 'active' ).addClass( 'follow' ).html('Seguir');
+        });
+    }
+    
 });
 
 
@@ -404,6 +460,11 @@ $('body').on('click', '.create_new_topic_known', function(){
 });
 
 
+// Allow links to specific tabs, using url # parameter
+var url = document.location.toString();
+if (url.match('#')) {
+    $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
+} 
 
 
 

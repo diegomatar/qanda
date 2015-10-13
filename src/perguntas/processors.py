@@ -9,6 +9,7 @@ from itertools import chain
 
 from .models import Pergunta, Resposta, Tag, Comment
 
+'''
 # Return a list of recent questions, answers and comments
 def atividades_recentes(request):
     perguntas = Pergunta.objects.order_by('-timestamp')[:30]
@@ -19,7 +20,7 @@ def atividades_recentes(request):
     ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)[0:6]
     
     return {'atividades_recentes': ativ_em_ordem}
-
+'''
 
 # Get the most active tags during the last days
 def tags(request):
@@ -49,7 +50,7 @@ def tags(request):
     return {'tags_todas': tags[0:10]}
 
 
-
+'''
 # Get the most active users during last days
 def active_users(request):
     last_days = 90
@@ -78,7 +79,7 @@ def active_users(request):
         autores.append(i[0])
     
     return {'usuarios': autores[0:10]}
-
+'''
 
 
 

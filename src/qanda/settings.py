@@ -84,9 +84,9 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'notifications.processors.unread_notifications',
-                'perguntas.processors.atividades_recentes',
+                #'perguntas.processors.atividades_recentes',
                 'perguntas.processors.tags',
-                'perguntas.processors.active_users',
+                #'perguntas.processors.active_users',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',

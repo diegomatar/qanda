@@ -104,11 +104,6 @@ a {
   border-radius: 100px;
 }
 
-.user-pic {
-  width: 40px;
-  height: 40px;
-  border-radius: 100px;
-}
 
 .user-pic-mini {
   width: 25px;
@@ -116,6 +111,30 @@ a {
   border-radius: 100px;
 }
 
+.user-pic {
+  width: 40px;
+  height: 40px;
+  border-radius: 100px;
+}
+
+.user-pic-tumb {
+  width: 55px;
+  height: 55px;
+  border-radius: 100px;
+}
+
+
+.profile-pic-m {
+    width: 150px;
+    height: 150px;
+    border-radius: 100%;
+}
+
+.profile-pic {
+    width: 200px;
+    height: 200px;
+    border-radius: 100%;
+}
 
 /* Buttons */
 
@@ -331,6 +350,19 @@ a>p.text:hover {
   color: #989898;
 }
 
+
+.control-label {
+  padding-top: 7px;
+  margin-bottom: 0;
+  font-size: 14px;
+  text-align: left;
+}
+
+
+.clearablefileinput {
+  font-size: 14px;
+}
+
 /* Footer */
 .footer {
   position: relative;
@@ -382,9 +414,8 @@ a>p.text:hover {
   padding-bottom: 20px;
 }
 .blog-title {
-    margin-top: 15px;
     margin-bottom: 0;
-    font-size: 50px;
+    font-size: 34px;
     font-weight: normal;
     color: #95a5a6;
 }
@@ -528,12 +559,6 @@ a>p.text:hover {
     text-align: center;
  }
  
- 
-.profile-pic {
-    width: 150px;
-    height: 150px;
-    border-radius: 100%;
-}
 
 .socialaccount_providers li {
   list-style-type: none;
@@ -591,3 +616,14 @@ a.email {
   background-position-y: center;
 }
 
+
+
+/* Social conector */
+
+.social-connect {
+  font-size: 15px;
+}
+
+.social-connect.activate {
+  color: #E67E22;
+}

@@ -71,9 +71,9 @@
                         <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">Sem respostas</a>
                     {% endif %}
                     <span class="bullet"> • </span>
-                    <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
-                        {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}
-                        | <span class="perg_followers_count" id="quest_{{ pergunta.id }}">{{ pergunta.follow_questions.all|length }}</span>
+                    <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
+                        <span class="perg_follow_status" id="quest_{{ pergunta.id }}">{% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</span>
+                        | <span class="perg_followers_count" id="quest_{{ pergunta.id }}">{{ pergunta.followers_num }}</span>
                     </a>
                     
                 </p>
@@ -132,7 +132,12 @@
         {% for tg in tags_todas %}
             <li class="sidebar-tags">
                 <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
-                <a class="info-text" id="tag_{{tg.pk}}">Seguir</a> | <span class="tag_followers_count" id="{{tag_id}}">2</span>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+                     | <span class="tag_followers_count" id="tag_{{ tg.pk }}">{{ tg.followers_num }}</span>
+                
+                
             </li>
         {% endfor %}
         </ul>

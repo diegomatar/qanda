@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
-
+from operator import itemgetter
 #from .models import Pergunta
 
 
 '''
-This algorithm atributes a score to each question,
-wich is used in home to display questions to users.
+This algorithm atributes a score to a list of questions,
 
 Factors considered:
 - when was asked (recent is better)
@@ -16,17 +15,17 @@ Factors considered:
 
 '''
 
-# weits the algoritm factors
+# weight the algoritm factors
 factors = {
-    'time': 3,
-    'votes': 1,
-    'answers': 0.5,
+    'time': 1,
+    'votes': 0,
+    'answers': 0,
 }
 
 
-#  A Variable that deffines how many questions will be considered
+#  Deffines how many questions will be considered
 # in deffining the ranking intervals
-questions_to_consider = 50
+questions_to_consider = 100
 
 
 # Returns only the considered questions
@@ -115,71 +114,88 @@ def get_answers_intervals():
 
 
 
-# Scores a list of questions question:
-def score_question(question):
+# Scores a list of questions:
+def score_questions(questions):
     
-    # Time factor
-    when_asked = question.timestamp.replace(tzinfo=None)
-    now = datetime.now()
-    time_elapsed = now - when_asked
-    interval_values = get_time_intervals()
-
-    if time_elapsed.days <= interval_values[0]:
-        t_points = 100
-    elif time_elapsed.days > interval_values[0] and time_elapsed.days <= interval_values[1]:
-        t_points = 80
-    elif time_elapsed.days > interval_values[1] and time_elapsed.days <= interval_values[2]:
-        t_points = 60
-    elif time_elapsed.days > interval_values[2] and time_elapsed.days <= interval_values[3]:
-        t_points = 40
-    else:
-        t_points = 20
-    #print "t_point = %s" % t_points
-    #print "days since asked = %s " % time_elapsed.days
+    # Get ranking intervals
+    time_interval_values = get_time_intervals()
+    votes_interval_values = get_votes_intervals()
+    answers_interval_values = get_answers_intervals()
+    
+    rank_data = []
+    
+    for question in questions:
+        
+        # Time factor
+        when_asked = question.timestamp.replace(tzinfo=None)
+        now = datetime.now()
+        time_elapsed = now - when_asked
         
     
-    # Votes factor:
-    votes = question.votes
-    interval_values = get_votes_intervals()
+        if time_elapsed.days <= time_interval_values[0]:
+            t_points = 100
+        elif time_elapsed.days > time_interval_values[0] and time_elapsed.days <= time_interval_values[1]:
+            t_points = 80
+        elif time_elapsed.days > time_interval_values[1] and time_elapsed.days <= time_interval_values[2]:
+            t_points = 60
+        elif time_elapsed.days > time_interval_values[2] and time_elapsed.days <= time_interval_values[3]:
+            t_points = 40
+        else:
+            t_points = 20
+        #print "t_point = %s" % t_points
+        #print "days since asked = %s " % time_elapsed.days
+            
+        
+        # Votes factor:
+        votes = question.votes
+        
+        
+        if votes >= votes_interval_values[0]:
+            v_points = 100
+        elif votes < votes_interval_values[0] and votes >= votes_interval_values[1]:
+            v_points = 80
+        elif votes < votes_interval_values[1] and votes >= votes_interval_values[2]:
+            v_points = 60
+        elif votes < votes_interval_values[2] and votes >= votes_interval_values[3]:
+            v_points = 40
+        else:
+            v_points = 20
+        #print "v_point = %s" % v_points
+        #print "votes = %s " % votes
+        
+        
+        # Answers factor:
+        answers = question.num_respostas()
+        
+        if answers >= answers_interval_values[0]:
+            a_points = 100
+        elif answers < answers_interval_values[0] and answers >= answers_interval_values[1]:
+            a_points = 80
+        elif answers < answers_interval_values[1] and answers >= answers_interval_values[2]:
+            a_points = 60
+        elif answers < answers_interval_values[2] and answers >= answers_interval_values[3]:
+            a_points = 40
+        else:
+            a_points = 20
+        #print "a_point = %s" % a_points
+        #print "answers = %s " % answers
+        
+        rank = factors['time']*t_points + factors['votes']*v_points + factors['answers']*a_points
+        
+        ranked = []
+        ranked.append(question)
+        ranked.append(rank)
+        
+        rank_data.append(ranked)
     
-    if votes >= interval_values[0]:
-        v_points = 100
-    elif votes < interval_values[0] and votes >= interval_values[1]:
-        v_points = 80
-    elif votes < interval_values[1] and votes >= interval_values[2]:
-        v_points = 60
-    elif votes < interval_values[2] and votes >= interval_values[3]:
-        v_points = 40
-    else:
-        v_points = 20
-    #print "v_point = %s" % v_points
-    #print "votes = %s " % votes
+    rank_data = sorted(rank_data, key=itemgetter(1), reverse=True)
+    print 'rank data = %s ' % rank_data
     
+    sorted_questions = []
+    for i in rank_data:
+        sorted_questions.append(i[0])
     
-    # Answers factor:
-    answers = question.num_respostas()
-    interval_values = get_answers_intervals()
-    
-    if answers >= interval_values[0]:
-        a_points = 100
-    elif answers < interval_values[0] and answers >= interval_values[1]:
-        a_points = 80
-    elif answers < interval_values[1] and answers >= interval_values[2]:
-        a_points = 60
-    elif answers < interval_values[2] and answers >= interval_values[3]:
-        a_points = 40
-    else:
-        a_points = 20
-    #print "a_point = %s" % a_points
-    #print "answers = %s " % answers
-    
-    rank = factors['time']*t_points + factors['votes']*v_points + factors['answers']*a_points
-    #print factors['time']*t_points
-    #print factors['votes']*v_points
-    #print factors['answers']*a_points
-    
-    #print rank
-    return rank
+    return sorted_questions
     
 
 '''

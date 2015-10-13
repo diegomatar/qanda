@@ -1,0 +1,167 @@
+{% extends "account/base.html" %}
+{% load socialaccount %}
+{% load crispy_forms_tags %}
+{% load django_select2_tags %}
+{% load app_filters %}
+{% load i18n %}
+
+{% block head %}{% import_django_select2_js_css %}{% endblock%}
+
+{% block head_title %}{% trans "Signup" %}{% endblock %}
+
+{% block content %}
+
+<h1 class="blog-title">Editar Perfil</h1>
+
+<div class="blog-post">
+      <div class="row">
+            <div class="col-sm-4">
+                  <hr>
+                  <p class="lead blog-description">Sua Foto:</p>
+                  <img class="img-responsive profile-pic-m" src="{{profile.profile_image_url}}">
+            
+  
+            
+
+                  <form class="editprofile form-horizontal" id="editprofile" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
+                    
+                    
+
+                        
+                    {% crispy picture_form %}
+                    
+                    
+                    <button class="btn btn-default btn-sm" type="submit"><i class="fa fa-check"></i> Alterar Foto</button>
+                    
+                  </form>
+                  
+            </div>
+            <div class="col-sm-8">
+                  <hr>
+                  <p class="lead blog-description">Suas Informações:</p>
+            
+                  <form class="editprofile form-horizontal" id="editprofile" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
+            
+            
+                    
+                    {% crispy user_form %}
+                    
+                    {% crispy profile_form %}
+                    
+                    
+                        <div class="form-group">
+                              <div class="col-sm-offset-3 col-sm-9">  
+                                    <button class="btn btn-default btn-sm" type="submit"><i class="fa fa-check"></i> Salvar Informações</button>
+                              </div>
+                        </div>
+                    
+                  </form>
+                  
+                  <div class="row">
+                        <hr>
+                        <p class="lead blog-description">Redes Sociais:</p>
+                        <div class="col-sm-4 social-connect">
+                              <p class="text-center">
+                                    {% if not profile.facebook %}<a href="{% provider_login_url "facebook" process="connect" %}">{% endif %}
+                                          <i class="fa fa-facebook-square fa-4x"></i><br>{% if profile.facebook %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not profile.facebook %}</a>{% endif %}
+                              </p>
+                        </div>
+                        <div class="col-sm-4 social-connect">
+                              <p class="text-center">
+                                    {% if not profile.google %}<a href="{% provider_login_url "google" process="connect" %}">{% endif %}
+                                          <i class="fa fa-google-plus-square fa-4x"></i><br>{% if profile.google %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not profile.google %}</a>{% endif %}
+                              </p>
+                        </div>
+                        <div class="col-sm-4 social-connect">
+                              <p class="text-center">
+                                    {% if not profile.twitter %}<a href="{% provider_login_url "twitter" process="connect" %}">{% endif %}
+                                          <i class="fa fa-twitter-square fa-4x"></i></i><br>{% if profile.twitter %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not profile.twitter %}</a>{% endif %}
+                              </p>
+                        </div>
+                  </div>
+                  
+                  <p>Facebook: {{ profile.facebook }}</p>
+                  <p>Google: {{ profile.google }}</p>
+                  <p>Twitter: {{ profile.twitter }}</p>
+                  
+                  <hr>
+            
+            
+            </div><!-- /.col -->
+      </div><!-- /.row -->
+</div><!-- /.blog-post -->
+
+
+{% endblock %}
+
+
+{% block sidebar %}
+
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <h4 class="sm-title">INTERESSADO EM:</h4>
+    {% if profile.interests %}
+        <ul>
+        {% for tg in profile.interests.all %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    | {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+            </li>
+        {% endfor %}  
+        </ul>
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
+    <hr>
+</div>
+
+
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <h4 class="sm-title">CONHECE SOBRE:</h4>
+    {% if profile.knows_about %}
+        <ul>
+        {% for tg in profile.knows_about.all %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    | {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+            </li>
+        {% endfor %}  
+        </ul>
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
+    <hr>
+</div>
+
+
+
+<div class="sidebar-module sidebar-module-inset">
+    <hr>
+    <h4 class="sm-title">SEGUINDO TEMAS:</h4>
+    {% if profile.follow_topics %}
+        <ul>
+        {% for tg in profile.follow_topics.all %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    | {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+            </li>
+        {% endfor %}  
+        </ul>
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
+    <hr>
+</div>
+    
+
+{% endblock %}

@@ -1,0 +1,22 @@
+{% load app_filters %}
+
+<div class="row">
+    <div class="col-sm-10 col-sm-offset-1">
+        <br>
+        {% for ativ in atividades|slice:":50" %}
+            {% if ativ.classe = 'pergunta' %}
+                <p class="info-text">
+                    <i>{{ ativ.timestamp|time_ago }}</i><span class="bullet"> • </span><b>perguntou:</b>
+                </p>
+                <p class="blog-post-title"><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
+                {% if ativ.descricao %}
+                    <div class="text">
+                        {{ ativ.descricao|striptags|truncatechars:100 }}<a href="{% url 'pergunta' ativ.slug %}"> mais ></a>
+                    </div>
+                {% endif %}
+            <hr>
+            {% endif %}
+            
+        {% endfor %}
+    </div>
+</div>

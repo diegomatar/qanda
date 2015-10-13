@@ -52,21 +52,25 @@
     
 <div class="sidebar-module sidebar-module-inset">
     <hr>
-    <div id="currentTopics">
-        <div class="row">
-            <h4 class="sm-title">VOCÊ CONHECE SOBRE:</h4>
-            {% if current_topics %}
-                <ul>
-                    {% for tpcs in current_topics %}
-                        <li><span class="label label-tag">{{ tpcs|title }}</span></li>
-                    {% endfor %}        
-                </ul>
-                <a href="{% url 'edit_user_known_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
-            {% else %}
-                <p class="info-text">Nenhum tema adicionado..</p>
-            {% endif %}
-        </div>            
-    </div>
+    <h4 class="sm-title">VOCÊ CONHECE SOBRE:</h4>
+    {% if current_topics %}
+        <ul>
+        {% for tg in current_topics %}
+            <li class="sidebar-tags">
+                <a href="{% url 'categoria' tg.slug %}"><span class="label label-tag">{{ tg.nome|title }}</span></a>
+                
+                <a class="follow_tag info-text {% if tg|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="tag_{{ tg.pk }}" data-tagid="{{ tg.pk }}">
+                    {% if tg|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</a>
+                     | <span class="tag_followers_count" id="tag_{{ tg.pk }}">{{ tg.followers_num }}</span>
+                
+                
+            </li>
+        {% endfor %}  
+        </ul>
+        <a href="{% url 'edit_user_known_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
+    {% else %}
+        <p class="info-text">Nenhum tema adicionado..</p>
+    {% endif %}        
     <hr>
 </div>
     

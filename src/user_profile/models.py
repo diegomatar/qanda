@@ -25,7 +25,7 @@ class UserProfile(models.Model):
     about = models.TextField(max_length=500, blank=True, null=True, verbose_name='Sobre')
     twitter = models.CharField(max_length=200, blank=True, null=True, verbose_name='Twitter')
     facebook = models.URLField(max_length=200, blank=True, null=True, verbose_name='Facebook')
-    linkedin = models.URLField(max_length=200, blank=True, null=True, verbose_name='Linked In')
+    google = models.URLField(max_length=200, blank=True, null=True, verbose_name='Google')
     picture = models.ImageField(upload_to='profile_pictures', verbose_name='Imagem de Perfil', blank=True, null=True)
     points = models.IntegerField(default=0)
     perg_upvotes = models.ManyToManyField('perguntas.Pergunta', related_name='perg_upvotes')
@@ -47,10 +47,11 @@ class UserProfile(models.Model):
         
         else:
             fb_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='facebook')
-         
+            twitter_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='twitter')
+            
             if len(fb_uid):
                 return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)+"?type=large"
-         
+             
             return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())+"?s=200"
     
     def name(self):

@@ -12,9 +12,11 @@
 
 
 
+import pytz
 
-
-from datetime import datetime
+from collections import Counter
+from datetime import datetime, timedelta
+from itertools import chain
 from random import randint
 
 from django.contrib import messages
@@ -29,6 +31,7 @@ from user_profile.models import UserProfile
 from notifications.views import new_Answer, new_Vote, new_Comment, new_AskAnswer
 from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm, EditarPerguntaForm
 from .models import Pergunta, Resposta, Tag, Comment
+from .rank import score_questions
 
 
 
@@ -63,20 +66,24 @@ def home(request):
             for fltr in filtered:
                 if fltr not in perguntas1:
                     perguntas1.append(fltr)
-        perguntas1 = sorted(perguntas1, key=lambda pergunta: pergunta.score(), reverse=True)
+        perguntas1 = score_questions(perguntas1)
     
     perguntas2 = []
     if len(perguntas1) < 100:
         perguntas2 = Pergunta.objects.all()
-        perguntas2 = sorted(perguntas2, key=lambda pergunta: pergunta.score(), reverse=True)
+        perguntas2 = score_questions(perguntas2)
     
     perguntas = perguntas1 + perguntas2
     
     
-    paginator = Paginator(perguntas, 30) # Show 30 questions per page
-    tags = Tag.objects.all()
+    # Get recent activities:
+    atividades = atividades_recentes()[0:6]
+    
+    # Get active users
+    usuarios = active_users()
     
     # Paginator:
+    paginator = Paginator(perguntas, 30) # Show 30 questions per page
     page = request.GET.get('page')
     try:
         perguntas = paginator.page(page)
@@ -87,13 +94,15 @@ def home(request):
         # If page is out of range (e.g. 9999), deliver last page of results.
         perguntas = paginator.page(paginator.num_pages)
     
+    # Random cover
     cover_list = ['a', 'b', 'c', 'd', 'e', 'f']
     cover = 'jumbotron-' + cover_list[randint(0,len(cover_list)-1)]
     
     context = {
         'perguntas': perguntas,
-        'tags': tags,
         'cover': cover,
+        'atividades_recentes': atividades,
+        'usuarios': usuarios,
     }
     return render(request, 'home.html', context)
 
@@ -232,10 +241,32 @@ def categoria(request, slug):
     
     tag = Tag.objects.get(slug=slug)
     perguntas = tag.pergunta_set.all()
+    perguntas = score_questions(perguntas)
+    
+    # Get recent activities of category
+    atividades = atividades_recentes(tag=tag, user=None)[0:6]
+    
+    # Get active users
+    usuarios = active_users(tag)
+    
+    # Paginator:
+    paginator = Paginator(perguntas, 30) # Show 30 questions per page
+    page = request.GET.get('page')
+    try:
+        perguntas = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        perguntas = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        perguntas = paginator.page(paginator.num_pages)
+    
     
     context = {
         'tag': tag,
         'perguntas': perguntas,
+        'atividades_recentes': atividades,
+        'usuarios': usuarios,
     }
     return render(request, 'perguntas/tag.html', context)
 
@@ -449,7 +480,7 @@ These views support other views based on user actions:
 - ###GET_QUESTION_LIST: based on the inputed data, searches for similar questions
 - SUGGEST_QUESTION: gets the inputed data in new question form, and return sugestions (using get_question_list)
 - PERGUNTAR_NOVAMENTE: allow user to ask again an existing question
-
+- ###ATIVIDADES_RECENTES: return a list of recent activities, based in inputed tag or user
 
 
 '''
@@ -624,6 +655,70 @@ def perguntar_novamente(request, pk):
     
     
 
+# Returns the recent activities, based in user and tag inputs
+def atividades_recentes(tag=None, user=None):
+    
+    if tag and user:
+        perguntas = Pergunta.objects.filter(tags__nome=tag.nome).filter(autor=user).order_by('-timestamp')[:30]
+        respostas = Resposta.objects.filter(tags__nome=tag.nome).filter(autor=user).order_by('-timestamp')[:30]
+        comentarios = Comment.objects.filter(tags__nome=tag.nome).filter(autor=user).order_by('-timestamp')[:30]
+        
+    elif tag:
+        perguntas = Pergunta.objects.filter(tags__nome=tag.nome).order_by('-timestamp')[:30]
+        respostas = Resposta.objects.filter(pergunta__tags__nome=tag.nome).order_by('-timestamp')[:30]
+        comentarios = Comment.objects.filter(answer__pergunta__tags__nome=tag.nome).order_by('-timestamp')[:30]
+    
+    elif user:
+        perguntas = Pergunta.objects.filter(autor=user).order_by('-timestamp')[:30]
+        respostas = Resposta.objects.filter(autor=user).order_by('-timestamp')[:30]
+        comentarios = Comment.objects.filter(autor=user).order_by('-timestamp')[:30]
+        
+    else:
+        perguntas = Pergunta.objects.order_by('-timestamp')[:30]
+        respostas = Resposta.objects.order_by('-timestamp')[:30]
+        comentarios = Comment.objects.order_by('-timestamp')[:30]
+    
+    atividades = list(chain(perguntas, respostas, comentarios))
+    ativ_em_ordem = sorted(atividades, key= lambda t: t.timestamp, reverse=True)
+    
+    return ativ_em_ordem
+
+
+
+
+
+# Get the most active users during last days
+def active_users(tag=None):
+    last_days = 90
+    now = datetime.now(pytz.utc)
+    then = now - timedelta(days=last_days)
+    
+    if tag:
+        perguntas = Pergunta.objects.filter(tags__nome=tag.nome).filter(timestamp__gte=then)
+        respostas = Resposta.objects.filter(pergunta__tags__nome=tag.nome).filter(timestamp__gte=then)
+        coments = Comment.objects.filter(answer__pergunta__tags__nome=tag.nome).filter(timestamp__gte=then)
+    else: 
+        perguntas = Pergunta.objects.filter(timestamp__gte=then)
+        respostas = Resposta.objects.filter(timestamp__gte=then)
+        coments = Comment.objects.filter(timestamp__gte=then)
+    
+    # Get the author of each recent content
+    autors = []
+    for perg in perguntas:
+        autors.append(perg.autor)
+    for resp in respostas:
+        autors.append(resp.autor)
+    for come in coments:
+        autors.append(come.autor)
+            
+    
+    # Check how many times they apears and order by appearance
+    counts = Counter(autors).most_common()
+    autores = []
+    for i in counts:
+        autores.append(i[0])
+    
+    return autores[0:10]
 
 
 
@@ -948,19 +1043,16 @@ def resp_downvote(request):
 '''
 ---- FOLLOW VIEWS: ----
 These views control the follow and unfollow actions:
-- FOLLOW_QUESTION: add a question to users follow_question list
-- UNFOLLOW QUESTION: removes a question from users follow_question list
-- 
-
+- FOLLOW_QUESTION: add a question to user's follow_questions list
+- UNFOLLOW QUESTION: removes a question from user's follow_questions list
+- FOLLOW_TAG: add a tag to user's follow_topics
+- UNFOLLOW_TAG: removes a tag from user's follow_topics
 
 '''
 
 
-    
-    
 
-# Add the question to following list
-# User starts to receive notifications from question
+# Add a question to following list
 @login_required
 def follow_question(request):
     # Get the data being passed by get
@@ -977,12 +1069,12 @@ def follow_question(request):
         if quest and quest not in profile.follow_questions.all():
             profile.follow_questions.add(quest)
             profile.save()
+        followers = quest.followers_num()
             
-    return HttpResponse()
+    return HttpResponse(followers)
 
 
-# Removes the question from the followed topics
-# User stops to receive notifications from question
+# Removes a question from the followed topics
 @login_required
 def unfollow_question(request):
      # Get the data being passed by get
@@ -999,9 +1091,54 @@ def unfollow_question(request):
         if quest and quest in profile.follow_questions.all():
             profile.follow_questions.remove(quest)
             profile.save()
+        followers = quest.followers_num()
             
-    return HttpResponse()
+    return HttpResponse(followers)
 
+
+# Add a tag to follow_topics
+@login_required
+def follow_tag(request):
+    # Get the data being passed by get
+    tag_id = None
+    if request.method == "GET":
+        tag_id = request.GET['tag_id']
+    # If was passed any value on get
+    if tag_id:
+        # Get the answer with the id received
+        tag = Tag.objects.get(id=int(tag_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # follows the tag
+        if tag and tag not in profile.follow_topics.all():
+            profile.follow_topics.add(tag)
+            profile.save()
+        followers = tag.followers_num()
+            
+    return HttpResponse(followers)
+
+
+
+# Removes a tag from follow_topics
+@login_required
+def unfollow_tag(request):
+     # Get the data being passed by get
+    tag_id = None
+    if request.method == "GET":
+        tag_id = request.GET['tag_id']
+    # If was passed any value on get
+    if tag_id:
+        # Get the answer with the id received
+        tag = Tag.objects.get(id=int(tag_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # unfollows the tag
+        if tag and tag in profile.follow_topics.all():
+            profile.follow_topics.remove(tag)
+            profile.save()
+        followers = tag.followers_num()
+        
+    return HttpResponse(followers)
 
 
     

@@ -83,10 +83,14 @@
                 vista: {{ pergunta.views }} vezes
               </p>
               <p class="info-text">
-                <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}active{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}" title="{% if pergunta|followed:request.user %}Deixar de seguir{% else %}Receba as atualizações desta pergunta{% endif %}" >
-                    {% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}
+                
+                <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >
+                        <span class="perg_follow_status" id="quest_{{ pergunta.id }}">{% if pergunta|followed:request.user %}Seguindo{% else %}Seguir{% endif %}</span>
+                        | <span class="perg_followers_count" id="quest_{{ pergunta.id }}">{{ pergunta.followers_num }}</span>
                 </a>
-                    {{ pergunta.follow_questions.all|length }} seguindo: {% for seg in pergunta.follow_questions.all %}<a href="{% url 'profile' seg.slug %}" title="{{ seg.name }}" ><img class="user-pic-mini" src="{{seg.profile_image_url}}"></a>{% endfor %}
+                
+                {% for seg in pergunta.follow_questions.all %} <a href="{% url 'profile' seg.slug %}" title="{{ seg.name }}" ><img class="user-pic-mini" src="{{seg.profile_image_url}}"></a>{% endfor %}
+                
               </p>
             </div>
             
