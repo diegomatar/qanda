@@ -189,7 +189,7 @@ def score_questions(questions):
         rank_data.append(ranked)
     
     rank_data = sorted(rank_data, key=itemgetter(1), reverse=True)
-    print 'rank data = %s ' % rank_data
+    #print 'rank data = %s ' % rank_data
     
     sorted_questions = []
     for i in rank_data:

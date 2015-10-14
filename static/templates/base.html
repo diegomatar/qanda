@@ -88,7 +88,7 @@
             <li class="dropdown">
               <a href="" class="dropdown-toggle img" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img class="nav-img" src="{{ request.user.userprofile.profile_image_url }}"> <span class="caret"></span></a>
               <ul class="dropdown-menu">
-                <li><a href="{% url 'profile' request.user.userprofile.slug %}"><i class="fa fa-user"></i> Meu Perfil</a></li>
+                <li><a href="{% url 'edit_profile' %}"><i class="fa fa-user"></i> Editar Perfil</a></li>
                 <li><a href="#"><i class="fa fa-cog"></i> Configurações</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="{% url 'account_logout' %}"><i class="fa fa-sign-out"></i> Sair</a></li>

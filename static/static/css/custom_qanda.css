@@ -358,6 +358,13 @@ a>p.text:hover {
   text-align: left;
 }
 
+.controls {
+  padding-top: 7px;
+  margin-bottom: 0;
+  font-size: 14px;
+  text-align: left;
+}
+
 
 .clearablefileinput {
   font-size: 14px;

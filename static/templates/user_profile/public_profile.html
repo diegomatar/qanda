@@ -29,7 +29,11 @@
                   </div>
                   <hr>
                   <p>{{ profile.about }}</p>
-                  <br>
+                  <p>
+                        {% if facebook %}<a href="{{facebook.get_profile_url}}"><i class="fa fa-facebook-square fa-lg"></i></a>{% endif %}
+                        {% if google %}<a href="{{google.get_profile_url}}"><i class="fa fa-google-plus-square"></i></a>{% endif %}
+                        {% if twitter %}<a href="{{twitter.get_profile_url}}"><i class="fa fa-twitter-square fa-lg"></i></a>{% endif %}
+                  </p>
                   <p>
                         <a class='follow_user btn btn-default {% if is_followed %}unfollow active{% else %}follow{% endif %}' id='user_{{ profile.user.pk }}' data-userid='{{ profile.user.id }}'>{% if is_followed %}Seguindo{% else %}Seguir{% endif %}</a>
                         | <span class='followers_count' id="user_{{profile.user.pk}}">{{ profile.followers_num }}</span> seguidores

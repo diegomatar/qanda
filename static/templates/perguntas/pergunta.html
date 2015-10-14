@@ -54,20 +54,16 @@
   <div class="row">
             
     <div class="col-xs-2"><!-- Vote Buttons -->
-      <a class="{% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
-        {% if user.is_authenticated %}id="perg_upvote" title="Gostei: esta pergunta é relevante, clara e bem escrita."
-        {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-        {% endif %}
-        data-pergid="{{ pergunta.id}}"  >gostei
-      </a>
-      <p class="votes_count"><span id="votes_count">{{ pergunta.votes }}</span></p>
-      <a class="{% if pergunta|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
-        {% if user.is_authenticated %}id="perg_downvote" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
-        {% else %}data-container="body" data-toggle="popover" data-placement="right" data-content="<b>Para poder votar:</b><br> <b><a href='{% url "account_login" %}'>Acesse sua conta</a></b><br> ou, se ainda não tem uma:<br> <b><a href='{% url "account_signup" %}'>Crie sua conta aqui</a></b>"
-        {% endif %}
-        data-pergid="{{ pergunta.id}}" >não gostei
-      </a>
-    </div><!-- col-xs-2 -->
+        <a class="perg_upvote {% if pergunta|upvoted:request.user %}active upvote-on{% else %}upvote-off{% endif %}"
+          id="perg_{{ pergunta.pk }}" title="Gostei: esta pergunta é relevante, clara e bem escrita."
+          data-pergid="{{ pergunta.id}}"  >gostei
+        </a>
+        <p class="votes_count" id="perg_{{ pergunta.pk }}">{{ pergunta.votes }}</p>
+        <a class="perg_downvote {% if pergunta|downvoted:request.user %}active downvote-on{% else %}downvote-off{% endif %}"
+          id="perg_{{ pergunta.pk }}" title="Não Gostei: pergunta não é relevante, confusa e mau escrita."
+          data-pergid="{{ pergunta.id}}" >não gostei
+        </a>
+      </div><!-- col-xs-2 -->
     
     <div class="col-xs-10">      
       <p class="blog-post-title">{{ pergunta.titulo }}</p>

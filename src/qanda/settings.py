@@ -164,30 +164,33 @@ ACCOUNT_USERNAME_MIN_LENGTH = 4
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_PASSWORD_MIN_LENGTH = 5
 SOCIALACCOUNT_ADAPTER = 'qanda.my_adapter.SocialAccountAdapter'
+SOCIALACCOUNT_QUERY_EMAIL = True
 
 # Allauth Social Settings
 SOCIALACCOUNT_PROVIDERS = \
-    {'facebook':
-       {'METHOD': 'oauth2',
-        'SCOPE': ['email', 'public_profile'],
-        'AUTH_PARAMS': {'auth_type': 'https'},
-        'FIELDS': [
-            'id',
-            'email',
-            'name',
-            'first_name',
-            'last_name',
-            'verified',
-            'locale',
-            'timezone',
-            'link',
-            'gender',
-            'updated_time'],
-        'EXCHANGE_TOKEN': True,
-        #'LOCALE_FUNC': 'path.to.callable',
-        'VERIFIED_EMAIL': False,
-        'VERSION': 'v2.4'}}
-
+{'facebook':
+    {'METHOD': 'oauth2',
+     'SCOPE': ['email', 'public_profile'],
+     'AUTH_PARAMS': {'auth_type': 'https'},
+     'FIELDS': [
+         'id',
+         'email',
+         'name',
+         'first_name',
+         'last_name',
+         'verified',
+         'locale',
+         'timezone',
+         'link',
+         'gender',
+         'updated_time'],
+     'EXCHANGE_TOKEN': True,
+     #'LOCALE_FUNC': 'path.to.callable',
+     'VERIFIED_EMAIL': False,
+     'VERSION': 'v2.4'}}
+{ 'google':
+    { 'SCOPE': ['profile', 'email'],
+      'AUTH_PARAMS': { 'access_type': 'online' } }}
 
 # Delect2 settings
 SELECT2_BOOTSTRAP = True

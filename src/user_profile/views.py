@@ -1,14 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from allauth.account.signals import user_signed_up
 from itertools import chain
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.urlresolvers import reverse
 from django.dispatch import receiver
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 
 
+from allauth.socialaccount.models import SocialAccount
 from perguntas.models import Pergunta, Resposta, Tag
 from notifications.views import new_Follow
 from perguntas.views import suggest_topics, atividades_recentes
@@ -17,38 +23,78 @@ from .models import UserProfile
 
 
 
+# Function that retirns user social account:
+def get_social_accounts(user):
+    
+    facebook = None
+    google = None
+    twitter = None
+    
+    facebook_list = SocialAccount.objects.filter(user_id=user.pk, provider='facebook')
+    if len(facebook_list):
+        facebook = facebook_list[0]
+    
+    google_list = SocialAccount.objects.filter(user_id=user.pk, provider='google')
+    if len(google_list):
+        google = google_list[0]
+    
+    twitter_list = SocialAccount.objects.filter(user_id=user.pk, provider='twitter')
+    if len(twitter_list):
+        twitter = twitter_list[0]
+        
+    return facebook, google, twitter
+
+
+
 # Allow user to edit its profile
 @login_required
 def edit_user_profile(request):
     
     profile = request.user.userprofile
+    facebook, google, twitter = get_social_accounts(request.user)
 
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=request.user)
         profile_form = EditProfileForm(request.POST, request.FILES, instance=profile)
-        picture_form = EditProfilePictureForm(instance=profile)
         
-        if profile_form.is_valid and user_form.is_valid and picture_form.is_valid:
+        if profile_form.is_valid and user_form.is_valid:
             user_form.save()
             profile_form.save()
-            picture_form.save()
             slug = str(profile.user.first_name) +' '+ str(profile.user.last_name)
             slug = slugify(slug)
             profile.slug = slug
             profile.save()
+            messages.success(request, 'Suas informações foram atualizadas com sucesso!!')
+        
     else:
         user_form = EditUserForm(instance=request.user)
         profile_form = EditProfileForm(instance=profile)
         picture_form = EditProfilePictureForm(instance=profile)
-        
+        # Use funtion to get user social accounts
     
     context ={
         'profile': profile,
         'user_form': user_form,
         'profile_form': profile_form,
         'picture_form': picture_form,
+        'facebook': facebook,
+        'google': google,
+        'twitter': twitter,
     }
     return render(request, 'user_profile/edit_profile.html', context)
+
+
+# Handle the picture submited form
+def edit_user_profile_picture(request):
+    profile = request.user.userprofile
+    if request.method == 'POST':
+        picture_form = EditProfilePictureForm(request.POST, request.FILES, instance=profile)
+        
+        if picture_form.is_valid:
+            picture_form.save()
+            messages.success(request, 'Sua foto foi atualizadas com sucesso!!')
+            
+    return HttpResponseRedirect(reverse('edit_profile', args=[] ))
 
 
 # This view creates and populates user profile with social data
@@ -68,15 +114,17 @@ def populate_profile(request, user, sociallogin=None, **kwargs):
                 perfil = user.userprofile
             else:
                 perfil = UserProfile(user=user)
-            perfil.facebook = sociallogin.account.extra_data['link']
+            perfil.facebook = sociallogin.account.get_profile_url()
             perfil.save()
         
         if sociallogin.account.provider == 'twitter':
             print 'twitter!!!'
             if not user.first_name and sociallogin.account.extra_data['name']:
-                user.first_name = sociallogin.account.extra_data['name'].split( )[0]
+                name = sociallogin.account.extra_data['name']
+                user.first_name = name.split()[0]
             if not user.last_name and sociallogin.account.extra_data['name']:
-                user.last_name = sociallogin.account.extra_data['name'].split( )[-1]
+                name = sociallogin.account.extra_data['name']
+                user.last_name = name.split()[1]
             if not user.email and sociallogin.account.extra_data['email']:
                 user.last_name = sociallogin.account.extra_data['email']
             user.save()
@@ -85,15 +133,15 @@ def populate_profile(request, user, sociallogin=None, **kwargs):
                 print "perfil: %s" % perfil
             else:
                 perfil = UserProfile(user=user)
-            perfil.twitter = 'http://twitter.com/'+ sociallogin.account.extra_data['screen_name']
+            perfil.twitter = sociallogin.account.get_profile_url()
             perfil.save()
             print "perfil twitter: %s" % perfil.twitter
             
         if sociallogin.account.provider == 'google':
-            if not user.first_name and sociallogin.account.extra_data['first_name']:
-                user.first_name = sociallogin.account.extra_data['first_name']
-            if not user.last_name and sociallogin.account.extra_data['last_name']:
-                user.last_name = sociallogin.account.extra_data['last_name']
+            if not user.first_name and sociallogin.account.extra_data['given_name']:
+                user.first_name = sociallogin.account.extra_data['given_name']
+            if not user.last_name and sociallogin.account.extra_data['family_name']:
+                user.last_name = sociallogin.account.extra_data['family_name']
             if not user.email and sociallogin.account.extra_data['email']:
                 user.last_name = sociallogin.account.extra_data['email']
             user.save()
@@ -101,7 +149,7 @@ def populate_profile(request, user, sociallogin=None, **kwargs):
                 perfil = user.userprofile
             else:
                 perfil = UserProfile(user=user)
-            perfil.google = sociallogin.account.extra_data['link']
+            perfil.google = sociallogin.account.get_profile_url()
             perfil.save()
         
         
@@ -121,13 +169,20 @@ def public_profile(request, slug):
     if request.user.is_authenticated():
         if user in request.user.userprofile.follow_users.all():
             is_followed = 1
+            
+    # Use funtion to get user social accounts
+    facebook, google, twitter = get_social_accounts(user)
     
+    print "Google: %s" % google.get_profile_url()
     
     context = {
         'user': user,
         'profile': profile,
         'atividades': atividades,
         'is_followed': is_followed,
+        'facebook': facebook,
+        'google': google,
+        'twitter': twitter,
     }
     
     return render(request, 'user_profile/public_profile.html', context)

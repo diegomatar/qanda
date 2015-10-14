@@ -5,9 +5,9 @@ from django.contrib import admin
 from .models import UserProfile
 
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['email', 'first_name', 'num_perg', 'num_resp', 'p_upvotes', 'p_downvotes', 'r_upvotes', 'r_downvotes']
+    list_display = ['email', 'first_name', 'num_perg', 'num_resp', 'p_upvotes', 'p_downvotes', 'r_upvotes', 'r_downvotes', 'picture']
     search_fields = ['user__email', 'user_userbame', 'autor', 'tags__nome']
-    list_filter = ['points', 'perg_upvotes', 'perg_downvotes', 'resp_upvotes', 'resp_downvotes']
+    list_filter = ['user_role',]
     readonly_fields = ['timestamp', 'updated', 'points', 'num_perg', 'num_resp', 'perg_upvotes', 'perg_downvotes', 'resp_upvotes', 'resp_downvotes']
     
     class Meta:

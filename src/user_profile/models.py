@@ -3,6 +3,7 @@
 
 import hashlib
 from allauth.socialaccount.models import SocialAccount
+from random import randint
 
 from django.db import models
 from django.contrib.auth.models import User
@@ -48,10 +49,19 @@ class UserProfile(models.Model):
         else:
             fb_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='facebook')
             twitter_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='twitter')
+            google_uid = SocialAccount.objects.filter(user_id=self.user.id, provider='google')
             
             if len(fb_uid):
-                return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)+"?type=large"
-             
+                return fb_uid[0].get_avatar_url()
+                #return "http://graph.facebook.com/{}/picture".format(fb_uid[0].uid)+"?type=large"
+            
+            elif len(twitter_uid):
+                #url = twitter_uid.extra_data['profile_image_url']
+                return twitter_uid[0].get_avatar_url()
+            
+            elif len(google_uid):
+                return google_uid[0].get_avatar_url()
+            
             return "http://www.gravatar.com/avatar/{}".format(hashlib.md5(self.user.email).hexdigest())+"?s=200"
     
     def name(self):
@@ -98,4 +108,24 @@ class UserProfile(models.Model):
         
     def __unicode__(self):
         return self.user.email
+    
+    
+    def save(self, *args, **kwargs):
+        slug = str(self.user.first_name) +' '+ str(self.user.last_name)
+        slug = slugify(slug)
+        print slug
+        existent_slug = UserProfile.objects.filter(slug=slug)
+        
+        if len(existent_slug): #checks if slug exists, if it does add a random num to the end of it
+            self.slug = slug + '-' + str(randint(0,100))
+            print 'New slug 1 %s' % self.slug
+        
+        else: # saves slug as it is
+            self.slug = slug
+            print 'New slug 2 %s' % self.slug
+        
+        super(UserProfile, self).save(*args, **kwargs)
+            
+            
+
     

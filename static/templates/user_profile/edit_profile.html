@@ -23,7 +23,7 @@
   
             
 
-                  <form class="editprofile form-horizontal" id="editprofile" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
+                  <form class="editprofile form-horizontal" id="editprofilepicture" method="post" action="{% url 'edit_profile_picture' %}" enctype="multipart/form-data">
                     
                     
 
@@ -31,7 +31,7 @@
                     {% crispy picture_form %}
                     
                     
-                    <button class="btn btn-default btn-sm" type="submit"><i class="fa fa-check"></i> Alterar Foto</button>
+                    <button class="btn btn-default btn-sm" type="submit" value="update_picture"><i class="fa fa-check"></i> Alterar Foto</button>
                     
                   </form>
                   
@@ -51,7 +51,7 @@
                     
                         <div class="form-group">
                               <div class="col-sm-offset-3 col-sm-9">  
-                                    <button class="btn btn-default btn-sm" type="submit"><i class="fa fa-check"></i> Salvar Informações</button>
+                                    <button class="btn btn-default btn-sm" type="submit" value="update_info"><i class="fa fa-check"></i> Salvar Informações</button>
                               </div>
                         </div>
                     
@@ -62,30 +62,26 @@
                         <p class="lead blog-description">Redes Sociais:</p>
                         <div class="col-sm-4 social-connect">
                               <p class="text-center">
-                                    {% if not profile.facebook %}<a href="{% provider_login_url "facebook" process="connect" %}">{% endif %}
-                                          <i class="fa fa-facebook-square fa-4x"></i><br>{% if profile.facebook %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
-                                    {% if not profile.facebook %}</a>{% endif %}
+                                    {% if not facebook %}<a href="{% provider_login_url "facebook" process="connect" %}">{% endif %}
+                                          <i class="fa fa-facebook-square fa-3x"></i><br>{% if facebook %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not facebook %}</a>{% endif %}
                               </p>
                         </div>
                         <div class="col-sm-4 social-connect">
                               <p class="text-center">
-                                    {% if not profile.google %}<a href="{% provider_login_url "google" process="connect" %}">{% endif %}
-                                          <i class="fa fa-google-plus-square fa-4x"></i><br>{% if profile.google %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
-                                    {% if not profile.google %}</a>{% endif %}
+                                    {% if not google %}<a href="{% provider_login_url "google" process="connect" %}">{% endif %}
+                                          <i class="fa fa-google-plus-square fa-3x"></i><br>{% if google %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not google %}</a>{% endif %}
                               </p>
                         </div>
                         <div class="col-sm-4 social-connect">
                               <p class="text-center">
-                                    {% if not profile.twitter %}<a href="{% provider_login_url "twitter" process="connect" %}">{% endif %}
-                                          <i class="fa fa-twitter-square fa-4x"></i></i><br>{% if profile.twitter %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
-                                    {% if not profile.twitter %}</a>{% endif %}
+                                    {% if not twitter %}<a href="{% provider_login_url "twitter" process="connect" %}">{% endif %}
+                                          <i class="fa fa-twitter-square fa-3x"></i></i><br>{% if twitter %}<i class="fa fa-check"></i> conectado{% else %}conectar conta{% endif %}
+                                    {% if not twitter %}</a>{% endif %}
                               </p>
                         </div>
                   </div>
-                  
-                  <p>Facebook: {{ profile.facebook }}</p>
-                  <p>Google: {{ profile.google }}</p>
-                  <p>Twitter: {{ profile.twitter }}</p>
                   
                   <hr>
             
@@ -102,8 +98,8 @@
 
 <div class="sidebar-module sidebar-module-inset">
     <hr>
-    <h4 class="sm-title">INTERESSADO EM:</h4>
-    {% if profile.interests %}
+    <h4 class="sm-title">TEMAS DE INTERESSES:</h4>
+    {% if profile.interests|length %}
         <ul>
         {% for tg in profile.interests.all %}
             <li class="sidebar-tags">
@@ -124,7 +120,7 @@
 <div class="sidebar-module sidebar-module-inset">
     <hr>
     <h4 class="sm-title">CONHECE SOBRE:</h4>
-    {% if profile.knows_about %}
+    {% if profile.knows_about|length %}
         <ul>
         {% for tg in profile.knows_about.all %}
             <li class="sidebar-tags">
@@ -146,7 +142,7 @@
 <div class="sidebar-module sidebar-module-inset">
     <hr>
     <h4 class="sm-title">SEGUINDO TEMAS:</h4>
-    {% if profile.follow_topics %}
+    {% if profile.follow_topics|length %}
         <ul>
         {% for tg in profile.follow_topics.all %}
             <li class="sidebar-tags">

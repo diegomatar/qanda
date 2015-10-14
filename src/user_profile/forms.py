@@ -80,7 +80,7 @@ class EditProfileForm(forms.ModelForm):
 
 
 class EditProfilePictureForm(forms.ModelForm):
-    picture = forms.ImageField(label="Alterar Foto", required=False)
+    picture = forms.ImageField(label="", required=False)
     
     class Meta:
         model = UserProfile
@@ -90,6 +90,9 @@ class EditProfilePictureForm(forms.ModelForm):
         super(EditProfilePictureForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.form_class = 'form-horizontal'
+        self.helper.label_class = 'col-lg-2'
+        self.helper.field_class = 'col-lg-10'
         self.helper.layout = Layout(
             'picture',
         )
