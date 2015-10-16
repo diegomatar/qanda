@@ -4,51 +4,67 @@
 
 {% block head_title %}{% trans "Account Connections" %}{% endblock %}
 
-{% block content %}
-<h1>{% trans "Account Connections" %}</h1>
-
-{% if form.accounts %}
-<p>{% blocktrans %}You can sign in to your account using any of the following third party accounts:{% endblocktrans %}</p>
-
-
-<form method="post" action="{% url 'socialaccount_connections' %}">
-{% csrf_token %}
-
-<fieldset>
-{% if form.non_field_errors %}
-<div id="errorMsg">{{ form.non_field_errors }}</div>
-{% endif %}
-
-{% for base_account in form.accounts %}
-{% with base_account.get_provider_account as account %}
-<div>
-<label for="id_account_{{ base_account.id }}">
-<input id="id_account_{{ base_account.id }}" type="radio" name="account" value="{{ base_account.id }}"/>
-<span class="socialaccount_provider {{ base_account.provider }} {{ account.get_brand.id }}">{{account.get_brand.name}}</span>
-{{ account }}
-</label>
-</div>
-{% endwith %}
-{% endfor %}
-
-<div>
-<button type="submit">{% trans 'Remove' %}</button>
-</div>
-
-</fieldset>
-
-</form>
-
-{% else %}
-<p>{% trans 'You currently have no social network accounts connected to this account.' %}</p>
-{% endif %}
-
-<h2>{% trans 'Add a 3rd Party Account' %}</h2>
-
-<ul class="socialaccount_providers">
-{% include "socialaccount/snippets/provider_list.html" with process="connect" %}
-</ul>
-
-{% include "socialaccount/snippets/login_extra.html" %}
+{% block header %}
+    
+<div class="row">
+        
+     <div class="col-md-5 col-md-offset-1">
+        
+        <h2 class="blog-title"><i class="fa fa-plus"></i> Conectar Contas</h2>
+        <div class="well">
+            <p>Escolha as redes sociais deseja conectar ao seu perfil no Qanda.</p>
+            <br>
+            <ul class="socialaccount_providers">
+            {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
+            </ul>
+            
+            {% include "socialaccount/snippets/login_extra.html" %}
+        </div>
+    </div><!-- col-md -->    
+    
+    <div class="col-md-5">
+        
+    <h2 class="blog-title"><i class="fa fa-times"></i> Remover Contas</h2>
+    <div class="well">
+        <p>Selecione qual conta deseja desconectar de seu perfil:</p>
+        
+        {% if form.accounts %}
+        
+            <form method="post" action="{% url 'socialaccount_connections' %}">
+                {% csrf_token %}
+                
+                
+                <fieldset>
+                    {% if form.non_field_errors %}
+                        <div id="errorMsg">{{ form.non_field_errors }}. <a href="{% url 'account_set_password' %}">Crie sua senha aqui</a>.</div>
+                        
+                    {% endif %}
+                
+                    {% for base_account in form.accounts %}
+                        {% with base_account.get_provider_account as account %}
+                        <div class="radio">
+                            <label for="id_account_{{ base_account.id }}">
+                                <input id="id_account_{{ base_account.id }}" type="radio" name="account" value="{{ base_account.id }}"/>
+                                <span class="socialaccount_provider {{ base_account.provider }} {{ account.get_brand.id }}">{{account.get_brand.name}}</span>
+                                {{ account }}
+                            </label>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                    <br>
+                    <div>
+                        <button type="submit" class="btn btn-default">Remover</button>
+                    </div>
+                </fieldset>
+            
+            
+            </form>
+            
+        {% else %}
+            <p>Você ainda não tem contas conectadas ao seu perfil...</p>
+        {% endif %}
+    </div><!-- well -->
+    </div><!-- col-md -->
+</div><!-- row -->
 
 {% endblock %}

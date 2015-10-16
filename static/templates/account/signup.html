@@ -82,7 +82,8 @@
                                           <input class="form-control" id="id_password2" name="password2" placeholder="Senha (novamente)" type="password"><input id="id_confirmation_key" maxlength="40" name="confirmation_key" type="hidden">
                                         </div>
                                       </div>  
-                                      <hr>             
+                                      <hr>
+                                      <input type="hidden" name="{{ redirect_field_name }}" value="{% url 'edit_profile' %}" />
                                       <div class="form-group">
                                         <div class="col-sm-offset-3 col-sm-9">
                                           <button class="primaryAction btn btn-warning btn-lg" type="submit">Criar Conta »</button>

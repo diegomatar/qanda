@@ -13,6 +13,18 @@
 
 <h1 class="blog-title">Editar Perfil</h1>
 
+<div class="alert alert-warning" role="alert">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      <p>Status de perfil: <b>{{ profile_status }}% completo</b></p>
+      <div class="progress progress-lm">
+        <div class="progress-bar  progress-bar-warning progress-bar-striped" role="progressbar" aria-valuenow="{{ profile_status }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ profile_status }}%;">
+        </div>
+      </div>
+      <p><i class="fa fa-arrow-right"></i> <b>próximo passo:</b> <a href="#">{{ next_step|safe }}</a></p>
+</div>
+
+
+
 <div class="blog-post">
       <div class="row">
             <div class="col-sm-4">
@@ -39,6 +51,16 @@
             <div class="col-sm-8">
                   <hr>
                   <p class="lead blog-description">Suas Informações:</p>
+                  
+                  {% if not request.user.has_usable_password %}
+                  <div class="alert alert-danger" role="alert">
+                    <p class="info-text">
+                        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                        <span class="sr-only">Error:</span>
+                        Sua conta ainda não tem uma senha...<br> <a href="{% url 'account_set_password' %}">Crie sua senha aqui!</a>
+                    </p>
+                  </div>
+                  {% endif %}
             
                   <form class="editprofile form-horizontal" id="editprofile" method="post" action="{% url 'edit_profile' %}" enctype="multipart/form-data">
             
@@ -81,6 +103,7 @@
                                     {% if not twitter %}</a>{% endif %}
                               </p>
                         </div>
+                  <p class="text-right"><a class="info-text" href="{% url 'socialaccount_connections' %}">editar contas ></a></p>
                   </div>
                   
                   <hr>
@@ -99,7 +122,7 @@
 <div class="sidebar-module sidebar-module-inset">
     <hr>
     <h4 class="sm-title">TEMAS DE INTERESSES:</h4>
-    {% if profile.interests|length %}
+    {% if profile.interests.all|length %}
         <ul>
         {% for tg in profile.interests.all %}
             <li class="sidebar-tags">
@@ -120,7 +143,7 @@
 <div class="sidebar-module sidebar-module-inset">
     <hr>
     <h4 class="sm-title">CONHECE SOBRE:</h4>
-    {% if profile.knows_about|length %}
+    {% if profile.knows_about.all|length %}
         <ul>
         {% for tg in profile.knows_about.all %}
             <li class="sidebar-tags">
@@ -142,7 +165,7 @@
 <div class="sidebar-module sidebar-module-inset">
     <hr>
     <h4 class="sm-title">SEGUINDO TEMAS:</h4>
-    {% if profile.follow_topics|length %}
+    {% if profile.follow_topics.all|length %}
         <ul>
         {% for tg in profile.follow_topics.all %}
             <li class="sidebar-tags">

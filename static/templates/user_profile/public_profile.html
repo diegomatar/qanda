@@ -28,7 +28,11 @@
                         {% endif %}
                   </div>
                   <hr>
-                  <p>{{ profile.about }}</p>
+                  {% if profile.about %}
+                        <p>{{ profile.about }}</p>
+                  {% else %}
+                        <p class="info-text">Perfil sem biografia... <br><a href="#">Pedir referências ao autor.</a></p>
+                  {% endif %}
                   <p>
                         {% if facebook %}<a href="{{facebook.get_profile_url}}"><i class="fa fa-facebook-square fa-lg"></i></a>{% endif %}
                         {% if google %}<a href="{{google.get_profile_url}}"><i class="fa fa-google-plus-square"></i></a>{% endif %}
