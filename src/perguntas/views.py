@@ -60,18 +60,19 @@ These views are used to render important pages of the site:
 def home(request):
     
     perguntas1 = []
+    '''
     if request.user.is_authenticated() and request.user.userprofile.interests.all():
         for interest in request.user.userprofile.interests.all():
             filtered = Pergunta.objects.filter(tags__nome=interest.nome)
             for fltr in filtered:
                 if fltr not in perguntas1:
                     perguntas1.append(fltr)
-        perguntas1 = score_questions(perguntas1)
-    
+        perguntas1 = score_questions(perguntas1)[:15]
+        print "perguntas 1 = %s" % perguntas1
+    '''
     perguntas2 = []
-    if len(perguntas1) < 100:
-        perguntas2 = Pergunta.objects.all()
-        perguntas2 = score_questions(perguntas2)
+    perguntas2 = Pergunta.objects.order_by('-timestamp')[:300]
+    perguntas2 = score_questions(perguntas2)
     
     perguntas = perguntas1 + perguntas2
     

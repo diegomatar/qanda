@@ -9,6 +9,7 @@ urlpatterns = [
     url(r'^remove-topic-known/$', views.remove_topic_known, name='remove-topic-known'),
     url(r'^editar-temas-conhecidos/$', views.edit_user_known_topics, name='edit_user_known_topics'),
     url(r'^editar-foto/$', views.edit_user_profile_picture, name='edit_profile_picture'),
+    url(r'^configuracoes/$', views.configuracoes, name='configuracoes'),
     url(r'^editar/$', views.edit_user_profile, name='edit_profile'),
     url(r'^(?P<slug>.*)/seguidores/$', views.user_followers, name='followers'),
     url(r'^(?P<slug>.*)/perguntas/$', views.user_questions, name='questions'),

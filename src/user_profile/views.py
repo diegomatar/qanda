@@ -52,12 +52,14 @@ def edit_user_profile(request):
     
     profile = request.user.userprofile
     facebook, google, twitter = get_social_accounts(request.user)
+    
 
     if request.method == 'POST':
         user_form = EditUserForm(request.POST, instance=request.user)
         profile_form = EditProfileForm(request.POST, request.FILES, instance=profile)
+        picture_form = EditProfilePictureForm(instance=profile)
         
-        if profile_form.is_valid and user_form.is_valid:
+        if profile_form.is_valid() and user_form.is_valid():
             user_form.save()
             profile_form.save()
             slug = str(profile.user.first_name) +' '+ str(profile.user.last_name)
@@ -72,6 +74,61 @@ def edit_user_profile(request):
         picture_form = EditProfilePictureForm(instance=profile)
         # Use funtion to get user social accounts
     
+    
+    # Check the progress of profile info
+    profile_status = 0
+    next_step = ''
+    
+    if len(profile.knows_about.all()):
+        profile_status += 15
+    else:
+        next_step = 'defina os temas que você conhece bem.'
+    
+    if len(profile.interests.all()):
+        profile_status += 15
+    else:
+        next_step = 'escolha seus temas de interesse.'
+    
+    if profile.user.has_usable_password():
+        profile_status += 10
+    else:
+        next_step = 'defina uma senha para sua conta.'
+    
+    if profile.about:
+        profile_status += 10
+    else:
+        next_step = 'complete o campo <b>Sobre Você</b>, contando quem é e o que faz.'
+    
+    if facebook or google or twitter or profile.picture:
+        profile_status += 20
+    else:
+        next_step = 'conecte suas redes sociais ou adicione sua foto.'
+        
+    if profile.user.last_name:
+        profile_status += 10
+    else:
+        next_step = 'complete seu sobrenome.'
+        
+    if profile.user.first_name:
+        profile_status += 10
+    else:
+        next_step = 'complete seu primeiro nome.'
+    
+    if profile.user.email:
+        profile_status += 10
+    else:
+        next_step = 'complete seu email.'
+        
+        
+        
+   
+
+    
+
+    
+
+    
+    
     context ={
         'profile': profile,
         'user_form': user_form,
@@ -80,6 +137,8 @@ def edit_user_profile(request):
         'facebook': facebook,
         'google': google,
         'twitter': twitter,
+        'profile_status': profile_status,
+        'next_step': next_step,
     }
     return render(request, 'user_profile/edit_profile.html', context)
 
@@ -172,8 +231,6 @@ def public_profile(request, slug):
             
     # Use funtion to get user social accounts
     facebook, google, twitter = get_social_accounts(user)
-    
-    print "Google: %s" % google.get_profile_url()
     
     context = {
         'user': user,
@@ -386,7 +443,16 @@ def edit_user_known_topics(request):
 
 
 
-
+# Allow user to edit its notifications and email preferences
+def configuracoes(request):
+    
+    
+    
+    context = {
+        
+    }
+    
+    return render(request, 'user_profile/configuracoes.html', context)
 
 
 
