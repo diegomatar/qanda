@@ -28,6 +28,20 @@ vote = (
     (0, 'unlike'), #unlike
 )
 
+
+class UserMessagesSet(models.Model):
+    new_follower = models.BooleanField()
+    follow_activities = models.BooleanField()
+    answer_question = models.BooleanField()
+    question_in_tag =  models.BooleanField()
+    ask_answer =  models.BooleanField()
+    new_comment =  models.BooleanField()
+    new_vote =  models.BooleanField()
+    email_summary_day =  models.BooleanField()
+    email_summary_week =  models.BooleanField()
+    
+
+
 class NotiAnswer(models.Model):
     to_user = models.ForeignKey(User, related_name='anotif_to_user')
     from_user = models.ForeignKey(User, related_name='anotif_from_user')
@@ -179,3 +193,4 @@ class NotiAsk(models.Model):
     @property
     def icon(self,):
         return '<i class="fa fa-university fa-2x"></i>'
+    

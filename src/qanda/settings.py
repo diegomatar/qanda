@@ -34,7 +34,17 @@ ADMINS = (
     ('Diego Matar', 'diegomatar@gmail.com'),
 )
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+#SETUP EMAIL ACOUNT
+# Test
+#EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Production
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.mandrillapp.com'
+EMAIL_HOST_USER = 'qandaperguntas@gmail.com'
+EMAIL_HOST_PASSWORD = 'KRRTGyf29Cbr5MQFA0jJuw'
+EMAIL_PORT = 587
+
 
 # Application definition
 
