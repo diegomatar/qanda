@@ -224,8 +224,8 @@ def score_questions(questions):
             f_points = 40
         else:
             f_points = 20
-        print "f_points = %s" % f_points
-        print "followers = %s " % followers
+        #print "f_points = %s" % f_points
+        #print "followers = %s " % followers
         
         
         

@@ -1,0 +1,15 @@
+{% if inputed_topic %}
+<div class="well">
+    <p class="info-text">Clique para adicionar:</p>
+<div class="row">
+{% for tpc in topic_list %}
+    <div class="col-sm-4 ">
+        <button class="add_topic_interest btn btn-default btn-margin" data-topicid='{{ tpc.pk }}'>{{ tpc.nome|title }}  <i class="fa fa-plus"></i></button>
+    </div>
+{% endfor %}
+    <div class="col-sm-4 ">
+        <button class="create_new_topic_interest btn btn-default btn-margin"><span id="newTopic"></span>  <i class="fa fa-plus"></i></button>
+    </div>
+</div>
+</div>
+{% endif %}

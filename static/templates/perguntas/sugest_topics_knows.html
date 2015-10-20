@@ -1,0 +1,9 @@
+<p class="info-text">Clique para adicionar:</p>
+<div class="row">
+    {% for sgt in sugestions%}
+    <div class="col-sm-4 ">
+        <button class="add_topic_know btn btn-default btn-margin" data-topicid='{{ sgt.pk }}'>{{ sgt.nome|title }}  <i class="fa fa-plus"></i></button>
+    </div>
+    {% endfor %}
+    
+</div>

@@ -13,11 +13,11 @@ from django.dispatch import receiver
 from django.shortcuts import render, HttpResponse, HttpResponseRedirect
 from django.template.defaultfilters import slugify
 
-
+from allauth.account.signals import user_signed_up
 from allauth.socialaccount.models import SocialAccount
 from perguntas.models import Pergunta, Resposta, Tag
 from notifications.views import new_Follow
-from perguntas.views import suggest_topics, atividades_recentes
+from perguntas.views import suggest_topics_knows, atividades_recentes, suggest_topics_interests
 from .forms import EditProfileForm, EditUserForm, EditProfilePictureForm
 from .models import UserProfile
 
@@ -82,17 +82,20 @@ def edit_user_profile(request):
     if len(profile.knows_about.all()):
         profile_status += 15
     else:
-        next_step = 'defina os temas que você conhece bem.'
+        url = reverse("edit_user_known_topics" , args=[])
+        next_step = '<a href="' + url + '">defina os temas que conhece bem.</a>'
     
     if len(profile.interests.all()):
         profile_status += 15
     else:
-        next_step = 'escolha seus temas de interesse.'
+        url = reverse("edit_user_interests_topics" , args=[])
+        next_step = '<a href="' + url + '">escolha seus temas de interesse.</a>'
     
     if profile.user.has_usable_password():
         profile_status += 10
     else:
-        next_step = 'defina uma senha para sua conta.'
+        url = reverse("account_set_password" , args=[])
+        next_step = '<a href="' + url + '">defina uma senha para sua conta.</a>'
     
     if profile.about:
         profile_status += 10
@@ -120,13 +123,7 @@ def edit_user_profile(request):
         next_step = 'complete seu email.'
         
         
-        
-   
-
     
-
-    
-
     
     
     context ={
@@ -432,14 +429,74 @@ def edit_user_known_topics(request):
     profile = request.user.userprofile
     current_topics = profile.knows_about.all()
     
-    sugestions = suggest_topics(profile)
+    sugestions = suggest_topics_knows(profile)
     
     context = {
         'sugestions': sugestions,
         'current_topics': current_topics,
     }
     
-    return render(request, 'user_profile/definir_topicos.html', context)
+    return render(request, 'user_profile/definir_topicos_conhecimento.html', context)
+
+
+
+
+
+# Add a topic to user interests topics
+def add_topic_interest(request):
+    # Get the data being passed by get
+    topic_id = None
+    if request.method == "GET":
+        topic_id = request.GET['topic_id']
+    # If was passed any value on get
+    if topic_id:
+        # Get the topic with the id received
+        topic = Tag.objects.get(pk=int(topic_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # adds the topic to knowledge
+        if topic and topic not in profile.interests.all():
+            profile.interests.add(topic)
+            profile.save()
+            
+    return HttpResponse()
+
+
+
+# Remove a topic from user interst topics
+def remove_topic_interest(request):
+    # Get the data being passed by get
+    topic_id = None
+    if request.method == "GET":
+        topic_id = request.GET['topic_id']
+    # If was passed any value on get
+    if topic_id:
+        # Get the topic with the id received
+        topic = Tag.objects.get(pk=int(topic_id))
+        # Get the user profile
+        profile = request.user.userprofile
+        # adds the topic to knowledge
+        if topic and topic in profile.interests.all():
+            profile.interests.remove(topic)
+            profile.save()
+            
+    return HttpResponse()
+
+
+# Allow user to edit its interest topics
+def edit_user_interests_topics(request):
+    # get profile, topics of knowledge and aswered questions
+    profile = request.user.userprofile
+    current_topics = profile.interests.all()
+    
+    sugestions = suggest_topics_interests(profile)
+    
+    context = {
+        'sugestions': sugestions,
+        'current_topics': current_topics,
+    }
+    
+    return render(request, 'user_profile/definir_topicos_interesse.html', context)
 
 
 

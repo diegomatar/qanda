@@ -10,9 +10,32 @@
 {% block head_title %}{% trans "Signup" %}{% endblock %}
 
 {% block content %}
+      
+      <script type="text/javascript">
+            mixpanel.identify("{{request.user.pk}}");
+            mixpanel.people.set({
+                  "$first_name": "{{request.user.first_name}}",
+                  "$last_name": "{{request.user.last_name}}",
+                  "$email": "{{ request.user.email }}",    // only special properties need the $
+                  "$created": "{{ request.user.userprofile.timestamp|date:'Y-m-d H:i' }}",
+                  "$last_login": new Date(),         // properties can be dates..
+                  "Role": "{{ request.user.userprofile.user_role }}",
+                  "Num of Questions": {{ request.user.userprofile.num_pergs}},
+                  "Num of Answers": {{ request.user.userprofile.num_respostas}},
+                  "Reputation": {{request.user.userprofile.reputation}},
+                  "Num of Followers": {{ request.user.userprofile.followers_num }},
+                  "Num of Followings": {{ request.user.userprofile.follow_users.all|length }},
+                  "Knows About": [{% for know in request.user.userprofile.knows_about.all %}"{{ know.nome }}", {% endfor %}],
+                  "Interests": [{% for inter in request.user.userprofile.interests.all %}'{{ inter.nome }}', {% endfor %}],
+                  "Follow Topics": [{% for tpc in request.user.userprofile.follow_topics.all %}'{{ tpc.nome }}', {% endfor %}],
+                
+            });
+      </script>
+
 
 <h1 class="blog-title">Editar Perfil</h1>
 
+{% if next_step %}
 <div class="alert alert-warning" role="alert">
       <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       <p>Status de perfil: <b>{{ profile_status }}% completo</b></p>
@@ -20,8 +43,9 @@
         <div class="progress-bar  progress-bar-warning progress-bar-striped" role="progressbar" aria-valuenow="{{ profile_status }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ profile_status }}%;">
         </div>
       </div>
-      <p><i class="fa fa-arrow-right"></i> <b>próximo passo:</b> <a href="#">{{ next_step|safe }}</a></p>
+      <p><i class="fa fa-arrow-right"></i> <b>próximo passo:</b> {{ next_step|safe }}</p>
 </div>
+{% endif %}
 
 
 
@@ -121,7 +145,7 @@
 
 <div class="sidebar-module sidebar-module-inset">
     <hr>
-    <h4 class="sm-title">TEMAS DE INTERESSES:</h4>
+    <h4 class="sm-title">TEMAS DE INTERESSE:</h4>
     {% if profile.interests.all|length %}
         <ul>
         {% for tg in profile.interests.all %}
@@ -135,7 +159,8 @@
         </ul>
     {% else %}
         <p class="info-text">Nenhum tema adicionado..</p>
-    {% endif %}        
+    {% endif %}
+    <a href="{% url 'edit_user_interests_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
     <hr>
 </div>
 
@@ -156,7 +181,8 @@
         </ul>
     {% else %}
         <p class="info-text">Nenhum tema adicionado..</p>
-    {% endif %}        
+    {% endif %}
+    <a href="{% url 'edit_user_known_topics' %}" class="btn btn-link"><i class="fa fa-pencil"></i> Alterar Temas</a>
     <hr>
 </div>
 

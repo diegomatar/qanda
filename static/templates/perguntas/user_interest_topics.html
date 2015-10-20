@@ -1,0 +1,14 @@
+{% if current_topics %}
+    <p class="info-text">Clique para remover:</p>
+    <p>
+        {% for tpcs in current_topics %}
+            <button class="add_topic_interest btn btn-margin" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+        {% endfor %}        
+    </p>
+    <hr>
+    <p class="text-center"><a href="{% url 'home' %}" class="btn btn-warning btn-margin">Explorar Temas</a></p>
+{% else %}
+    <p class="info-text">Nenhum tema adicionado..</p>
+{% endif %}
+
+

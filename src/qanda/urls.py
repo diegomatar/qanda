@@ -27,30 +27,53 @@ from report import urls as report_urls
 urlpatterns = [
     url(r'^$', views.home, name='home'),
     url(r'^pergunta/(?P<slug>.*)$', views.pergunta, name='pergunta'),
+    
     url(r'^perguntar/$', views.perguntar, name='perguntar'),
-    url(r'^responder-perguntas/$', views.responder_perguntas, name='responder-perguntas'),
     url(r'^sugerir-pergunta/$', views.suggest_question, name='suggest_question'),
-    url(r'^buscar-topicos/$', views.search_topics, name='search_topics'),
+    url(r'^editar-pergunta/(?P<pk>.*)$', views.edit_question, name='editar_pergunta'),
+    
+    url(r'^perguntar-novamente/(?P<pk>.*)$', views.perguntar_novamente, name='perguntar_novamente'),
+    url(r'^pedir-resposta/$', views.ask_to_answer, name='ask_to_answer'),
+    
+    url(r'^responder/(?P<pk>.*)$', views.responder, name='responder'),
+    url(r'^editar-resposta/(?P<pk>.*)$', views.edit_answer, name='editar_resposta'),
+    url(r'^responder-perguntas/$', views.responder_perguntas, name='responder-perguntas'),
+    
+    url(r'^comentar-resposta/(?P<pk>.*)$', views.add_comment, name='add_comment'),
+    url(r'^editar-comentario/(?P<pk>.*)$', views.edit_comment, name='edit_comment'),
+    
+    url(r'^categoria/(?P<slug>.*)$', views.categoria, name='categoria'),
+    url(r'^membros/$', user_profile_views.members, name='members'),
+    
+    url(r'^buscar-topicos-conhecimento/$', views.search_topics_knows, name='search_topics_knows'),
     url(r'^criar-topico-conhecimento/$', views.create_topic_known, name='create_topic_known'),
     url(r'^conhecimentos-atuais/$', views.current_known_topics, name='current_known_topics'),
-    url(r'^atualiza-sugestoes/$', views.update_topics_sugestion, name='update_topics_sugestion'),
+    url(r'^atualiza-sugestoes-conhecimento/$', views.update_topics_sugestion_knows, name='update_topics_sugestion'),
+    
+    url(r'^buscar-topicos-interesse/$', views.search_topics_interests, name='search_topics_interests'),
+    url(r'^criar-topico-interesse/$', views.create_topic_interest, name='create_topic_interest'),
+    url(r'^interesses-atuais/$', views.current_interest_topics, name='current_interest_topics'),
+    url(r'^atualiza-sugestoes-interesses/$', views.update_topics_sugestion_interests, name='update_topics_sugestion_interests'),
+    
+    
+    
+    url(r'^follow-question/$', views.follow_question, name='follow_question'),
     url(r'^unfollow-question/$', views.unfollow_question, name='unfollow_question'),
     url(r'^follow-tag/$', views.follow_tag, name='follow_tag'),
     url(r'^unfollow-tag/$', views.unfollow_tag, name='unfollow_tag'),
-    url(r'^follow-question/$', views.follow_question, name='follow_question'),
-    url(r'^responder/(?P<pk>.*)$', views.responder, name='responder'),
-    url(r'^perguntar-novamente/(?P<pk>.*)$', views.perguntar_novamente, name='perguntar_novamente'),
-    url(r'^pedir-resposta/$', views.ask_to_answer, name='ask_to_answer'),
-    url(r'^editar-pergunta/(?P<pk>.*)$', views.edit_question, name='editar_pergunta'),
-    url(r'^editar-resposta/(?P<pk>.*)$', views.edit_answer, name='editar_resposta'),
-    url(r'^comentar-resposta/(?P<pk>.*)$', views.add_comment, name='add_comment'),
-    url(r'^editar-comentario/(?P<pk>.*)$', views.edit_comment, name='edit_comment'),
+    
+    
+    
+    
+    
+    
+    
     url(r'^upvote/$', views.upvote, name='upvote'),
     url(r'^downvote/$', views.downvote, name='downvote'),
     url(r'^resp-upvote/$', views.resp_upvote, name='resp_upvote'),
     url(r'^resp-downvote/$', views.resp_downvote, name='resp_downvote'),
-    url(r'^categoria/(?P<slug>.*)$', views.categoria, name='categoria'),
-    url(r'^membros/$', user_profile_views.members, name='members'),
+    
+    
     url(r'^admin/', include(admin.site.urls)),
     url(r'^conta/', include('allauth.urls')),
     url(r'^reportar/', include(report_urls)),

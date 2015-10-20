@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load app_filters %}
+
+{% block responder_active %}active{% endblock %}
+
+
+{% block content %}
+
+<h1 class="blog-title">Por quais temas você se interessa?</h1>
+<hr>
+<h3 class="lead blog-description">Pesquisar temas:</h3>
+<form action='{% url "perguntar" %}'>
+    <div class="form-group">
+        <div class="input-group">
+            <div class="input-group-addon"><i class="fa fa-search"></i></div>
+            <input type="text" class="form-control input-lg" id="searchTopic" placeholder="Pesquise temas de conhecimento aqui.">
+        </div>
+  </div>
+</form>
+<div id="topicSearch">
+    
+</div>
+
+<hr>
+
+<h3 class="lead blog-description">Temas sugeridos:</h3>
+
+<div id="topicsSuggestions">
+<p class="info-text">Clique para adicionar:</p>
+<div class="row">
+    {% for sgt in sugestions%}
+    <div class="col-sm-4 ">
+        <button class="add_topic_interest btn btn-default btn-margin" data-topicid='{{ sgt.pk }}'>{{ sgt.nome|title }}  <i class="fa fa-plus"></i></button>
+    </div>
+    {% endfor %}
+    
+</div>
+
+</div>
+
+
+{% endblock %}
+
+
+{% block sidebar %}
+<div class="sidebar-module sidebar-module-inset">
+    <div class="row">
+        <div class="well">
+            <h4 class="sm-title">INTERESSES ATUAIS:</h4>
+            <div id="currentTopics">
+                {% if current_topics %}
+                    <p class="info-text">Clique para remover:</p>
+                    <p>
+                        {% for tpcs in current_topics %}
+                            <button class="add_topic_interest btn btn-margin" data-topicid='{{ tpcs.pk }}'>{{ tpcs|title }} <i class="fa fa-times"></i></button>
+                        {% endfor %}        
+                    </p>
+                    <hr>
+                    <p class="text-center"><a href="{% url 'home' %}" class="btn btn-warning btn-margin">Explorar Temas</a></p>
+                {% else %}
+                    <p class="info-text">Nenhum tema adicionado..</p>
+                {% endif %}
+            </div>
+        </div>            
+    </div>
+</div>
+    
+{% endblock %}

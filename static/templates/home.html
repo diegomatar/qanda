@@ -5,6 +5,30 @@
 
 
 {% block jumbotrone %}
+
+{% if request.user.is_authenticated %}
+<script type="text/javascript">
+            mixpanel.identify("{{request.user.pk}}");
+            mixpanel.people.set({
+                  "$first_name": "{{request.user.first_name}}",
+                  "$last_name": "{{request.user.last_name}}",
+                  "$email": "{{ request.user.email }}",    // only special properties need the $
+                  "$created": "{{ request.user.userprofile.timestamp|date:'Y-m-d H:i' }}",
+                  "$last_login": new Date(),         // properties can be dates..
+                  "Role": "{{ request.user.userprofile.user_role }}",
+                  "Num of Questions": {{ request.user.userprofile.num_pergs}},
+                  "Num of Answers": {{ request.user.userprofile.num_respostas}},
+                  "Reputation": {{request.user.userprofile.reputation}},
+                  "Num of Followers": {{ request.user.userprofile.followers_num }},
+                  "Num of Followings": {{ request.user.userprofile.follow_users.all|length }},
+                  "Knows About": [{% for know in request.user.userprofile.knows_about.all %}"{{ know.nome }}", {% endfor %}],
+                  "Interests": [{% for inter in request.user.userprofile.interests.all %}'{{ inter.nome }}', {% endfor %}],
+                  "Follow Topics": [{% for tpc in request.user.userprofile.follow_topics.all %}'{{ tpc.nome }}', {% endfor %}],
+                
+            });
+</script>
+{% endif %}
+    
 {% if not user.is_authenticated %}
     <div class="jumbotron {{cover}}">
         <div class="container">

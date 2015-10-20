@@ -27,9 +27,9 @@ class TagField(AutoModelSelect2TagField):
 
 
 class PerguntaForm(forms.ModelForm):
-    titulo = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Qual é sua pergunta?'}))
-    descricao = forms.CharField(widget=SummernoteInplaceWidget(), label=" ", required=False)
-    tags = TagField(label=" ")
+    titulo = forms.CharField(max_length=200, label="", widget=forms.TextInput(attrs={'placeholder': 'Exemplo: Qual a diferença entre um Deputado e um Senador?...'}))
+    descricao = forms.CharField(max_length=800, widget=SummernoteInplaceWidget(), label="", required=False)
+    tags = TagField(label="")
     
     class Meta:
         model = Pergunta
@@ -45,34 +45,38 @@ class PerguntaForm(forms.ModelForm):
         
 
         self.helper.layout = Layout(
+            HTML("""
+                <p class="lead blog-description close-to-next-line"><b>1.</b> Escreva sua pergunta:</p>
+            """),
             'titulo',
             HTML("""
             <div id="collapseQsts">
+            {% include "perguntas/sugest_question.html" %}
             </div>
-            <div id='newquestion'><button class="btn btn-warning" type="button">Minha Pergunta e Nova</button></div>
             """),
             HTML("""
-                <div id="collapseDetails">
-                <p class="sm-title close-to-next-line">Se desejar, escreva mais detalhes sobre o que deseja saber:</p>
+                <p class="lead blog-description close-to-next-line"><b>2.</b> (opcional) escreva mais detalhes sobre o que deseja saber:</p>
             """),
             'descricao',
             HTML("""
-                <p class="sm-title close-to-next-line">Quais os assuntos desta perguta?</p>
+                <p class="lead blog-description close-to-next-line"><b>3.</b> Escolha quais os temas desta perguta?</p>
+                <p class="info-text">
+                    Clique nos temas sugeridos ou use "enter" para criar um novo tema.
+                    <br>
+                    Exemplo: <i>Tecnologia, Faculdade, Governo, etc.</i> - limite de 6 temas
+                </p>
             """),
             'tags',
             Div(
-                Submit('submit', 'Enviar Pergunta >', css_class='btn-warning btn-lg'),
-                css_class='col-lg-offset-3 col-lg-9',
+                Submit('enviar-pergunta', 'Enviar Pergunta', css_class='btn-warning btn-lg btn-block'),
+                css_class='col-lg-offset-3 col-lg-6',
             ),
-            HTML("""
-            </div>
-            """),
         )
         
 
 class EditarPerguntaForm(forms.ModelForm):
-    titulo = forms.CharField(label="", widget=forms.TextInput(attrs={'placeholder': 'Qual é sua pergunta?'}))
-    descricao = forms.CharField(widget=SummernoteInplaceWidget(), label=" ", required=False)
+    titulo = forms.CharField(max_length=200, label="", widget=forms.TextInput(attrs={'placeholder': 'Qual é sua pergunta?'}))
+    descricao = forms.CharField(max_length=800, widget=SummernoteInplaceWidget(), label=" ", required=False)
     tags = TagField(label=" ")
     
     class Meta:
@@ -104,7 +108,7 @@ class EditarPerguntaForm(forms.ModelForm):
              
 
 class RespostaForm(forms.ModelForm):
-    resposta = forms.CharField(widget=SummernoteInplaceWidget(), label="", required=True)
+    resposta = forms.CharField(max_length=2000, widget=SummernoteInplaceWidget(), label="", required=True)
     
     class Meta:
         model = Resposta
@@ -129,7 +133,7 @@ class RespostaForm(forms.ModelForm):
                 css_class='col-lg-8',
             ),
             Div(
-                Submit('submit', 'Enviar Resposta', css_class='btn-warning'),
+                Submit('enviar-resposta', 'Enviar Resposta', css_class='btn-warning'),
                 css_class='col-lg-2',
             ),
             HTML("""
@@ -146,7 +150,7 @@ class TagForm(forms.ModelForm):
         
         
 class CommentForm(forms.ModelForm):
-    comment = forms.CharField(widget=forms.Textarea, label="Comentário", required=True)
+    comment = forms.CharField(max_length=800, widget=forms.Textarea, label="Comentário", required=True)
     
     
     class Meta:
@@ -170,7 +174,7 @@ class CommentForm(forms.ModelForm):
             """),
             'comment',
             Div(
-                Submit('submit', 'Enviar Comentario >', css_class='btn-info btn-lg'),
-                css_class='col-lg-offset-3 col-lg-9',
-            )
+                Submit('enviar-pergunta', 'Enviar Comentario', css_class='btn-warning btn-lg btn-block'),
+                css_class='col-lg-offset-3 col-lg-6',
+            ),
         )

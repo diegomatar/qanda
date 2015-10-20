@@ -1,24 +1,29 @@
 {% if qst_list %}
-<div class="well">
-<p class="sm-title close-to-next-line">Perguntas Sugeridas:</p>
-<p class="sm-title ligth">Alguma destas perguntas é igual a sua?</p>
 
-{% for qst in qst_list %}
-<div class="row">
-    <div class="col-xs-1">
-        <p class="list-icon"><i class="fa fa-check"></i></p>
-    </div>
-    <div class="col-xs-10">
-    <p class="text">
-    <a href="{% url 'pergunta' qst.slug %}">
-    
-    {{ qst.titulo|safe }}</a> 
-    <a href="{% url 'perguntar_novamente' qst.slug %}" class="btn btn-link">- Perguntar Novamente</a>
-    </p>
-    </div>
-</div>
-{% endfor %}
+        <div class="well">
+            
+                <p class="lead blog-description">Alguma destas é igual a sua?</p>
+                
+                {% for qst in qst_list %}
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <ul>
+                            <li class="text">
+                                <a href="{% url 'pergunta' qst.slug %}">
+                                    {{ qst.titulo|safe }}
+                                </a>
+                                <i><a href="{% url 'perguntar_novamente' qst.slug %}" class="btn btn-link">Perguntar Novamente</a></i>
+                            </li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+        
+            <button id='newquestion' class="btn btn-default" type="button">Não, minha pergunta é nova!</button>
+            
+            
+        
+        </div>
+        
 
-<hr>
-</div>
 {% endif %}

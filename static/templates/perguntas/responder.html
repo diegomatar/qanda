@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
 {% load crispy_forms_tags %}
+{% load app_filters %}
 
 
 {% block add_script %}
@@ -10,61 +11,39 @@
 
 
 
+
 {% block content %}
-
-
-<h1 class="sm-title">RESPONDER PERGUNTA:<span class="lead blog-description bullet"></h1>
-<div class="row">
-        <div class="col-sm-10 col-sm-offset-1">
-
-                <p class="info-text"><b>{{pergunta.titulo}}</b></p>
-                <p class="info-text">{{pergunta.descricao|striptags}}</p>
-          <p class="info-text">
-                <a href="{% url 'profile' pergunta.autor.userprofile.slug %}">
-                        <img class="user-pic" src='{{ pergunta.autor.userprofile.profile_image_url }}'/>
-                </a>
-                <a href="{% url 'profile' pergunta.autor.userprofile.slug %}">
-                        <span class='autor-info'> {{ pergunta.autor.userprofile.name }}{% if pergunta.autor.userprofile.about %}, {{ pergunta.autor.userprofile.about }}{% endif %}</span>
-                </a>
-          </p> 
-        </div><!--.col-sm-10-->
-</div><!--.row-->
-<hr>
-
-
-<div class="row">
-    <div class="col-sm-7">
-        <p class="lead blog-description">Responda aqui:</p>
-    </div>
-</div>
-
-<div class="blog-post">
-
-  
-      {% crispy form form.helper %}
-      
-</div><!-- /.blog-post -->
-
-
-
+        <div class="row">
+                <div class="col-sm-12">
+                
+                
+                        <h1 class="blog-title">Escrever Resposta</h1>
+                        <hr>
+                        
+                        <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
+                        <p class="blog-post-title"><a href="{% url "pergunta" pergunta.slug %}">{{ pergunta.titulo|title }}</a></p>
+                        <p class="text">{{pergunta.descricao|safe}}</p>
+                        
+                        <hr>
+                        <p class="lead blog-description">Responda aqui:</p>
+                        {% crispy form form.helper %}
+                
+                </div>
+        </div>
 {% endblock %}
 
 
+
+
 {% block sidebar %}
+    
+    
     <div class="sidebar-module sidebar-module-inset">
-        <h4>Atividades Recentes</h4>
-        {% for ativ in atividades_recentes %}
-            {% if ativ.classe = 'pergunta' %}
-                <p><a href='{% url 'profile' ativ.autor.userprofile.slug %}'>{{ ativ.autor.userprofile.name }}</a> perguntou:</p>
-                <p><a href="{% url 'pergunta' ativ.slug %}">{{ ativ.titulo }}</a></p>
-                <p><i> - {{ ativ.timestamp }}</i></p>
-                <hr>
-            {% elif ativ.classe = 'resposta' %}
-                <p><a href="{% url 'profile' ativ.autor.userprofile.slug %}">{{ ativ.autor.userprofile.name }}</a> respondeu:</p>
-                <p><a href="{% url 'pergunta' ativ.pergunta.slug %}">{{ ativ.resposta|safe|truncatewords_html:30 }}</a></p>
-                <p><i> - {{ ativ.timestamp }}</i></p>
-                <hr>
-            {% endif %}
+     <hr>
+        <h4 class="sm-title">PERGUNTAS RELACIONADAS:</h4>
+        {% for perg in related %}
+        <p><a href={% url 'pergunta' perg.slug  %}>{{ perg.titulo }}</a></p>
         {% endfor %}
+    <hr>
     </div>
 {% endblock %}

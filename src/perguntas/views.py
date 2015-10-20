@@ -12,7 +12,7 @@
 
 
 
-import pytz
+import pytz, string
 
 from collections import Counter
 from datetime import datetime, timedelta
@@ -60,7 +60,7 @@ These views are used to render important pages of the site:
 def home(request):
     
     perguntas1 = []
-    '''
+    
     if request.user.is_authenticated() and request.user.userprofile.interests.all():
         for interest in request.user.userprofile.interests.all():
             filtered = Pergunta.objects.filter(tags__nome=interest.nome)
@@ -68,8 +68,7 @@ def home(request):
                 if fltr not in perguntas1:
                     perguntas1.append(fltr)
         perguntas1 = score_questions(perguntas1)[:15]
-        print "perguntas 1 = %s" % perguntas1
-    '''
+        
     perguntas2 = []
     perguntas2 = Pergunta.objects.order_by('-timestamp')[:300]
     perguntas2 = score_questions(perguntas2)
@@ -276,6 +275,8 @@ def categoria(request, slug):
 # User asks a new question
 @login_required
 def perguntar(request):
+    qst_list = []
+    
     if request.method == 'POST':
 
         form = PerguntaForm(request.POST)
@@ -306,11 +307,16 @@ def perguntar(request):
     else:
         if request.GET.get('q', ''):
             form = PerguntaForm(initial={'titulo': request.GET.get('q', '')})
+            inputed_question = request.GET.get('q', '')
+            qst_list = get_question_list(5, inputed_question)
+            
+            
         else:
             form = PerguntaForm()
     
     context = {
         'form': form,
+        'qst_list': qst_list,
     }
     
     return render(request, 'perguntas/perguntar.html', context)
@@ -343,10 +349,19 @@ def responder(request, pk):
             return HttpResponseRedirect(url)
     else:
         form = RespostaForm()
+        
+    # Get related questions list
+    related = related_questions(pergunta, 15)
+    
+    # Get users who can answer the question
+    ask_users = user_to_answer(pergunta, 10)
     
     context = {
         'form': form,
         'pergunta': pergunta,
+        'related': related,
+        'ask_users': ask_users,
+        
     }
      
     return render(request, 'perguntas/responder.html', context)
@@ -370,11 +385,19 @@ def add_comment(request, pk=0):
             return HttpResponseRedirect(reverse('pergunta', args=[resp.pergunta.slug]))
     else:
         form = CommentForm()
+        
+    # Get related questions list
+    related = related_questions(resp.pergunta, 15)
+    
+    # Get users who can answer the question
+    ask_users = user_to_answer(resp.pergunta, 10)
     
     context = {
         'form': form,
         'answer': resp,
         'edit': 0,
+        'related': related,
+        'ask_users': ask_users,
     }
     
     return render(request, 'perguntas/comment.html', context)    
@@ -573,13 +596,19 @@ def get_question_list(max_results=0, inputed_question=''):
     if inputed_question:
         inputed = inputed_question.split()
         word = []
+        exclude_words = ['que', 'de', 'para', 'é', 'quando', 'como', 'porque', 'por',
+                         'onde', 'tem', 'a', 'o', 'as', 'os', 'são', 'quem', 'quanto',
+                         'será', 'no', 'na', 'nos', 'nas', 'e']
         for i in inputed:
             x = i.lower()
-            word.append(x)  
+            exclude = set(string.punctuation)
+            x = ''.join(ch for ch in x if ch not in exclude)
+            if x not in exclude_words:
+                word.append(x)  
         perguntas = Pergunta.objects.all()
         
         # Starts only afther X words are typed
-        if len(word) < 0:
+        if len(word) < 4:
             return None
         
         for perg in perguntas:
@@ -730,10 +759,10 @@ These views controls and help actions related to topics (Tags):
 (Those marked with ### are only helper function that can be reused in diferent views)
 
 
-- ###SUGGEST_TOPICS: suggest topics that user migth know about, based on its profile
-- UPDATE_TOPICS_SUGESTION: on page update suggested topics that user migth know about
+- ###SUGGEST_TOPICS_KNOWS: suggest topics that user migth know about, based on its profile
+- UPDATE_TOPICS_SUGESTION_KNOWS: on page update suggested topics that user migth know about
 - ###GET_TOPIC_LIST: return related topics based on the inputed one (SEARCH_TOPIC helper)
-- SEARCH_TOPICS: searches for topics based on inputed search query
+- SEARCH_TOPICS_KNOWS: searches for knows topics based on inputed search query
 - CREATE_TOPIC_KNOWN: creates a new Tag and add it to user_knows_about topics
 - CURRENT_KNOWN_TOPICS: on page update of current user known topics
 
@@ -743,7 +772,7 @@ These views controls and help actions related to topics (Tags):
 
 
 # Sugest knows_about topics based in what user knows about
-def suggest_topics(profile):
+def suggest_topics_knows(profile):
     sugestions = []
     if profile.knows_about.all():
         for tpc in profile.knows_about.all():
@@ -763,17 +792,49 @@ def suggest_topics(profile):
     return sugestions[0:30]
 
 
+# Sugest interest topics based in what user is iterested about
+def suggest_topics_interests(profile):
+    sugestions = []
+    if profile.interests.all():
+        for tpc in profile.interests.all():
+            perguntas = tpc.pergunta_set.all()
+            for perg in perguntas:
+                for tag in perg.tags.all():
+                    if (tag not in sugestions) and (tag not in profile.interests.all()):
+                        sugestions.append(tag)
+    
+    if len(sugestions) < 30:
+        tags = Tag.objects.all()
+        tags = sorted(tags, key= lambda t: t.num_perguntas(), reverse=True)
+        for tag in tags:
+            if (tag not in sugestions) and (tag not in profile.interests.all()):
+                sugestions.append(tag)
+    
+    return sugestions[0:30]
 
-# Updates the suggested topic list
-def update_topics_sugestion(request):
+
+
+# Updates the suggested known topic list
+def update_topics_sugestion_knows(request):
     profile = request.user.userprofile
-    sugestions = suggest_topics(profile)
+    sugestions = suggest_topics_knows(profile)
     
     context = {
             'sugestions': sugestions,
         }    
-    return render(request, 'perguntas/sugest_topics.html', context)
+    return render(request, 'perguntas/sugest_topics_knows.html', context)
 
+
+
+# Updates the suggested interst topic list
+def update_topics_sugestion_interests(request):
+    profile = request.user.userprofile
+    sugestions = suggest_topics_interests(profile)
+    
+    context = {
+            'sugestions': sugestions,
+        }    
+    return render(request, 'perguntas/sugest_topics_interest.html', context)
 
 
 
@@ -831,8 +892,8 @@ def get_topic_list(max_results=0, inputed_topic=''):
 
 
 
-# Search topics based on inputed search query
-def search_topics(request):
+# Search know topics based on inputed search query
+def search_topics_knows(request):
     topic_list = []
     inputed_topic = ''
     if request.method == 'GET':
@@ -843,8 +904,23 @@ def search_topics(request):
         'inputed_topic': inputed_topic,
         'topic_list': topic_list,
     }
-    return render(request, 'perguntas/search_topic.html', context)
+    return render(request, 'perguntas/search_topic_knows.html', context)
     
+
+
+# Search interest topics based on inputed search query
+def search_topics_interests(request):
+    topic_list = []
+    inputed_topic = ''
+    if request.method == 'GET':
+        inputed_topic = request.GET['suggestion']
+    topic_list = get_topic_list(15, inputed_topic)
+    
+    context = {
+        'inputed_topic': inputed_topic,
+        'topic_list': topic_list,
+    }
+    return render(request, 'perguntas/search_topic_interest.html', context)
 
 
 # Create a new topic and add to user knowledge
@@ -867,6 +943,27 @@ def create_topic_known(request):
     return HttpResponse()
     
     
+
+# Create a new topic and add to user interests
+def create_topic_interest(request):
+    topic_name = ''
+    if request.method == 'GET':
+        topic_name = request.GET['topic_name']
+    
+    # create new topic
+    topic = Tag(nome=topic_name, slug=slugify(topic_name))
+    topic.save()
+    
+    profile = request.user.userprofile
+    profile.interests.add(topic)
+    profile.save()
+    
+    context = {
+    'topic': topic,
+    }
+    return HttpResponse()
+    
+    
 # Get the users curent known topics and return as a list
 def current_known_topics(request):
     if request.method == 'GET':
@@ -876,10 +973,21 @@ def current_known_topics(request):
             'current_topics': current_topics,
         }
         
-        return render(request, 'perguntas/user_topics.html', context)
-    
+        return render(request, 'perguntas/user_know_topics.html', context)
     
 
+
+
+# Get the users curent interest topics and return as a list
+def current_interest_topics(request):
+    if request.method == 'GET':
+        current_topics = request.user.userprofile.interests.all()
+        
+        context = {
+            'current_topics': current_topics,
+        }
+        
+        return render(request, 'perguntas/user_interest_topics.html', context)
     
 
 
