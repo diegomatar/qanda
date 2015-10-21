@@ -94,6 +94,7 @@ class UserProfile(models.Model):
             reputation += rsp.votes
         return reputation
     
+    
     def followed(self, user):
         try:
             profile = user.userprofile
@@ -118,11 +119,9 @@ class UserProfile(models.Model):
         
         if len(existent_slug): #checks if slug exists, if it does add a random num to the end of it
             self.slug = slug + '-' + str(randint(0,100))
-            print 'New slug 1 %s' % self.slug
         
         else: # saves slug as it is
             self.slug = slug
-            print 'New slug 2 %s' % self.slug
         
         super(UserProfile, self).save(*args, **kwargs)
             

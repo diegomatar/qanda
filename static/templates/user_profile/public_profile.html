@@ -3,7 +3,9 @@
 
 {% load i18n %}
 
-{% block head_title %}{% trans "Signup" %}{% endblock %}
+{% block title %}{{ profile.name|title }}{% endblock %}
+
+{% block description %}Veja as útimas atividades de {{ profile.name|title }} no Qanda, quais foram suas respostas e quais seus temas de interesse.{% endblock %}
 
 {% block content %}
   

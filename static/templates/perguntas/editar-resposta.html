@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}Editar Resposta{% endblock %}
 
 {% block content %}
 
 
 <div class="blog-header">
         <h1 class="blog-title">Editar Resposta</h1>
-        <p class="lead blog-description">{{ pergunta.titulo }}</p>
-        <p class="lead blog-description">{{ pergunta.descricao }}</p>
+        <p class="lead blog-description">{{ resposta.pergunta.titulo }}</p>
+        <p class="lead blog-description">{{ respostar.pergunta.descricao }}</p>
       </div>
 
       <div class="row">

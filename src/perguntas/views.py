@@ -14,10 +14,12 @@
 
 import pytz, string
 
+from bs4 import BeautifulSoup #pip install beautifulsoup4
 from collections import Counter
 from datetime import datetime, timedelta
 from itertools import chain
 from random import randint
+
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -29,9 +31,10 @@ from django.shortcuts import render, HttpResponse, HttpResponseRedirect, Http404
 
 from user_profile.models import UserProfile
 from notifications.views import new_Answer, new_Vote, new_Comment, new_AskAnswer
-from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm, EditarPerguntaForm
+from .forms import PerguntaForm, RespostaForm, TagForm, CommentForm
 from .models import Pergunta, Resposta, Tag, Comment
 from .rank import score_questions
+
 
 
 
@@ -120,6 +123,8 @@ def pergunta(request, slug):
             form_data = form.save(commit=False)
             form_data.pergunta = pergunta
             form_data.autor = request.user
+            form_data.resposta = sanitize_html(form_data.resposta)
+            form_data.resposta = add_responsive_img_class(form_data.resposta)
             form_data.save()
             answer = form_data
             for usr in pergunta.follow_questions.all():
@@ -317,6 +322,7 @@ def perguntar(request):
     context = {
         'form': form,
         'qst_list': qst_list,
+        'edit': 0,
     }
     
     return render(request, 'perguntas/perguntar.html', context)
@@ -335,6 +341,8 @@ def responder(request, pk):
             form_data = form.save(commit=False)
             form_data.pergunta = pergunta
             form_data.autor = request.user
+            form_data.resposta = sanitize_html(form_data.resposta)
+            form_data.resposta = add_responsive_img_class(form_data.resposta)
             form_data.save()
             notif = new_Answer(pergunta.autor, request.user, pergunta, form_data)
             url = pergunta.get_absolute_url()
@@ -361,6 +369,7 @@ def responder(request, pk):
         'pergunta': pergunta,
         'related': related,
         'ask_users': ask_users,
+        'edit': 0,
         
     }
      
@@ -412,23 +421,24 @@ def edit_question(request, pk):
     if request.user == question.autor or request.user.userprofile.user_role == 'admin':
         # If is post get the data and save the edited question
         if request.method == 'POST':
-            form = EditarPerguntaForm(request.POST, request.FILES, instance=question)
+            form = PerguntaForm(request.POST, request.FILES, instance=question)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Pergunta editada com sucesso!!')
                 return HttpResponseRedirect(reverse('pergunta', args=[question.slug]))
         # Otherwise, display the form to edit question:
         else:
-            form = EditarPerguntaForm(instance=question)
+            form = PerguntaForm(instance=question)
     else:
         raise Http404
     
     context = {
         'form': form,
         'question': question,
+        'edit': 1,
     }
     
-    return render(request, 'perguntas/editar_pergunta.html', context)
+    return render(request, 'perguntas/perguntar.html', context)
 
 
 
@@ -442,9 +452,12 @@ def edit_answer(request, pk):
         if request.method == 'POST':
             form = RespostaForm(request.POST, request.FILES, instance=answer)
             if form.is_valid():
-                    form.save()
-                    messages.success(request, 'Resposta editada com sucesso!!')
-                    return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug]))
+                form_data = form.save(commit=False)
+                form_data.resposta = sanitize_html(form_data.resposta)
+                form_data.resposta = add_responsive_img_class(form_data.resposta)
+                form_data.save()
+                messages.success(request, 'Resposta editada com sucesso!!')
+                return HttpResponseRedirect(reverse('pergunta', args=[answer.pergunta.slug]))
         # Otherwise, just display the form to edit:
         else:
             form = RespostaForm(instance=answer)
@@ -453,10 +466,27 @@ def edit_answer(request, pk):
         
     context = {
         'form': form,
-        'resposta': answer,
+       
     }
     
-    return render(request, 'perguntas/editar-resposta.html', context)
+    
+    # Get related questions list
+    related = related_questions(answer.pergunta, 15)
+    
+    # Get users who can answer the question
+    ask_users = user_to_answer(answer.pergunta, 10)
+    
+    context = {
+        'form': form,
+        'resposta': answer,
+        'pergunta': answer.pergunta,
+        'related': related,
+        'ask_users': ask_users,
+        'edit': 1,
+        
+    }
+    
+    return render(request, 'perguntas/responder.html', context)
     
 
 
@@ -508,6 +538,28 @@ These views support other views based on user actions:
 
 
 '''
+
+
+# Remove unwanted tags from inputed html
+VALID_TAGS = ['strong', 'em', 'p', 'ul', 'ol', 'li', 'br', 'a', 'br', 'img', 'hr', 'b', 'i', 'u']
+def sanitize_html(value):
+    soup = BeautifulSoup(value)
+    for tag in soup.findAll(True):
+        if tag.name not in VALID_TAGS:
+            tag.hidden = True
+
+    return soup.renderContents()
+
+
+# Add img-responsive class to images in inputed html
+def add_responsive_img_class(myhtml):
+    soup = BeautifulSoup(myhtml)
+    for img_tag in soup.find_all('img'):    
+        img_tag['class'] = img_tag.get('class', []) + ['img-responsive']
+    html = soup.prettify(soup.original_encoding)
+    return html
+
+
 
 # returns a list with x suggested users to answer a question
 def user_to_answer(question, x):
@@ -598,7 +650,7 @@ def get_question_list(max_results=0, inputed_question=''):
         word = []
         exclude_words = ['que', 'de', 'para', 'é', 'quando', 'como', 'porque', 'por',
                          'onde', 'tem', 'a', 'o', 'as', 'os', 'são', 'quem', 'quanto',
-                         'será', 'no', 'na', 'nos', 'nas', 'e']
+                         'será', 'no', 'na', 'nos', 'nas', 'e', 'qual']
         for i in inputed:
             x = i.lower()
             exclude = set(string.punctuation)
@@ -749,6 +801,17 @@ def active_users(tag=None):
         autores.append(i[0])
     
     return autores[0:10]
+
+
+
+
+
+
+# Search for images in string and add class="img-responsive"
+
+
+
+
 
 
 

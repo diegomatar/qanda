@@ -129,6 +129,16 @@ class Pergunta(models.Model):
         followers = self.follow_questions.all()
         return len(followers)
     
+    
+    
+    def answered(self, user):
+        for answer in self.resposta.all():
+            if user == answer.autor:
+                return 1
+            else:
+                return 0
+            
+    
 
 
 class Resposta(models.Model):

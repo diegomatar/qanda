@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
+import re
 import pytz # This had to be installed separately 'pip install pytz'
 
 from django import template
 from datetime import date, timedelta, datetime, tzinfo
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -58,4 +59,28 @@ def downvoted(obj, user):
 
 @register.filter
 def followed(obj, user):
-    return obj.followed(user)    
+    return obj.followed(user)
+
+
+
+
+
+
+
+# Mark all external links as nofollow
+NOFOLLOW_RE = re.compile(u'<a (?![^>]*rel=["\']nofollow[\'"])' \
+                         u'(?![^>]*href=["\']\.{0,2}/[^/])',
+                         re.UNICODE|re.IGNORECASE)
+@register.filter
+def nofollow(content):
+    return mark_safe(re.sub(NOFOLLOW_RE, u'<a rel="nofollow" ', content))
+
+
+# add class="responsive" to images
+NOFOLLOW_RE = re.compile(u'<a (?![^>]*rel=["\']nofollow[\'"])' \
+                         u'(?![^>]*href=["\']\.{0,2}/[^/])',
+                         re.UNICODE|re.IGNORECASE)
+@register.filter
+def nofollow(content):
+    return mark_safe(re.sub(NOFOLLOW_RE, u'<a rel="nofollow" ', content))
+

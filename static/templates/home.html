@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% load app_filters %}
 
+{% block title %}As Melhores Respostas{% endblock %}
+
 {% block home_active %}active{% endblock %}
 
 
@@ -81,18 +83,18 @@
         
         
             <div class="col-xs-10"> 
-                <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
-                <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo|striptags|truncatewords:30 }}</a> <small>{{ pergunta.score }}</small></h2>        
-                {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
+                <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}" target="_blank"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
+                <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}" target="_blank">{{ pergunta.titulo|striptags|truncatewords:30 }}</a> <small>{{ pergunta.score }}</small></h2>        
+                {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}" target="_blank">mais ...</a></p>{% endif %}
                 <p class="info-text">
-                    <a href="{% url 'responder' pergunta.id %}" class="btn btn-default">Responder</a>
+                    <a href="{% url 'responder' pergunta.id %}" class="btn btn-default" target="_blank">Responder</a>
                     
                     {% if pergunta.num_respostas > 1 %}
-                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} respostas</a>
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link" target="_blank">{{ pergunta.num_respostas }} respostas</a>
                     {% elif pergunta.num_respostas = 1 %}
-                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">{{ pergunta.num_respostas }} resposta</a>
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link" target="_blank">{{ pergunta.num_respostas }} resposta</a>
                     {% elif pergunta.num_respostas = 0 %}
-                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link">Sem respostas</a>
+                        <a href="{% url 'pergunta' pergunta.slug %}" class="btn btn-link" target="_blank">Sem respostas</a>
                     {% endif %}
                     <span class="bullet"> • </span>
                     <a class="follow_quest btn btn-link {% if pergunta|followed:request.user %}unfollow active{% else %}follow{% endif %}" id="quest_{{ pergunta.id }}" data-questid="{{ pergunta.id}}"  >

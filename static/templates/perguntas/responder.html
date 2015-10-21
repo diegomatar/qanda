@@ -4,6 +4,8 @@
 {% load app_filters %}
 
 
+{% block title %}Nova Resposta{% endblock %}
+
 {% block add_script %}
 <link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
@@ -16,13 +18,15 @@
         <div class="row">
                 <div class="col-sm-12">
                 
-                
+                {% if edit %}
+                        <h1 class="blog-title">Editar Resposta</h1>
+                {% else %}
                         <h1 class="blog-title">Escrever Resposta</h1>
+                {% endif %}
                         <hr>
-                        
                         <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
                         <p class="blog-post-title"><a href="{% url "pergunta" pergunta.slug %}">{{ pergunta.titulo|title }}</a></p>
-                        <p class="text">{{pergunta.descricao|safe}}</p>
+                        <p class="text">{{pergunta.descricao}}</p>
                         
                         <hr>
                         <p class="lead blog-description">Responda aqui:</p>

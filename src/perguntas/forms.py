@@ -27,8 +27,8 @@ class TagField(AutoModelSelect2TagField):
 
 
 class PerguntaForm(forms.ModelForm):
-    titulo = forms.CharField(max_length=200, label="", widget=forms.TextInput(attrs={'placeholder': 'Exemplo: Qual a diferença entre um Deputado e um Senador?...'}))
-    descricao = forms.CharField(max_length=800, widget=SummernoteInplaceWidget(), label="", required=False)
+    titulo = forms.CharField(max_length=300, label="", widget=forms.TextInput(attrs={'placeholder': 'Exemplo: Qual a diferença entre um Deputado e um Senador?...'}))
+    descricao = forms.CharField(max_length=1000, widget=forms.Textarea, label="", required=False)
     tags = TagField(label="")
     
     class Meta:
@@ -42,7 +42,6 @@ class PerguntaForm(forms.ModelForm):
         self.helper.form_class = 'perguntar'
         self.helper.form_method = 'post'
         self.helper.form_action = 'perguntar'
-        
 
         self.helper.layout = Layout(
             HTML("""
@@ -57,7 +56,7 @@ class PerguntaForm(forms.ModelForm):
             HTML("""
                 <p class="lead blog-description close-to-next-line"><b>2.</b> (opcional) escreva mais detalhes sobre o que deseja saber:</p>
             """),
-            'descricao',
+            Field('descricao', rows="5"),
             HTML("""
                 <p class="lead blog-description close-to-next-line"><b>3.</b> Escolha quais os temas desta perguta?</p>
                 <p class="info-text">
@@ -72,39 +71,6 @@ class PerguntaForm(forms.ModelForm):
                 css_class='col-lg-offset-3 col-lg-6',
             ),
         )
-        
-
-class EditarPerguntaForm(forms.ModelForm):
-    titulo = forms.CharField(max_length=200, label="", widget=forms.TextInput(attrs={'placeholder': 'Qual é sua pergunta?'}))
-    descricao = forms.CharField(max_length=800, widget=SummernoteInplaceWidget(), label=" ", required=False)
-    tags = TagField(label=" ")
-    
-    class Meta:
-        model = Pergunta
-        fields = ['titulo', 'descricao', 'tags']
-        
-    def __init__(self, *args, **kwargs):
-        super(EditarPerguntaForm, self).__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'perguntar'
-        self.helper.form_class = 'editar_pergunta'
-        self.helper.form_method = 'post'
-        
-
-        self.helper.layout = Layout(
-            'titulo',
-            'descricao',
-            HTML("""
-                <p class="sm-title close-to-next-line">Quais os assuntos desta perguta?</p>
-            """),
-            'tags',
-            Div(
-                Submit('submit', 'Alterar Pergunta >', css_class='btn-warning btn-lg'),
-                css_class='col-lg-offset-3 col-lg-9',
-            ),
-        )
-
-    
              
 
 class RespostaForm(forms.ModelForm):

@@ -3,6 +3,8 @@
 {% load crispy_forms_tags %}
 {% load django_select2_tags %}
 
+{% block title %}Nova Pergunta{% endblock %}
+
 
 {% block perguntar_active %}active-nav{% endblock %}
 
@@ -19,8 +21,11 @@
         <div class="row">
                 <div class="col-sm-8 col-sm-offset-2">
                 
-                
+                        {% if edit %}
+                        <h1 class="blog-title">Editar Pergunta</h1>
+                        {% else %}
                         <h1 class="blog-title">Nova Pergunta</h1>
+                        {% endif %}
                         <hr>
                         
                         {% crispy form form.helper %}

@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load app_filters %}
 
+{% block title %}Perguntas Sobre {{ tag.nome|title }}{% endblock %}
+
+{% block description %}Encontrei {{ perguntas|length }} excelentes perguntas e respostas sobre {{ tag.nome|title }} e milhares sobre outros temas. Confira todas aqui!{% endblock %}
+
 {% block content %}
 
 
