@@ -27,18 +27,6 @@
         <!-- Add Topic Bio Modal Script -->
         <script type="text/javascript">
         $('#BioModal').modal('show');
-        
-        // Add new tag bio to user
-        $('body').on('click', '.savebio', function(){
-            var $th = $(this);
-            var desc = $('#biodesc').val();
-            var userid = $th.attr("data-userid");
-            var tagid = $th.attr("data-tagid");
-            
-            $.get('/perfil/salvar-bio/', {tag_id: tagid, bio_text: desc}, function(data){
-                
-            });
-        });
         </script>
         {% endif %}
 

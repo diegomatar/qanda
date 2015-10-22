@@ -96,5 +96,4 @@ class EditProfilePictureForm(forms.ModelForm):
         self.helper.layout = Layout(
             'picture',
         )
-
         

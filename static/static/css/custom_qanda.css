@@ -235,6 +235,11 @@ hr {
   font-size: 13px;
 }
 
+
+.inline-with-tag {
+  margin-top: 5px;
+}
+
 /* Paragraphs and texts */
 
 .sm-title{

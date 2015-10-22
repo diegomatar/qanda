@@ -9,6 +9,39 @@
 
 {% block title %}Editar Perfil{% endblock %}
 
+
+{% block jumbotrone %}
+<!-- Edit Bio Modal -->
+<div class="modal fade" id="bioModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="savebio close" data-dismiss="modal" aria-label="Close"  data-userid="{{ request.user.id}}" data-tagid="{{ bio_tag.pk }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Editar sua biografia sobre <b><span id="bioname"></span></b>:</h4>
+      </div>
+      <div class="modal-body">
+        <form>
+                  <div class="row">
+                        <div class="col-lg-12">
+                              <div class="form-group">
+                                  <div class="input-group">
+                                      <input type="text" class="form-control" id="biodesc" placeholder="Conte sua experiência sobre este assunto...">
+                                      <span class="input-group-btn">
+                                          <button id="savebio" class="savebio btn btn-warning" type="button" data-userid="{{ request.user.id}}" data-tagid="" data-dismiss="modal">Salvar</button>
+                                      </span>
+                                  </div>
+                              </div><!-- form-group -->
+                        </div><!-- col-lg-10 -->
+                  </div><!-- row -->
+            </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
 {% block content %}
       
       <script type="text/javascript">
@@ -130,9 +163,52 @@
                   <p class="text-right"><a class="info-text" href="{% url 'socialaccount_connections' %}">editar contas ></a></p>
                   </div>
                   
-                  <hr>
+
+                        
+                        
+                  <div class="row">
+                        <hr>
+                        <p class="lead blog-description">Suas Biografias:</p>
+                        <div class="table-responsive well">
+                        
+                        {% if request.user.userbio_set.all|length %}              
+                        <table class="table table-condensed">
+                        <thead>
+                              <tr>
+                                    <th class="sm-title">Tema</th>
+                                    <th class="sm-title">Experiências no Tema</th>
+                                    <th></th>
+                              </tr>
+                        </thead>
+                        {% for bio in request.user.userbio_set.all %}
+                        <tr>
+                              <td>
+                                 <p class="text"><b>{{ bio.tag|title }}:</b></p>
+                              </td>
+                              <td>
+                                    <p class="info-text" id="bio_{{ bio.tag.pk }}">{{ bio.bio }}</p>
+                              </td>
+                              <td>
+                                    <a href="#" class="edit-bio info-text" data-tagid="{{ bio.tag.pk }}"  data-tagname="{{ bio.tag.nome|title }}" title="Editar Biografia" data-toggle="modal" data-target="#bioModal"><i class="fa fa-pencil"></i></a>
+                              </td>
+                              
+                        </tr>
+                        {% endfor %}
+                        </table>
+                        {% else %}
+                              <p class="text">
+                                    Você ainda não tem biografias..
+                                    <br>
+                                    <a href="{% url 'responder-perguntas' %}">Responda perguntas para adicioná-las!</a>
+                              </p>
+                        {% endif %}
+                  </div>
+                  
+                  </div>
+  
+                  
             
-            
+            <hr>
             </div><!-- /.col -->
       </div><!-- /.row -->
 </div><!-- /.blog-post -->

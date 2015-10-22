@@ -442,7 +442,7 @@ $('#searchTopic').keyup(function(){
 
 // Create new topic and add to user knowledge
 $('body').on('click', '.create_new_topic_known', function(){
-    var topic = $('#newTopic').text();
+    var topic = $('.create_new_topic_known').text();
     var $th = $(this);
     $.get('/criar-topico-conhecimento/', {topic_name: topic}, function(data){
         $th.parent().hide();
@@ -512,7 +512,7 @@ $('#searchTopic').keyup(function(){
 
 // Create new topic and add to user interests
 $('body').on('click', '.create_new_topic_interest', function(){
-    var topic = $('#newTopic').text();
+    var topic = $('.create_new_topic_interest').text();
     var $th = $(this);
     $.get('/criar-topico-interesse/', {topic_name: topic}, function(data){
         $th.parent().hide();
@@ -527,13 +527,40 @@ $('body').on('click', '.create_new_topic_interest', function(){
 });
 
 
-
-
 // Allow links to specific tabs, using url # parameter
 var url = document.location.toString();
 if (url.match('#')) {
     $('.nav-tabs a[href=#'+url.split('#')[1]+']').tab('show') ;
 } 
+
+
+
+// Add new tag bio to user when answer is asked
+$('body').on('click', '.savebio', function(){
+    var $th = $(this);
+    var desc = $('#biodesc').val();
+    var userid = $th.attr("data-userid");
+    var tagid = $th.attr("data-tagid");
+    
+    $.get('/perfil/salvar-bio/', {tag_id: tagid, bio_text: desc}, function(data){
+        $('#bio_'+tagid).html(data);
+    });
+});
+
+
+// Create and edit user tag bio info
+$('body').on('click', '.edit-bio', function(){
+    var $th = $(this);
+    var tagid = $th.attr("data-tagid");
+    var tagname = $th.attr("data-tagname");
+    $('#bioname').text(tagname);
+    $('#savebio').attr("data-tagid", tagid )
+});
+
+
+
+
+
 
 
 

@@ -14,7 +14,7 @@
 {% for pergunta in sugestions %}
     
     <div class="blog-post">
-        <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag.nome|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.data|post_date }}</p>
+        <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag.nome|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
         <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}">{{ pergunta.titulo }}</a></h2>        
         {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}">mais ...</a></p>{% endif %}
         <p class="info-text">

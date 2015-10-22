@@ -123,9 +123,6 @@ def edit_user_profile(request):
         next_step = 'complete seu email.'
         
         
-    
-    
-    
     context ={
         'profile': profile,
         'user_form': user_form,
@@ -522,9 +519,7 @@ def save_bio(request):
     
     if request.method == "GET":
         tag_id = request.GET['tag_id']
-        print tag_id
         bio_text = request.GET['bio_text']
-        print bio_text
         
     # If was passed any value on get
     if tag_id and bio_text:
@@ -532,16 +527,19 @@ def save_bio(request):
         tag = Tag.objects.get(pk=int(tag_id))
         # Get the user
         user = request.user
-        # Check for existent bio
+        # Check for existent bio and update it
         try:
             user_bio = UserBio.objects.get(user=user, tag=tag)
+            user_bio.bio = bio_text
+            user_bio.save()
             
         except:
             # create the new tag bio on user
             user_bio = UserBio(user=user, tag=tag, bio=bio_text)
             user_bio.save()
 
-    return HttpResponse()
+    return HttpResponse(bio_text)
+
     
 
 
