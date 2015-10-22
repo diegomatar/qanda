@@ -9,22 +9,8 @@ from datetime import date, timedelta, datetime, tzinfo
 from django.utils.safestring import mark_safe
 
 register = template.Library()
-
-@register.filter
-def post_date(value):
-    data = value
-    delta = date.today() - data
-
-    if delta.days == 0:
-        return "hoje"
-    elif delta.days == 1:
-        return "ontem"
-    elif delta.days > 1 and delta.days < 10 :
-        return "%s dias atrás" % delta.days
-    else:
-        return "{:%d de %b}".format(data)
     
-    
+# Return post date as elapsed time
 @register.filter
 def time_ago(value):
     time = value
@@ -47,22 +33,21 @@ def time_ago(value):
         return "agora"
     
     
-    
+# Check if object was upvoted by user
 @register.filter
 def upvoted(obj, user):
     return obj.upvoted(user)
 
+# Check if object was downvoted by user
 @register.filter
 def downvoted(obj, user):
     return obj.downvoted(user)
 
 
+# Check if the object is followed by user
 @register.filter
 def followed(obj, user):
     return obj.followed(user)
-
-
-
 
 
 
@@ -76,11 +61,20 @@ def nofollow(content):
     return mark_safe(re.sub(NOFOLLOW_RE, u'<a rel="nofollow" ', content))
 
 
-# add class="responsive" to images
-NOFOLLOW_RE = re.compile(u'<a (?![^>]*rel=["\']nofollow[\'"])' \
-                         u'(?![^>]*href=["\']\.{0,2}/[^/])',
-                         re.UNICODE|re.IGNORECASE)
+
+# Returns user bio of inputed tags
 @register.filter
-def nofollow(content):
-    return mark_safe(re.sub(NOFOLLOW_RE, u'<a rel="nofollow" ', content))
+def userbio(user, tags):
+        bio = user.userprofile.about
+     
+        for tg in tags:
+            try:
+                bio = user.userbio_set.get(tag=tg)
+                return bio
+            except:
+                pass
+
+        return bio
+        
+
 

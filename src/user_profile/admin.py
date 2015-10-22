@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 from django.contrib import admin
 
-from .models import UserProfile
+from .models import UserProfile, UserBio
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ['email', 'first_name', 'num_perg', 'num_resp', 'p_upvotes', 'p_downvotes', 'r_upvotes', 'r_downvotes', 'picture']
@@ -59,3 +59,23 @@ class UserProfileAdmin(admin.ModelAdmin):
         
     
 admin.site.register(UserProfile, UserProfileAdmin)
+
+
+
+class UserBioAdmin(admin.ModelAdmin):
+    list_display = ['name', 'email', 'tag', 'bio']
+    search_fields = ['user__email', 'tag__nome']
+    list_filter = ['tag__nome',]
+    
+    class Meta:
+        model = UserBio
+        
+    def email(self, obj):
+        email = obj.user.email
+        return email
+    
+    def name(self, obj):
+        name = obj.user.userprofile.name()
+        return name
+        
+admin.site.register(UserBio, UserBioAdmin)

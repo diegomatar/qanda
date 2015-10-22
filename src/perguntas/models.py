@@ -112,7 +112,6 @@ class Pergunta(models.Model):
             return 1
         else:
             return 0
-        
     
     
     def followed(self, user):
@@ -137,6 +136,10 @@ class Pergunta(models.Model):
                 return 1
             else:
                 return 0
+            
+    def tags_o(self, ):
+        tags = sorted(self.tags.all(), key=lambda tag: tag.num_perguntas(), reverse=True)
+        return tags
             
     
 

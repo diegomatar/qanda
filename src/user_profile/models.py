@@ -104,7 +104,6 @@ class UserProfile(models.Model):
             return 1
         else:
             return 0
-            
         
         
     def __unicode__(self):
@@ -126,5 +125,19 @@ class UserProfile(models.Model):
         super(UserProfile, self).save(*args, **kwargs)
             
             
+
+
+class UserBio(models.Model):
+    user = models.ForeignKey(User)
+    tag = models.ForeignKey('perguntas.Tag')
+    bio = models.CharField(max_length=200, verbose_name='Sobre')
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+    updated = models.DateTimeField(auto_now_add=False, auto_now=True)
+    
+    def __unicode__(self):
+        return self.bio
+    
+    
+    
 
     

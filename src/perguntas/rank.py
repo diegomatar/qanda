@@ -218,9 +218,9 @@ def score_questions(questions):
             f_points = 100
         elif followers < followers_interval_values[0] and followers >= followers_interval_values[1]:
             f_points = 80
-        elif followers < votes_ifollowers_interval_valuesnterval_values[1] and followers >= followers_interval_values[2]:
+        elif followers < followers_interval_values[1] and followers >= followers_interval_values[2]:
             f_points = 60
-        elif followers < votes_ifollowers_interval_valuesnterval_values[2] and followers >= followers_interval_values[3]:
+        elif followers < followers_interval_values[2] and followers >= followers_interval_values[3]:
             f_points = 40
         else:
             f_points = 20

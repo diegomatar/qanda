@@ -6,30 +6,36 @@
 {% block home_active %}active{% endblock %}
 
 
-{% block jumbotrone %}
+{% block head %}
+    
+    {% if request.user.is_authenticated %}
+        <script type="text/javascript">
+                    mixpanel.identify("{{request.user.pk}}");
+                    mixpanel.people.set({
+                          "$first_name": "{{request.user.first_name}}",
+                          "$last_name": "{{request.user.last_name}}",
+                          "$email": "{{ request.user.email }}",    // only special properties need the $
+                          "$created": "{{ request.user.userprofile.timestamp|date:'Y-m-d H:i' }}",
+                          "$last_login": new Date(),         // properties can be dates..
+                          "Role": "{{ request.user.userprofile.user_role }}",
+                          "Num of Questions": {{ request.user.userprofile.num_pergs}},
+                          "Num of Answers": {{ request.user.userprofile.num_respostas}},
+                          "Reputation": {{request.user.userprofile.reputation}},
+                          "Num of Followers": {{ request.user.userprofile.followers_num }},
+                          "Num of Followings": {{ request.user.userprofile.follow_users.all|length }},
+                          "Knows About": [{% for know in request.user.userprofile.knows_about.all %}"{{ know.nome }}", {% endfor %}],
+                          "Interests": [{% for inter in request.user.userprofile.interests.all %}'{{ inter.nome }}', {% endfor %}],
+                          "Follow Topics": [{% for tpc in request.user.userprofile.follow_topics.all %}'{{ tpc.nome }}', {% endfor %}],
+                        
+                    });
+        </script>
+    {% endif %}
+    
+{% endblock%}
 
-{% if request.user.is_authenticated %}
-<script type="text/javascript">
-            mixpanel.identify("{{request.user.pk}}");
-            mixpanel.people.set({
-                  "$first_name": "{{request.user.first_name}}",
-                  "$last_name": "{{request.user.last_name}}",
-                  "$email": "{{ request.user.email }}",    // only special properties need the $
-                  "$created": "{{ request.user.userprofile.timestamp|date:'Y-m-d H:i' }}",
-                  "$last_login": new Date(),         // properties can be dates..
-                  "Role": "{{ request.user.userprofile.user_role }}",
-                  "Num of Questions": {{ request.user.userprofile.num_pergs}},
-                  "Num of Answers": {{ request.user.userprofile.num_respostas}},
-                  "Reputation": {{request.user.userprofile.reputation}},
-                  "Num of Followers": {{ request.user.userprofile.followers_num }},
-                  "Num of Followings": {{ request.user.userprofile.follow_users.all|length }},
-                  "Knows About": [{% for know in request.user.userprofile.knows_about.all %}"{{ know.nome }}", {% endfor %}],
-                  "Interests": [{% for inter in request.user.userprofile.interests.all %}'{{ inter.nome }}', {% endfor %}],
-                  "Follow Topics": [{% for tpc in request.user.userprofile.follow_topics.all %}'{{ tpc.nome }}', {% endfor %}],
-                
-            });
-</script>
-{% endif %}
+
+
+{% block jumbotrone %}
     
 {% if not user.is_authenticated %}
     <div class="jumbotron {{cover}}">
@@ -83,7 +89,7 @@
         
         
             <div class="col-xs-10"> 
-                <p class="info-text">{% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}" target="_blank"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
+                <p class="info-text">{% for tag in pergunta.tags_o %}<a href="{% url 'categoria' tag.slug %}" target="_blank"><span class="label label-tag">{{ tag|title }}</span></a> {% endfor %}<span class="bullet"> • </span>{{ pergunta.timestamp|time_ago }}</p>
                 <h2 class="blog-post-title"><a href="{% url 'pergunta' pergunta.slug %}" target="_blank">{{ pergunta.titulo|striptags|truncatewords:30 }}</a> <small>{{ pergunta.score }}</small></h2>        
                 {% if pergunta.descricao %}<p class='text'>{{ pergunta.descricao|striptags|truncatewords:30 }} <a href="{% url 'pergunta' pergunta.slug %}" target="_blank">mais ...</a></p>{% endif %}
                 <p class="info-text">

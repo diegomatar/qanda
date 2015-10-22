@@ -60,14 +60,6 @@
     <!-- Production Version-->  
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
      
-    {% if messages %}
-      {% for message in messages %}
-        <div class='alert {% if message.tags %}alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}'{% endif %}>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-          {{ message }}
-        </div>
-      {% endfor %}
-    {% endif %}
         
     {% block head %}{% endblock%}
     
@@ -81,9 +73,7 @@
   <body>
     
     {% if not request.user.is_authenticated %}
-    
-    {% include "login_modal.html" %}
-    
+      {% include "login_modal.html" %}
     {% endif %}
     
     <nav class="navbar navbar-default navbar-fixed-top">
@@ -140,6 +130,15 @@
       </div>
     </nav>
 
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class='alert {% if message.tags %}alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}'{% endif %}>
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
 
     
     {% block jumbotrone %}{% endblock %}

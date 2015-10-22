@@ -111,6 +111,8 @@ def home(request):
 
 
 # view pergunta: user can see a question and all its answers and comments
+# user can ask answer to other users
+# user is asked to fill tag bio if just answered quaestion (answered=1)
 def pergunta(request, slug):
     
     pergunta = Pergunta.objects.get(slug=slug)
@@ -130,16 +132,22 @@ def pergunta(request, slug):
             for usr in pergunta.follow_questions.all():
                 notif = new_Answer(usr.user, request.user, pergunta, answer)
             
-            url = pergunta.get_absolute_url()
-            
             # Add the first two topics of question to user knowledge
-            question_tags = pergunta.tags.all()[0:2]
+            question_tags = pergunta.tags_o()[0:2]
             profile = request.user.userprofile
             profile.knows_about.add(*question_tags)
             # Add question to followed questions
             profile.follow_questions.add(pergunta)
             profile.save()
-            return HttpResponseRedirect(url)
+            
+            # Check if user already has a bio for main question tag
+            try:
+                request.user.userbio_set.get(tag=pergunta.tags_o()[0])
+            # If it does not, asks to create a new one
+            except:
+                request.session['new_answer'] = True
+            
+            return HttpResponseRedirect(reverse('pergunta', args=[pergunta.slug] ))
     else:
         form = RespostaForm()
     
@@ -354,6 +362,14 @@ def responder(request, pk):
             # Add the question to followed ones
             profile.follow_questions.add(pergunta)
             profile.save()
+            
+            # Check if user already has a bio for main question tag
+            try:
+                request.user.userbio_set.get(tag=pergunta.tags_o()[0])
+            # If it does not, asks to create a new one
+            except:
+                request.session['new_answer'] = True
+            
             return HttpResponseRedirect(url)
     else:
         form = RespostaForm()
@@ -421,7 +437,7 @@ def edit_question(request, pk):
     if request.user == question.autor or request.user.userprofile.user_role == 'admin':
         # If is post get the data and save the edited question
         if request.method == 'POST':
-            form = PerguntaForm(request.POST, request.FILES, instance=question)
+            form = PerguntaForm(request.POST, instance=question)
             if form.is_valid():
                 form.save()
                 messages.success(request, 'Pergunta editada com sucesso!!')
@@ -429,6 +445,7 @@ def edit_question(request, pk):
         # Otherwise, display the form to edit question:
         else:
             form = PerguntaForm(instance=question)
+            form.helper.form_action = reverse('editar_pergunta', args=[pk])
     else:
         raise Http404
     
@@ -543,7 +560,7 @@ These views support other views based on user actions:
 # Remove unwanted tags from inputed html
 VALID_TAGS = ['strong', 'em', 'p', 'ul', 'ol', 'li', 'br', 'a', 'br', 'img', 'hr', 'b', 'i', 'u']
 def sanitize_html(value):
-    soup = BeautifulSoup(value)
+    soup = BeautifulSoup(value, "lxml")
     for tag in soup.findAll(True):
         if tag.name not in VALID_TAGS:
             tag.hidden = True

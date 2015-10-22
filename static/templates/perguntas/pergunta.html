@@ -13,21 +13,77 @@
                 {{ first_resp.resposta }}
                 {% endwith %}
         {% else %}
-                Peça para um especialista em {{ pergunta.tags.all|first }} responder esta pergunta.
+                Peça para um especialista em {{ pergunta.tags_o|first|title }} responder esta pergunta.
         {% endif %}
 {% endblock %}
 
 
+
 {% block add_script %}
-<link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <link href="{% static 'css/custom_qanda.css' %}" rel="stylesheet">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        
+        {% if request.session.new_answer %}
+        <!-- Add Topic Bio Modal Script -->
+        <script type="text/javascript">
+        $('#BioModal').modal('show');
+        
+        // Add new tag bio to user
+        $('body').on('click', '.savebio', function(){
+            var $th = $(this);
+            var desc = $('#biodesc').val();
+            var userid = $th.attr("data-userid");
+            var tagid = $th.attr("data-tagid");
+            
+            $.get('/perfil/salvar-bio/', {tag_id: tagid, bio_text: desc}, function(data){
+                
+            });
+        });
+        </script>
+        {% endif %}
+
 {% endblock %}
 
 
 
 
 {% block jumbotrone %}
-<!-- Modal -->
+
+{% if request.session.new_answer %}
+{%  with pergunta.tags_o|first as bio_tag %}
+<!-- Add Topic Bio Modal -->
+<div class="modal fade" id="BioModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="savebio close" data-dismiss="modal" aria-label="Close"  data-userid="{{ request.user.id}}" data-tagid="{{ bio_tag.pk }}"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Adicione sua biografia sobre o tema <b>{{ bio_tag.nome|title }}</b></h4>
+      </div>
+      <div class="modal-body">
+                <form>
+                        <div class="row">
+                        <div class="col-lg-10">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="biodesc" placeholder="Conte sua experiência sobre este assunto...">
+                                <span class="input-group-btn">
+                                    <button id="savebio" class="savebio btn btn-warning" type="button" data-userid="{{ request.user.id}}" data-tagid="{{ bio_tag.pk }}" data-dismiss="modal">Salvar</button>
+                                </span>
+                            </div>
+                        </div><!-- form-group -->
+                        </div><!-- col-lg-10 -->
+                        </div><!-- row -->
+             </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endwith %}
+{% endif %}
+
+
+
+<!-- Ask Answer Modal -->
 <div class="modal " id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -64,6 +120,7 @@
 
 
 {% block content %}
+
 <div class="blog-post">
   <div class="row">
             
@@ -82,13 +139,13 @@
     <div class="col-xs-10">      
       <p class="blog-post-title">{{ pergunta.titulo }}</p>
       <p class="text">{{ pergunta.descricao }}</p>
-      <p class="info-text">Tópicos: {% for tag in pergunta.tags.all %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag }}</span></a> {% endfor %}</p>          
+      <p class="info-text">Tópicos: {% for tag in pergunta.tags_o %}<a href="{% url 'categoria' tag.slug %}"><span class="label label-tag">{{ tag.nome|title }}</span></a> {% endfor %}</p>          
       <div class="row"><!-- views and time, comments and options menu -->
             <div class="col-xs-9"><!-- views and time -->
               <p class="info-text">
                 <a href="{% url 'perguntar_novamente' pergunta.slug %}">Perguntar Novamente</a>
                 <span class="bullet"> • </span> 
-                {{ pergunta.data|post_date }}
+                {{ pergunta.timestamp|time_ago }}
                 <span class="bullet"> • </span> 
                 vista: {{ pergunta.views }} vezes
               </p>
@@ -181,7 +238,7 @@
                 <div class="col-xs-11">
                         <p class="info-text">      
                                 <a href="{% url 'profile' resp.autor.userprofile.slug %}">
-                                        <span class='autor-info'><b>{{ resp.autor.userprofile.name }}</b>{% if resp.autor.userprofile.about %}, {{ resp.autor.userprofile.about }}{% endif %}</span>
+                                        <span class='autor-info'><b>{{ resp.autor.userprofile.name }}</b>, {{ resp.autor|userbio:resp.pergunta.tags_o }}</span>
                                 </a>
                 </p>
                 </div><!-- col-xs-10 -->
@@ -193,7 +250,7 @@
             <div class="row"><!-- views and time, comments and options menu -->
             <div class="col-xs-9"><!-- views and time -->
               <p class="info-text">
-                {{ resp.data|post_date }}
+                {{ resp.timestamp|time_ago }}
                 <span class="bullet"> • </span> 
                 vista: {{ resp.views }} vezes
                 <a class="btn btn-link" role="button" data-toggle="collapse" href="#collapse{{resp.id}}" aria-expanded="false" aria-controls="collapseExample">comentários <span class="badge badge-c">{{ resp.comment_num }}</span></a>
@@ -232,7 +289,7 @@
                     <div class=col-xs-11>
                       <p class="info-text black"><img class="nav-img" src='{{ com.autor.userprofile.profile_image_url }}'/> <a href='{% url 'profile' com.autor.userprofile.slug %}'><b>{{ pergunta.autor.userprofile.name }}</b></a>
                         <span class="info-text">
-                          - {{ com.data|post_date }}                          
+                          - {{ com.timestamp|time_ago }}                          
                         </span>
                       </p>
                     </div>

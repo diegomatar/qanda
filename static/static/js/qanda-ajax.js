@@ -529,12 +529,6 @@ $('body').on('click', '.create_new_topic_interest', function(){
 
 
 
-
-
-
-
-
-
 // Allow links to specific tabs, using url # parameter
 var url = document.location.toString();
 if (url.match('#')) {

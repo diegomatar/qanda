@@ -19,7 +19,7 @@ from perguntas.models import Pergunta, Resposta, Tag
 from notifications.views import new_Follow
 from perguntas.views import suggest_topics_knows, atividades_recentes, suggest_topics_interests
 from .forms import EditProfileForm, EditUserForm, EditProfilePictureForm
-from .models import UserProfile
+from .models import UserProfile, UserBio
 
 
 
@@ -511,6 +511,38 @@ def configuracoes(request):
     
     return render(request, 'user_profile/configuracoes.html', context)
 
+
+
+# Save a new tag bio to user profile
+def save_bio(request):
+     # Get the data being passed by get
+    tag_id = None
+    bio_text = None
+    request.session['new_answer'] = False
+    
+    if request.method == "GET":
+        tag_id = request.GET['tag_id']
+        print tag_id
+        bio_text = request.GET['bio_text']
+        print bio_text
+        
+    # If was passed any value on get
+    if tag_id and bio_text:
+        # Get the tag with the id received
+        tag = Tag.objects.get(pk=int(tag_id))
+        # Get the user
+        user = request.user
+        # Check for existent bio
+        try:
+            user_bio = UserBio.objects.get(user=user, tag=tag)
+            
+        except:
+            # create the new tag bio on user
+            user_bio = UserBio(user=user, tag=tag, bio=bio_text)
+            user_bio.save()
+
+    return HttpResponse()
+    
 
 
 

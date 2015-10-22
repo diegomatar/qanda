@@ -41,7 +41,6 @@ class PerguntaForm(forms.ModelForm):
         self.helper.form_id = 'perguntar'
         self.helper.form_class = 'perguntar'
         self.helper.form_method = 'post'
-        self.helper.form_action = 'perguntar'
 
         self.helper.layout = Layout(
             HTML("""

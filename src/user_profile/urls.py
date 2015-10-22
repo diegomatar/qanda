@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^editar-foto/$', views.edit_user_profile_picture, name='edit_profile_picture'),
     url(r'^configuracoes/$', views.configuracoes, name='configuracoes'),
     url(r'^editar/$', views.edit_user_profile, name='edit_profile'),
+    url(r'^salvar-bio/$', views.save_bio, name='save_bio'),
     url(r'^(?P<slug>.*)/seguidores/$', views.user_followers, name='followers'),
     url(r'^(?P<slug>.*)/perguntas/$', views.user_questions, name='questions'),
     url(r'^(?P<slug>.*)/respostas/$', views.user_answers, name='answers'),
